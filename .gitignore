@@ -14,9 +14,11 @@ build/
 .env.*.local
 *.env
 
-# ── IDE ──
+# ── IDE / Agent skills ──
 .vscode/
 .idea/
+.cursor/
+.agents/
 *.swp
 *.swo
 *~

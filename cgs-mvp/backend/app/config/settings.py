@@ -1,3 +1,4 @@
+from __future__ import annotations
 from pydantic_settings import BaseSettings
 from functools import lru_cache
 
@@ -25,11 +26,14 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     anthropic_api_key: str = ""
     google_api_key: str = ""
+    gemini_api_key: str = ""
+    deepseek_api_key: str = ""
     default_llm_provider: str = "openai"
     default_llm_model: str = "gpt-4o"
 
     # Tools
     perplexity_api_key: str = ""
+    serper_api_key: str = ""
 
     # Storage
     output_bucket: str = "outputs"
@@ -39,6 +43,11 @@ class Settings(BaseSettings):
     @property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",")]
+
+    @property
+    def effective_gemini_key(self) -> str:
+        """Usa GEMINI_API_KEY se presente, altrimenti GOOGLE_API_KEY."""
+        return self.gemini_api_key or self.google_api_key
 
     class Config:
         env_file = ".env"

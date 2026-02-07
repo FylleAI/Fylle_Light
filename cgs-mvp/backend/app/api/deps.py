@@ -1,22 +1,17 @@
 from fastapi import Depends, HTTPException, Header
-from jose import jwt, JWTError
-from app.config.settings import get_settings
-from app.config.supabase import get_supabase_admin
+from app.config.supabase import get_supabase_admin, get_supabase_client
 from uuid import UUID
 
 
 async def get_current_user(authorization: str = Header(...)) -> UUID:
-    """Estrae user_id dal JWT Supabase."""
+    """Verifica token JWT tramite Supabase Auth (supporta HS256 e ES256)."""
     token = authorization.replace("Bearer ", "")
     try:
-        payload = jwt.decode(
-            token,
-            get_settings().supabase_jwt_secret,
-            algorithms=["HS256"],
-            audience="authenticated",
-        )
-        return UUID(payload["sub"])
-    except (JWTError, KeyError, ValueError):
+        # Usa il client admin per validare il token via Supabase Auth
+        db = get_supabase_admin()
+        user = db.auth.get_user(token)
+        return UUID(user.user.id)
+    except Exception:
         raise HTTPException(401, "Invalid token")
 
 

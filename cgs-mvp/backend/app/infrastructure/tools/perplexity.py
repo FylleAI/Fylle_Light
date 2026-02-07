@@ -1,5 +1,8 @@
 import httpx
+import logging
 from app.config.settings import get_settings
+
+logger = logging.getLogger(__name__)
 
 
 class PerplexityTool:
@@ -13,11 +16,17 @@ class PerplexityTool:
                     "Content-Type": "application/json",
                 },
                 json={
-                    "model": "llama-3.1-sonar-large-128k-online",
+                    "model": "sonar",
                     "messages": [{"role": "user", "content": query}],
                     "max_tokens": 2000,
                 },
-                timeout=30.0,
+                timeout=60.0,
             )
             data = response.json()
+            if response.status_code != 200:
+                logger.error(f"Perplexity error {response.status_code}: {data}")
+                raise RuntimeError(f"Perplexity API error: {data.get('error', {}).get('message', str(data))}")
+            if "choices" not in data:
+                logger.error(f"Perplexity unexpected response: {data}")
+                raise RuntimeError(f"Perplexity unexpected response format: {list(data.keys())}")
             return data["choices"][0]["message"]["content"]

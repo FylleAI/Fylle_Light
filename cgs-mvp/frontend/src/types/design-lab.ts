@@ -137,8 +137,8 @@ export interface ContentReviewState {
 export const CONTEXT_AREAS: ContextArea[] = [
   {
     id: "fonti-informative",
-    label: "Fonti Informative",
-    description: "Sito web, fonti dati, documenti aziendali",
+    label: "Information Sources",
+    description: "Website, data sources, company documents",
     href: "/design-lab/context/fonti-informative",
     icon: "📄",
     iconBg: "bg-blue-500/10",
@@ -146,8 +146,8 @@ export const CONTEXT_AREAS: ContextArea[] = [
   },
   {
     id: "fonti-mercato",
-    label: "Fonti di Mercato",
-    description: "Trend, competitor, news, database pubblici",
+    label: "Market Sources",
+    description: "Trends, competitors, news, public databases",
     href: "/design-lab/context/fonti-mercato",
     icon: "📈",
     iconBg: "bg-purple-500/10",
@@ -156,7 +156,7 @@ export const CONTEXT_AREAS: ContextArea[] = [
   {
     id: "brand",
     label: "Brand",
-    description: "Colori, tono di voce, asset visivi, linee guida",
+    description: "Colors, tone of voice, visual assets, guidelines",
     href: "/design-lab/context/brand",
     icon: "🎨",
     iconBg: "bg-pink-500/10",
@@ -164,8 +164,8 @@ export const CONTEXT_AREAS: ContextArea[] = [
   },
   {
     id: "operativo",
-    label: "Contesto Operativo",
-    description: "Prodotto, target, campagne, topic e altro",
+    label: "Operational Context",
+    description: "Product, target, campaigns, topics and more",
     href: "/design-lab/context/operativo",
     icon: "⚙️",
     iconBg: "bg-amber-500/10",
@@ -174,7 +174,7 @@ export const CONTEXT_AREAS: ContextArea[] = [
   {
     id: "agent-pack",
     label: "Agent Pack",
-    description: "Brief per Newsletter, Blog e altro",
+    description: "Briefs for Newsletter, Blog and more",
     href: "/design-lab/context/agent-pack",
     icon: "🤖",
     iconBg: "bg-green-500/10",

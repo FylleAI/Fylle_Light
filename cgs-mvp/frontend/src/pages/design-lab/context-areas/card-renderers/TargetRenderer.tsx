@@ -57,7 +57,7 @@ export default function TargetRenderer({ title, content }: Props) {
         {content.goals && content.goals.length > 0 && (
           <div>
             <h4 className="text-xs text-neutral-500 uppercase tracking-wide mb-2">
-              Obiettivi
+              Goals
             </h4>
             <ul className="space-y-1">
               {content.goals.map((g, i) => (
@@ -78,7 +78,7 @@ export default function TargetRenderer({ title, content }: Props) {
             <div className="grid grid-cols-2 gap-2">
               {content.demographics.ageRange && (
                 <div className="bg-surface rounded-lg p-2">
-                  <p className="text-xs text-neutral-500">Età</p>
+                  <p className="text-xs text-neutral-500">Age</p>
                   <p className="text-sm text-neutral-300">{content.demographics.ageRange}</p>
                 </div>
               )}
@@ -90,7 +90,7 @@ export default function TargetRenderer({ title, content }: Props) {
               )}
               {content.demographics.role && (
                 <div className="bg-surface rounded-lg p-2">
-                  <p className="text-xs text-neutral-500">Ruolo</p>
+                  <p className="text-xs text-neutral-500">Role</p>
                   <p className="text-sm text-neutral-300">{content.demographics.role}</p>
                 </div>
               )}

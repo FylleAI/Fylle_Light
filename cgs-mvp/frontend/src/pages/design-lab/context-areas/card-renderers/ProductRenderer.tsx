@@ -50,7 +50,7 @@ export default function ProductRenderer({ title, content }: Props) {
         {content.differentiators && content.differentiators.length > 0 && (
           <div>
             <h4 className="text-xs text-neutral-500 uppercase tracking-wide mb-2">
-              Differenziatori
+              Differentiators
             </h4>
             <div className="flex flex-wrap gap-2">
               {content.differentiators.map((d, i) => (
@@ -68,7 +68,7 @@ export default function ProductRenderer({ title, content }: Props) {
         {content.useCases && content.useCases.length > 0 && (
           <div>
             <h4 className="text-xs text-neutral-500 uppercase tracking-wide mb-2">
-              Casi d'uso
+              Use Cases
             </h4>
             <ul className="space-y-1">
               {content.useCases.map((u, i) => (
@@ -84,7 +84,7 @@ export default function ProductRenderer({ title, content }: Props) {
         {content.performanceMetrics && content.performanceMetrics.length > 0 && (
           <div>
             <h4 className="text-xs text-neutral-500 uppercase tracking-wide mb-2">
-              Metriche
+              Metrics
             </h4>
             <div className="grid grid-cols-2 gap-2">
               {content.performanceMetrics.map((m, i) => (

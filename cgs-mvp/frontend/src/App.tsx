@@ -36,7 +36,7 @@ function LoadingScreen() {
     <div className="min-h-screen flex items-center justify-center bg-neutral-100">
       <div className="text-center">
         <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-neutral-400" />
-        <p className="text-neutral-500 text-sm">Caricamento...</p>
+        <p className="text-neutral-500 text-sm">Loading...</p>
       </div>
     </div>
   );

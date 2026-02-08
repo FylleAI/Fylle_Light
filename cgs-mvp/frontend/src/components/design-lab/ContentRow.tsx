@@ -18,17 +18,17 @@ const statusConfig: Record<
   { label: string; bg: string; text: string }
 > = {
   da_approvare: {
-    label: "Da approvare",
+    label: "Pending Review",
     bg: "bg-yellow-500/10",
     text: "text-yellow-400",
   },
   completato: {
-    label: "Completato",
+    label: "Completed",
     bg: "bg-green-500/10",
     text: "text-green-400",
   },
   adattato: {
-    label: "Adattato",
+    label: "Adapted",
     bg: "bg-blue-500/10",
     text: "text-blue-400",
   },
@@ -37,7 +37,7 @@ const statusConfig: Record<
 function formatDate(dateStr: string): string {
   try {
     const d = new Date(dateStr);
-    return d.toLocaleDateString("it-IT", {
+    return d.toLocaleDateString("en-US", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",

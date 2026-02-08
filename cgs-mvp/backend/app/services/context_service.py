@@ -19,7 +19,7 @@ class ContextService:
         repo = ContextRepository(self.db)
         context = repo.get_with_cards(context_id)
         if not context or context["user_id"] != str(user_id):
-            raise NotFoundException("Context non trovato")
+            raise NotFoundException("Context not found")
         return context
 
     def create(self, user_id: UUID, data: dict) -> dict:
@@ -55,14 +55,14 @@ class ContextService:
                 .execute().data)
 
     def get_summary(self, context_id: UUID, user_id: UUID) -> dict:
-        """Restituisce le 5 aree del contesto per il Design Lab."""
+        """Return the 5 context areas for the Design Lab."""
         context = (self.db.table("contexts")
                    .select("*")
                    .eq("id", str(context_id))
                    .single()
                    .execute().data)
         if not context or context["user_id"] != str(user_id):
-            raise NotFoundException("Context non trovato")
+            raise NotFoundException("Context not found")
 
         cards = (self.db.table("cards")
                  .select("card_type, title")
@@ -75,12 +75,12 @@ class ContextService:
 
         return {
             "fonti_informative": {
-                "label": "Fonti Informative",
+                "label": "Information Sources",
                 "data": context.get("company_info", {}),
                 "count": len(context.get("company_info", {}).get("key_offerings", [])),
             },
             "fonti_mercato": {
-                "label": "Fonti di Mercato",
+                "label": "Market Sources",
                 "data": context.get("research_data", {}),
                 "has_data": bool(context.get("research_data")),
             },
@@ -90,7 +90,7 @@ class ContextService:
                 "cards": [c for c in cards if c["card_type"] == "brand_voice"],
             },
             "operativo": {
-                "label": "Contesto Operativo",
+                "label": "Operational Context",
                 "cards": [c for c in cards if c["card_type"] in (
                     "product", "target", "campaigns", "topic", "performance", "feedback"
                 )],

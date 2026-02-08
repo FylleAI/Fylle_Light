@@ -41,12 +41,12 @@ export function useCards(contextId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cards", ctxId] });
-      toast({ title: "Card aggiornata", description: "Salvata con successo" });
+      toast({ title: "Card updated", description: "Saved successfully" });
     },
     onError: () => {
       toast({
-        title: "Errore",
-        description: "Impossibile salvare le modifiche",
+        title: "Error",
+        description: "Unable to save changes",
         variant: "destructive",
       });
     },

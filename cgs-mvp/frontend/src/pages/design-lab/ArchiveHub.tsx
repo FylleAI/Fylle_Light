@@ -34,9 +34,9 @@ function formatDate(dateStr: string): string {
 }
 
 const statusConfig = {
-  approved: { label: "Approvato", icon: CheckCircle, color: "text-green-400", bg: "bg-green-500/10" },
-  rejected: { label: "Rifiutato", icon: XCircle, color: "text-red-400", bg: "bg-red-500/10" },
-  pending: { label: "In attesa", icon: Clock, color: "text-yellow-400", bg: "bg-yellow-500/10" },
+  approved: { label: "Approved", icon: CheckCircle, color: "text-green-400", bg: "bg-green-500/10" },
+  rejected: { label: "Rejected", icon: XCircle, color: "text-red-400", bg: "bg-red-500/10" },
+  pending: { label: "Pending", icon: Clock, color: "text-yellow-400", bg: "bg-yellow-500/10" },
 };
 
 export default function ArchiveHub() {
@@ -84,19 +84,19 @@ export default function ArchiveHub() {
   }, [items, searchResults, filter]);
 
   const tabs: { key: FilterTab; label: string; count?: number }[] = [
-    { key: "all", label: "Tutti", count: stats?.total },
-    { key: "approved", label: "Approvati", count: stats?.approved },
-    { key: "rejected", label: "Rifiutati", count: stats?.rejected },
-    { key: "references", label: "Riferimenti", count: stats?.references_count },
+    { key: "all", label: "All", count: stats?.total },
+    { key: "approved", label: "Approved", count: stats?.approved },
+    { key: "rejected", label: "Rejected", count: stats?.rejected },
+    { key: "references", label: "References", count: stats?.references_count },
   ];
 
   return (
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-neutral-100 mb-1">Archivio</h1>
+        <h1 className="text-2xl font-bold text-neutral-100 mb-1">Archive</h1>
         <p className="text-neutral-400 text-sm">
-          Storico degli output generati con le relative valutazioni e feedback.
+          History of generated outputs with their reviews and feedback.
         </p>
       </div>
 
@@ -106,25 +106,25 @@ export default function ArchiveHub() {
           <Card className="bg-surface-elevated border-0 rounded-2xl">
             <CardContent className="p-4 text-center">
               <p className="text-2xl font-bold text-neutral-100">{stats.total}</p>
-              <p className="text-xs text-neutral-500 mt-1">Totale</p>
+              <p className="text-xs text-neutral-500 mt-1">Total</p>
             </CardContent>
           </Card>
           <Card className="bg-surface-elevated border-0 rounded-2xl">
             <CardContent className="p-4 text-center">
               <p className="text-2xl font-bold text-green-400">{stats.approved}</p>
-              <p className="text-xs text-neutral-500 mt-1">Approvati</p>
+              <p className="text-xs text-neutral-500 mt-1">Approved</p>
             </CardContent>
           </Card>
           <Card className="bg-surface-elevated border-0 rounded-2xl">
             <CardContent className="p-4 text-center">
               <p className="text-2xl font-bold text-red-400">{stats.rejected}</p>
-              <p className="text-xs text-neutral-500 mt-1">Rifiutati</p>
+              <p className="text-xs text-neutral-500 mt-1">Rejected</p>
             </CardContent>
           </Card>
           <Card className="bg-surface-elevated border-0 rounded-2xl">
             <CardContent className="p-4 text-center">
               <p className="text-2xl font-bold text-amber-400">{stats.references_count}</p>
-              <p className="text-xs text-neutral-500 mt-1">Riferimenti</p>
+              <p className="text-xs text-neutral-500 mt-1">References</p>
             </CardContent>
           </Card>
         </div>
@@ -137,7 +137,7 @@ export default function ArchiveHub() {
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cerca nell'archivio (ricerca semantica)..."
+            placeholder="Search the archive (semantic search)..."
             className="bg-surface-elevated border-neutral-700 text-neutral-100 h-10 rounded-xl pl-10"
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           />
@@ -150,7 +150,7 @@ export default function ArchiveHub() {
           {searchMutation.isPending ? (
             <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
-            "Cerca"
+            "Search"
           )}
         </Button>
         {searchResults && (
@@ -159,7 +159,7 @@ export default function ArchiveHub() {
             onClick={clearSearch}
             className="text-neutral-400 hover:text-neutral-200 rounded-xl h-10"
           >
-            Annulla
+            Cancel
           </Button>
         )}
       </div>
@@ -196,8 +196,8 @@ export default function ArchiveHub() {
             <Archive className="w-10 h-10 text-neutral-600 mx-auto mb-3" />
             <p className="text-neutral-400 text-sm">
               {searchResults
-                ? "Nessun risultato trovato per la ricerca."
-                : "Nessun elemento nell'archivio. Genera e valuta contenuti per popolare l'archivio."}
+                ? "No results found for the search."
+                : "No items in the archive. Generate and review content to populate the archive."}
             </p>
           </CardContent>
         </Card>

@@ -3,14 +3,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 
 const fieldLabels: Record<string, { label: string; icon: string }> = {
-  name: { label: "Nome Azienda", icon: "🏢" },
-  description: { label: "Descrizione", icon: "📝" },
-  industry: { label: "Settore", icon: "🏭" },
-  products: { label: "Prodotti/Servizi", icon: "📦" },
+  name: { label: "Company Name", icon: "🏢" },
+  description: { label: "Description", icon: "📝" },
+  industry: { label: "Industry", icon: "🏭" },
+  products: { label: "Products/Services", icon: "📦" },
   key_offerings: { label: "Key Offerings", icon: "⭐" },
   usp: { label: "Unique Selling Proposition", icon: "💎" },
-  values: { label: "Valori", icon: "❤️" },
-  target_market: { label: "Mercato Target", icon: "🎯" },
+  values: { label: "Values", icon: "❤️" },
+  target_market: { label: "Target Market", icon: "🎯" },
   mission: { label: "Mission", icon: "🚀" },
 };
 
@@ -32,7 +32,7 @@ export default function FontiInformative() {
   if (!hasData) {
     return (
       <p className="text-neutral-500 text-sm italic py-4">
-        Nessun dato disponibile. Completa l'onboarding per popolare le fonti informative.
+        No data available. Complete onboarding to populate information sources.
       </p>
     );
   }
@@ -71,7 +71,7 @@ export default function FontiInformative() {
   return (
     <div className="space-y-6">
       <p className="text-neutral-400 text-sm">
-        Informazioni raccolte dal sito web e da fonti aziendali.
+        Information collected from the website and company sources.
       </p>
 
       {website && (
@@ -79,7 +79,7 @@ export default function FontiInformative() {
           <CardContent className="p-5">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-lg">🌐</span>
-              <h3 className="text-sm font-medium text-neutral-200">Sito Web</h3>
+              <h3 className="text-sm font-medium text-neutral-200">Website</h3>
             </div>
             <a
               href={website}

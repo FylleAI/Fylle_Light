@@ -40,7 +40,7 @@ export async function apiRequest<T = unknown>(
     // Token expired or invalid — redirect to login
     await supabase.auth.signOut();
     window.location.href = "/login";
-    throw new Error("Sessione scaduta. Effettua di nuovo il login.");
+    throw new Error("Session expired. Please log in again.");
   }
 
   if (!response.ok) {
@@ -50,12 +50,12 @@ export async function apiRequest<T = unknown>(
     if (Array.isArray(error.detail)) {
       message = error.detail.map((e: { msg?: string; loc?: string[] }) => {
         const field = e.loc?.slice(-1)[0] || "";
-        return field ? `${field}: ${e.msg}` : e.msg || "Errore di validazione";
+        return field ? `${field}: ${e.msg}` : e.msg || "Validation error";
       }).join("; ");
     } else if (typeof error.detail === "string") {
       message = error.detail;
     } else {
-      message = `Errore API: ${response.status}`;
+      message = `API error: ${response.status}`;
     }
     throw new Error(message);
   }

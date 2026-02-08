@@ -13,7 +13,7 @@ router = APIRouter()
 @router.post("")
 @limiter.limit("10/minute")
 async def start_execution(request: Request, data: RunCreate, user_id: UUID = Depends(get_current_user), db=Depends(get_db)):
-    # Verifica che il brief appartenga all'utente
+    # Verify the brief belongs to the user
     brief = (db.table("briefs")
              .select("id")
              .eq("id", str(data.brief_id))
@@ -23,7 +23,7 @@ async def start_execution(request: Request, data: RunCreate, user_id: UUID = Dep
     if not brief.data:
         raise HTTPException(404, "Brief not found")
 
-    # Crea run
+    # Create run
     run = db.table("workflow_runs").insert({
         "brief_id": str(data.brief_id),
         "user_id": str(user_id),

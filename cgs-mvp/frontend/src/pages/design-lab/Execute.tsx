@@ -141,7 +141,7 @@ export default function Execute({ briefId }: ExecuteProps) {
               break;
 
             case "error":
-              setErrorMessage(event.data.error || "Errore sconosciuto");
+              setErrorMessage(event.data.error || "Unknown error");
               setPhase("error");
               break;
           }
@@ -153,11 +153,11 @@ export default function Execute({ briefId }: ExecuteProps) {
       );
     } catch (error: unknown) {
       const msg =
-        error instanceof Error ? error.message : "Errore nell'avvio";
+        error instanceof Error ? error.message : "Start error";
       setErrorMessage(msg);
       setPhase("error");
       toast({
-        title: "Errore",
+        title: "Error",
         description: msg,
         variant: "destructive",
       });
@@ -177,13 +177,13 @@ export default function Execute({ briefId }: ExecuteProps) {
   if (!brief) {
     return (
       <div className="text-center py-20">
-        <p className="text-neutral-500">Brief non trovato</p>
+        <p className="text-neutral-500">Brief not found</p>
         <Button
           variant="ghost"
           onClick={() => navigate("/design-lab")}
           className="mt-4 text-accent"
         >
-          Torna alla Home
+          Back to Home
         </Button>
       </div>
     );
@@ -213,7 +213,7 @@ export default function Execute({ briefId }: ExecuteProps) {
           </span>
         </div>
         <h1 className="text-2xl font-bold text-neutral-100">
-          Genera Contenuto
+          Generate Content
         </h1>
       </div>
 
@@ -222,12 +222,12 @@ export default function Execute({ briefId }: ExecuteProps) {
         <Card className="bg-surface-elevated border-0 rounded-2xl">
           <CardContent className="p-6">
             <label className="block text-sm font-medium text-neutral-300 mb-2">
-              Topic / Argomento
+              Topic
             </label>
             <Input
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              placeholder="Es. Come usare l'AI nel content marketing nel 2026"
+              placeholder="E.g. How to use AI in content marketing in 2026"
               className="bg-surface border-neutral-700 text-neutral-100 h-12 rounded-xl mb-4"
               onKeyDown={(e) =>
                 e.key === "Enter" && topic.trim() && handleGenerate()
@@ -244,7 +244,7 @@ export default function Execute({ briefId }: ExecuteProps) {
               ) : (
                 <Sparkles className="w-4 h-4 mr-2" />
               )}
-              Genera
+              Generate
             </Button>
           </CardContent>
         </Card>
@@ -256,7 +256,7 @@ export default function Execute({ briefId }: ExecuteProps) {
           <CardContent className="p-6 space-y-6">
             <div className="text-center">
               <h2 className="text-lg font-semibold text-neutral-100 mb-1">
-                Generazione in corso...
+                Generating...
               </h2>
               <p className="text-sm text-neutral-400">
                 Topic: {topic}
@@ -266,7 +266,7 @@ export default function Execute({ briefId }: ExecuteProps) {
             {/* Progress bar */}
             <div>
               <div className="flex justify-between text-xs text-neutral-500 mb-2">
-                <span>Progresso</span>
+                <span>Progress</span>
                 <span>{progress}%</span>
               </div>
               <div className="h-3 bg-neutral-800 rounded-full overflow-hidden">
@@ -304,10 +304,10 @@ export default function Execute({ briefId }: ExecuteProps) {
                   </span>
                   <span className="text-neutral-600 text-xs ml-auto">
                     {agent.status === "completed"
-                      ? "completato"
+                      ? "completed"
                       : agent.status === "running"
-                      ? "in esecuzione..."
-                      : "in attesa"}
+                      ? "running..."
+                      : "pending"}
                   </span>
                   {agent.tokens && (
                     <span className="text-neutral-600 text-xs">
@@ -321,7 +321,7 @@ export default function Execute({ briefId }: ExecuteProps) {
             {/* Tokens counter */}
             {totalTokens > 0 && (
               <p className="text-xs text-neutral-500 text-center">
-                Token usati: {totalTokens.toLocaleString()}
+                Tokens used: {totalTokens.toLocaleString()}
               </p>
             )}
           </CardContent>
@@ -334,12 +334,12 @@ export default function Execute({ briefId }: ExecuteProps) {
           <CardContent className="p-8 text-center space-y-4">
             <CheckCircle className="w-12 h-12 text-green-500 mx-auto" />
             <h2 className="text-xl font-semibold text-neutral-100">
-              Contenuto generato!
+              Content generated!
             </h2>
             <p className="text-sm text-neutral-400">
               {duration && `${duration.toFixed(1)}s`}
               {totalTokens > 0 &&
-                ` — ${totalTokens.toLocaleString()} token utilizzati`}
+                ` — ${totalTokens.toLocaleString()} tokens used`}
             </p>
 
             <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:justify-center">
@@ -351,7 +351,7 @@ export default function Execute({ briefId }: ExecuteProps) {
                 variant="outline"
                 className="border-neutral-600 text-neutral-300 hover:bg-neutral-700 rounded-xl h-11"
               >
-                Genera un altro
+                Generate another
               </Button>
               {outputId && (
                 <Button
@@ -362,7 +362,7 @@ export default function Execute({ briefId }: ExecuteProps) {
                   }
                   className="bg-accent hover:bg-accent/90 text-black font-medium rounded-xl h-11"
                 >
-                  Vedi contenuto
+                  View content
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               )}
@@ -377,7 +377,7 @@ export default function Execute({ briefId }: ExecuteProps) {
           <CardContent className="p-8 text-center space-y-4">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto" />
             <h2 className="text-xl font-semibold text-neutral-100">
-              Errore nella generazione
+              Generation error
             </h2>
             <p className="text-sm text-red-400">{errorMessage}</p>
 
@@ -389,7 +389,7 @@ export default function Execute({ briefId }: ExecuteProps) {
               variant="outline"
               className="border-neutral-600 text-neutral-300 hover:bg-neutral-700 rounded-xl h-11"
             >
-              Riprova
+              Retry
             </Button>
           </CardContent>
         </Card>

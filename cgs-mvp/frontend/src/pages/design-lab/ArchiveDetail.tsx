@@ -36,18 +36,18 @@ function formatDate(dateStr: string): string {
 }
 
 const statusConfig = {
-  approved: { label: "Approvato", icon: CheckCircle, color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/20" },
-  rejected: { label: "Rifiutato", icon: XCircle, color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/20" },
-  pending: { label: "In attesa", icon: Clock, color: "text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/20" },
+  approved: { label: "Approved", icon: CheckCircle, color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/20" },
+  rejected: { label: "Rejected", icon: XCircle, color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/20" },
+  pending: { label: "Pending", icon: Clock, color: "text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/20" },
 };
 
 const categoryLabels: Record<string, string> = {
-  tone: "Tono",
-  length: "Lunghezza",
-  relevance: "Rilevanza",
-  accuracy: "Accuratezza",
-  structure: "Struttura",
-  creativity: "Creativit\u00e0",
+  tone: "Tone",
+  length: "Length",
+  relevance: "Relevance",
+  accuracy: "Accuracy",
+  structure: "Structure",
+  creativity: "Creativity",
 };
 
 export default function ArchiveDetail({ outputId }: ArchiveDetailProps) {
@@ -71,13 +71,13 @@ export default function ArchiveDetail({ outputId }: ArchiveDetailProps) {
   if (!output && !archiveItem) {
     return (
       <div className="text-center py-20">
-        <p className="text-neutral-500">Elemento non trovato nell'archivio</p>
+        <p className="text-neutral-500">Item not found in the archive</p>
         <Button
           variant="ghost"
           onClick={() => navigate("/design-lab/archive")}
           className="mt-4 text-accent"
         >
-          Torna all'archivio
+          Back to archive
         </Button>
       </div>
     );
@@ -98,7 +98,7 @@ export default function ArchiveDetail({ outputId }: ArchiveDetailProps) {
           className="text-neutral-400 hover:text-neutral-200 hover:bg-surface-elevated rounded-lg"
         >
           <ArrowLeft className="w-4 h-4 mr-1" />
-          Archivio
+          Archive
         </Button>
       </div>
 
@@ -135,7 +135,7 @@ export default function ArchiveDetail({ outputId }: ArchiveDetailProps) {
               {archiveItem?.is_reference && (
                 <span className="flex items-center gap-1 text-xs text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
                   <Star className="w-3 h-3" />
-                  Riferimento
+                  Reference
                 </span>
               )}
             </div>
@@ -149,13 +149,13 @@ export default function ArchiveDetail({ outputId }: ArchiveDetailProps) {
           <CardContent className="p-5 space-y-4">
             <h3 className="text-xs text-neutral-500 uppercase tracking-wide flex items-center gap-2">
               <MessageSquare className="w-3.5 h-3.5" />
-              Dettagli Valutazione
+              Review Details
             </h3>
 
             {/* Feedback categories */}
             {archiveItem.feedback_categories.length > 0 && (
               <div>
-                <p className="text-xs text-neutral-500 mb-2">Categorie:</p>
+                <p className="text-xs text-neutral-500 mb-2">Categories:</p>
                 <div className="flex flex-wrap gap-2">
                   {archiveItem.feedback_categories.map((cat) => (
                     <span
@@ -185,7 +185,7 @@ export default function ArchiveDetail({ outputId }: ArchiveDetailProps) {
               <div>
                 <p className="text-xs text-neutral-500 mb-1 flex items-center gap-1">
                   <Star className="w-3 h-3 text-amber-400" />
-                  Note di riferimento:
+                  Reference notes:
                 </p>
                 <p className="text-sm text-neutral-200 whitespace-pre-wrap">
                   {archiveItem.reference_notes}
@@ -201,7 +201,7 @@ export default function ArchiveDetail({ outputId }: ArchiveDetailProps) {
         <Card className="bg-surface-elevated border-0 rounded-2xl">
           <CardContent className="p-6 md:p-8">
             <h3 className="text-xs text-neutral-500 uppercase tracking-wide mb-4">
-              Contenuto Originale
+              Original Content
             </h3>
             <article className="prose prose-invert prose-sm max-w-none prose-headings:text-neutral-100 prose-p:text-neutral-300 prose-li:text-neutral-300 prose-strong:text-neutral-200 prose-a:text-accent prose-blockquote:border-neutral-700 prose-blockquote:text-neutral-400 prose-code:text-accent prose-code:bg-neutral-800 prose-code:px-1 prose-code:rounded prose-pre:bg-neutral-900 prose-hr:border-neutral-700">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -217,17 +217,17 @@ export default function ArchiveDetail({ outputId }: ArchiveDetailProps) {
         <div className="flex flex-wrap gap-3 text-xs text-neutral-500">
           {output.version > 1 && (
             <span className="px-2 py-1 rounded-lg bg-blue-500/10 text-blue-400">
-              Versione {output.version}
+              Version {output.version}
             </span>
           )}
           {output.author && (
             <span className="px-2 py-1 rounded-lg bg-neutral-800">
-              Autore: {output.author}
+              Author: {output.author}
             </span>
           )}
           {output.output_type && (
             <span className="px-2 py-1 rounded-lg bg-neutral-800">
-              Tipo: {output.output_type}
+              Type: {output.output_type}
             </span>
           )}
         </div>

@@ -149,8 +149,8 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
   const handleSubmit = async () => {
     if (!contextId) {
       toast({
-        title: "Errore",
-        description: "Context non trovato. Completa l'onboarding.",
+        title: "Error",
+        description: "Context not found. Complete the onboarding.",
         variant: "destructive",
       });
       return;
@@ -168,9 +168,9 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
       setStep("done");
     } catch (error: unknown) {
       const msg =
-        error instanceof Error ? error.message : "Errore nella creazione";
+        error instanceof Error ? error.message : "Creation error";
       toast({
-        title: "Errore",
+        title: "Error",
         description: msg,
         variant: "destructive",
       });
@@ -197,13 +197,13 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
   if (!pack) {
     return (
       <div className="text-center py-20">
-        <p className="text-neutral-500">Pack non trovato</p>
+        <p className="text-neutral-500">Pack not found</p>
         <Button
           variant="ghost"
           onClick={() => navigate("/design-lab")}
           className="mt-4 text-accent"
         >
-          Torna alla Home
+          Back to Home
         </Button>
       </div>
     );
@@ -220,7 +220,7 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
           className="text-neutral-400 hover:text-neutral-200 hover:bg-surface-elevated rounded-lg"
         >
           <ArrowLeft className="w-4 h-4 mr-1" />
-          Indietro
+          Back
         </Button>
       </div>
 
@@ -230,8 +230,8 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
           <div className="flex items-center justify-between text-xs text-neutral-500 mb-2">
             <span>
               {step === "name"
-                ? "Nome Brief"
-                : `Domanda ${questionIndex + 1} di ${totalQuestions}`}
+                ? "Brief Name"
+                : `Question ${questionIndex + 1} of ${totalQuestions}`}
             </span>
             <span>{progress}%</span>
           </div>
@@ -260,16 +260,16 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
             <Card className="bg-surface-elevated border-0 rounded-3xl shadow-lg">
               <CardContent className="p-8">
                 <h2 className="text-xl font-semibold text-neutral-100 mb-2">
-                  Come vuoi chiamare questo Brief?
+                  What do you want to call this Brief?
                 </h2>
                 <p className="text-sm text-neutral-400 mb-6">
-                  Scegli un nome descrittivo (es. "Welcome B2B", "Editoriale
-                  settimanale")
+                  Choose a descriptive name (e.g. "Welcome B2B", "Weekly
+                  editorial")
                 </p>
                 <Input
                   value={briefName}
                   onChange={(e) => setBriefName(e.target.value)}
-                  placeholder="Nome del brief..."
+                  placeholder="Brief name..."
                   className="bg-surface border-neutral-700 text-neutral-100 h-12 rounded-xl"
                   onKeyDown={(e) => e.key === "Enter" && handleNext()}
                   autoFocus
@@ -280,7 +280,7 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
                     disabled={!briefName.trim()}
                     className="bg-accent hover:bg-accent/90 text-black font-medium rounded-xl h-11 px-6"
                   >
-                    Continua
+                    Continue
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </div>
@@ -304,7 +304,7 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
                   {currentQuestion.question}
                 </h2>
                 {!currentQuestion.required && (
-                  <p className="text-xs text-neutral-500 mb-4">(Opzionale)</p>
+                  <p className="text-xs text-neutral-500 mb-4">(Optional)</p>
                 )}
 
                 <div className="mt-6 space-y-3">
@@ -373,7 +373,7 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
                     <Input
                       value={(currentAnswer as string) || ""}
                       onChange={(e) => setAnswer(e.target.value)}
-                      placeholder={currentQuestion.placeholder || "Scrivi qui..."}
+                      placeholder={currentQuestion.placeholder || "Type here..."}
                       className="bg-surface border-neutral-700 text-neutral-100 h-12 rounded-xl"
                       onKeyDown={(e) =>
                         e.key === "Enter" && canProceedQuestion() && handleNext()
@@ -387,7 +387,7 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
                     <Textarea
                       value={(currentAnswer as string) || ""}
                       onChange={(e) => setAnswer(e.target.value)}
-                      placeholder={currentQuestion.placeholder || "Scrivi qui..."}
+                      placeholder={currentQuestion.placeholder || "Type here..."}
                       className="bg-surface border-neutral-700 text-neutral-100 rounded-xl min-h-[120px]"
                       autoFocus
                     />
@@ -402,7 +402,7 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
                     className="text-neutral-400 hover:text-neutral-200 rounded-xl"
                   >
                     <ArrowLeft className="w-4 h-4 mr-1" />
-                    Indietro
+                    Back
                   </Button>
 
                   <div className="flex gap-2">
@@ -412,7 +412,7 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
                         onClick={handleNext}
                         className="text-neutral-500 hover:text-neutral-300 rounded-xl text-sm"
                       >
-                        Salta
+                        Skip
                       </Button>
                     )}
                     <Button
@@ -424,12 +424,12 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
                     >
                       {questionIndex < totalQuestions - 1 ? (
                         <>
-                          Continua
+                          Continue
                           <ArrowRight className="w-4 h-4 ml-2" />
                         </>
                       ) : (
                         <>
-                          Crea Brief
+                          Create Brief
                           <Sparkles className="w-4 h-4 ml-2" />
                         </>
                       )}
@@ -448,10 +448,10 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
               <CardContent className="p-12 text-center">
                 <Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" />
                 <h2 className="text-lg font-semibold text-neutral-100 mb-2">
-                  Creazione del brief...
+                  Creating the brief...
                 </h2>
                 <p className="text-sm text-neutral-400">
-                  Stiamo compilando il tuo brief in base alle risposte.
+                  We are compiling your brief based on your answers.
                 </p>
               </CardContent>
             </Card>
@@ -466,11 +466,11 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
                 <div className="text-center mb-6">
                   <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
                   <h2 className="text-xl font-semibold text-neutral-100 mb-2">
-                    Brief creato!
+                    Brief created!
                   </h2>
                   <p className="text-sm text-neutral-400">
-                    "{createdBrief.name}" è pronto. Rivedi le sezioni e genera il
-                    primo contenuto.
+                    "{createdBrief.name}" is ready. Review the sections and generate
+                    your first content.
                   </p>
                 </div>
 
@@ -478,7 +478,7 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
                 {createdBrief.compiled_brief && (
                   <div className="bg-surface rounded-2xl p-5 mb-6 max-h-60 overflow-y-auto">
                     <h3 className="text-xs text-neutral-500 uppercase tracking-wide mb-3">
-                      Brief Compilato
+                      Compiled Brief
                     </h3>
                     <div className="text-sm text-neutral-300 whitespace-pre-wrap">
                       {createdBrief.compiled_brief}
@@ -495,7 +495,7 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
                     variant="outline"
                     className="flex-1 border-neutral-600 text-neutral-300 hover:bg-neutral-700 rounded-xl h-11"
                   >
-                    Vedi Brief
+                    View Brief
                   </Button>
                   <Button
                     onClick={() =>
@@ -503,7 +503,7 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
                     }
                     className="flex-1 bg-accent hover:bg-accent/90 text-black font-medium rounded-xl h-11"
                   >
-                    Genera Contenuto
+                    Generate Content
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </div>

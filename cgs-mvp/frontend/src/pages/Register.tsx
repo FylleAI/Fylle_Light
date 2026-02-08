@@ -31,12 +31,12 @@ export default function Register() {
     setError("");
 
     if (password !== confirmPassword) {
-      setError("Le password non coincidono");
+      setError("Passwords do not match");
       return;
     }
 
     if (password.length < 6) {
-      setError("La password deve avere almeno 6 caratteri");
+      setError("Password must be at least 6 characters");
       return;
     }
 
@@ -46,7 +46,7 @@ export default function Register() {
       await register(email, password);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Errore durante la registrazione"
+        err instanceof Error ? err.message : "Registration error"
       );
     } finally {
       setIsLoading(false);
@@ -71,10 +71,10 @@ export default function Register() {
         <Card className="bg-white border-neutral-200 shadow-sm rounded-3xl">
           <CardContent className="pt-8 pb-8 px-8">
             <h2 className="text-xl font-semibold text-neutral-900 mb-1">
-              Registrati
+              Sign Up
             </h2>
             <p className="text-neutral-500 text-sm mb-6">
-              Crea il tuo account Fylle
+              Create your Fylle account
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -85,7 +85,7 @@ export default function Register() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="tuonome@azienda.com"
+                  placeholder="yourname@company.com"
                   className="h-12 bg-neutral-50 border-neutral-200 text-neutral-900 placeholder:text-neutral-400 rounded-xl"
                   required
                   autoFocus
@@ -99,20 +99,20 @@ export default function Register() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Minimo 6 caratteri"
+                  placeholder="Minimum 6 characters"
                   className="h-12 bg-neutral-50 border-neutral-200 text-neutral-900 placeholder:text-neutral-400 rounded-xl"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Conferma Password</Label>
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Ripeti la password"
+                  placeholder="Repeat password"
                   className="h-12 bg-neutral-50 border-neutral-200 text-neutral-900 placeholder:text-neutral-400 rounded-xl"
                   required
                 />
@@ -132,22 +132,22 @@ export default function Register() {
                 {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Registrazione...
+                    Signing up...
                   </>
                 ) : (
-                  "Registrati"
+                  "Sign Up"
                 )}
               </Button>
             </form>
 
             <div className="mt-6 text-center">
               <p className="text-sm text-neutral-500">
-                Hai già un account?{" "}
+                Already have an account?{" "}
                 <button
                   onClick={() => navigate("/login")}
                   className="text-neutral-900 font-medium hover:underline"
                 >
-                  Accedi
+                  Log In
                 </button>
               </p>
             </div>

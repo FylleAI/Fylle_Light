@@ -24,7 +24,7 @@ class OutputService:
         return query.order("number", desc=True).execute().data
 
     def get_summary(self, user_id: UUID) -> list:
-        """Vista aggregata per pack: contatori brief + flag nuovi."""
+        """Aggregated view by pack: brief counters + new flags."""
         briefs = (self.db.table("briefs")
                   .select("id, name, slug, pack_id")
                   .eq("user_id", str(user_id))
@@ -83,14 +83,14 @@ class OutputService:
                   .single()
                   .execute())
         if not result.data:
-            raise NotFoundException("Output non trovato")
+            raise NotFoundException("Output not found")
         return result.data
 
     def get_latest(self, output_id: UUID, user_id: UUID) -> dict:
         repo = OutputRepository(self.db)
         latest = repo.get_latest_version(output_id)
         if not latest or latest.get("user_id") != str(user_id):
-            raise NotFoundException("Output non trovato")
+            raise NotFoundException("Output not found")
         return latest
 
     def get_download_url(self, output_id: UUID, user_id: UUID) -> dict:
@@ -104,13 +104,13 @@ class OutputService:
             storage = StorageService()
             url = storage.get_signed_url(output.data["file_path"])
             return {"download_url": url}
-        raise NotFoundException("Nessun file disponibile per il download")
+        raise NotFoundException("No file available for download")
 
     def update(self, output_id: UUID, user_id: UUID, data: dict) -> list:
         allowed_fields = {"is_new"}
         update_data = {k: v for k, v in data.items() if k in allowed_fields}
         if not update_data:
-            raise ValidationException("Nessun campo valido da aggiornare")
+            raise ValidationException("No valid fields to update")
         return (self.db.table("outputs")
                 .update(update_data)
                 .eq("id", str(output_id))
@@ -122,7 +122,7 @@ class OutputService:
         logger.info("Deleted output %s", output_id)
 
     def review(self, output_id: UUID, user_id: UUID, review_data) -> dict:
-        """Review output: aggiorna archive + outputs status."""
+        """Review output: update archive + outputs status."""
         archive_update = {
             "review_status": review_data.status.value,
             "feedback": review_data.feedback,

@@ -25,7 +25,7 @@ export default function AgentPackList() {
   if (!packs || packs.length === 0) {
     return (
       <p className="text-neutral-500 text-sm italic py-4">
-        Nessun Agent Pack configurato.
+        No Agent Packs configured.
       </p>
     );
   }
@@ -43,7 +43,7 @@ export default function AgentPackList() {
   return (
     <div className="space-y-6">
       <p className="text-neutral-400 text-sm">
-        I tuoi Agent Pack attivi con i brief associati.
+        Your active Agent Packs with associated briefs.
       </p>
 
       <div className="space-y-4">
@@ -77,9 +77,9 @@ export default function AgentPackList() {
                       }`}
                     >
                       {packStatus === "active"
-                        ? "Attivo"
+                        ? "Active"
                         : packStatus === "available"
-                        ? "Disponibile"
+                        ? "Available"
                         : "Coming Soon"}
                     </span>
                   </div>
@@ -92,7 +92,7 @@ export default function AgentPackList() {
                       }
                       className="text-xs border-neutral-600 text-neutral-300 hover:bg-neutral-700 rounded-lg h-7 px-2"
                     >
-                      Attiva →
+                      Activate →
                     </Button>
                   )}
                   {packStatus === "active" && (
@@ -104,7 +104,7 @@ export default function AgentPackList() {
                       }
                       className="text-xs border-neutral-600 text-neutral-300 hover:bg-neutral-700 rounded-lg h-7 px-2"
                     >
-                      + Nuovo Brief
+                      + New Brief
                     </Button>
                   )}
                 </div>
@@ -141,7 +141,7 @@ export default function AgentPackList() {
                               }}
                               className="text-xs text-accent hover:text-accent/80 h-6 px-2 rounded-md"
                             >
-                              Genera →
+                              Generate →
                             </Button>
                             <Button
                               size="sm"
@@ -157,8 +157,8 @@ export default function AgentPackList() {
                               }`}
                             >
                               {confirmDeleteId === brief.id
-                                ? "Conferma"
-                                : "Elimina"}
+                                ? "Confirm"
+                                : "Delete"}
                             </Button>
                           </div>
                         </div>
@@ -169,7 +169,7 @@ export default function AgentPackList() {
 
                 {packBriefs.length === 0 && packStatus === "active" && (
                   <p className="text-xs text-neutral-600 italic">
-                    Nessun brief creato per questo pack
+                    No briefs created for this pack
                   </p>
                 )}
               </CardContent>

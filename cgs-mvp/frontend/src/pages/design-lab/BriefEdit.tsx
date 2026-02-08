@@ -137,9 +137,9 @@ export default function BriefEdit({ briefSlug }: BriefEditProps) {
       setStep("done");
     } catch (error: unknown) {
       const msg =
-        error instanceof Error ? error.message : "Errore nel salvataggio";
+        error instanceof Error ? error.message : "Save error";
       toast({
-        title: "Errore",
+        title: "Error",
         description: msg,
         variant: "destructive",
       });
@@ -166,13 +166,13 @@ export default function BriefEdit({ briefSlug }: BriefEditProps) {
   if (!brief) {
     return (
       <div className="text-center py-20">
-        <p className="text-neutral-500">Brief non trovato</p>
+        <p className="text-neutral-500">Brief not found</p>
         <Button
           variant="ghost"
           onClick={() => navigate("/design-lab")}
           className="mt-4 text-accent"
         >
-          Torna alla Home
+          Back to Home
         </Button>
       </div>
     );
@@ -189,10 +189,10 @@ export default function BriefEdit({ briefSlug }: BriefEditProps) {
           className="text-neutral-400 hover:text-neutral-200 hover:bg-surface-elevated rounded-lg"
         >
           <ArrowLeft className="w-4 h-4 mr-1" />
-          Indietro
+          Back
         </Button>
         <span className="text-xs text-neutral-500 uppercase tracking-wide">
-          Modifica Brief
+          Edit Brief
         </span>
       </div>
 
@@ -202,8 +202,8 @@ export default function BriefEdit({ briefSlug }: BriefEditProps) {
           <div className="flex items-center justify-between text-xs text-neutral-500 mb-2">
             <span>
               {step === "name"
-                ? "Nome Brief"
-                : `Domanda ${questionIndex + 1} di ${totalQuestions}`}
+                ? "Brief Name"
+                : `Question ${questionIndex + 1} of ${totalQuestions}`}
             </span>
             <span>{progress}%</span>
           </div>
@@ -226,15 +226,15 @@ export default function BriefEdit({ briefSlug }: BriefEditProps) {
             <Card className="bg-surface-elevated border-0 rounded-3xl shadow-lg">
               <CardContent className="p-8">
                 <h2 className="text-xl font-semibold text-neutral-100 mb-2">
-                  Modifica il nome del Brief
+                  Edit the Brief name
                 </h2>
                 <p className="text-sm text-neutral-400 mb-6">
-                  Puoi aggiornare il nome o procedere alle domande.
+                  You can update the name or proceed to the questions.
                 </p>
                 <Input
                   value={effectiveName}
                   onChange={(e) => setBriefName(e.target.value)}
-                  placeholder="Nome del brief..."
+                  placeholder="Brief name..."
                   className="bg-surface border-neutral-700 text-neutral-100 h-12 rounded-xl"
                   onKeyDown={(e) => e.key === "Enter" && handleNext()}
                   autoFocus
@@ -245,7 +245,7 @@ export default function BriefEdit({ briefSlug }: BriefEditProps) {
                     disabled={!effectiveName.trim()}
                     className="bg-accent hover:bg-accent/90 text-black font-medium rounded-xl h-11 px-6"
                   >
-                    Continua
+                    Continue
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </div>
@@ -269,7 +269,7 @@ export default function BriefEdit({ briefSlug }: BriefEditProps) {
                   {currentQuestion.question}
                 </h2>
                 {!currentQuestion.required && (
-                  <p className="text-xs text-neutral-500 mb-4">(Opzionale)</p>
+                  <p className="text-xs text-neutral-500 mb-4">(Optional)</p>
                 )}
 
                 <div className="mt-6 space-y-3">
@@ -338,7 +338,7 @@ export default function BriefEdit({ briefSlug }: BriefEditProps) {
                     <Input
                       value={(currentAnswer as string) || ""}
                       onChange={(e) => setAnswer(e.target.value)}
-                      placeholder={currentQuestion.placeholder || "Scrivi qui..."}
+                      placeholder={currentQuestion.placeholder || "Type here..."}
                       className="bg-surface border-neutral-700 text-neutral-100 h-12 rounded-xl"
                       onKeyDown={(e) =>
                         e.key === "Enter" && canProceedQuestion() && handleNext()
@@ -352,7 +352,7 @@ export default function BriefEdit({ briefSlug }: BriefEditProps) {
                     <Textarea
                       value={(currentAnswer as string) || ""}
                       onChange={(e) => setAnswer(e.target.value)}
-                      placeholder={currentQuestion.placeholder || "Scrivi qui..."}
+                      placeholder={currentQuestion.placeholder || "Type here..."}
                       className="bg-surface border-neutral-700 text-neutral-100 rounded-xl min-h-[120px]"
                       autoFocus
                     />
@@ -367,7 +367,7 @@ export default function BriefEdit({ briefSlug }: BriefEditProps) {
                     className="text-neutral-400 hover:text-neutral-200 rounded-xl"
                   >
                     <ArrowLeft className="w-4 h-4 mr-1" />
-                    Indietro
+                    Back
                   </Button>
 
                   <div className="flex gap-2">
@@ -377,7 +377,7 @@ export default function BriefEdit({ briefSlug }: BriefEditProps) {
                         onClick={handleNext}
                         className="text-neutral-500 hover:text-neutral-300 rounded-xl text-sm"
                       >
-                        Salta
+                        Skip
                       </Button>
                     )}
                     <Button
@@ -389,12 +389,12 @@ export default function BriefEdit({ briefSlug }: BriefEditProps) {
                     >
                       {questionIndex < totalQuestions - 1 ? (
                         <>
-                          Continua
+                          Continue
                           <ArrowRight className="w-4 h-4 ml-2" />
                         </>
                       ) : (
                         <>
-                          Salva Modifiche
+                          Save Changes
                           <Save className="w-4 h-4 ml-2" />
                         </>
                       )}
@@ -413,10 +413,10 @@ export default function BriefEdit({ briefSlug }: BriefEditProps) {
               <CardContent className="p-12 text-center">
                 <Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" />
                 <h2 className="text-lg font-semibold text-neutral-100 mb-2">
-                  Salvataggio in corso...
+                  Saving...
                 </h2>
                 <p className="text-sm text-neutral-400">
-                  Stiamo aggiornando il brief e ricompilando le risposte.
+                  We are updating the brief and recompiling the answers.
                 </p>
               </CardContent>
             </Card>
@@ -431,10 +431,10 @@ export default function BriefEdit({ briefSlug }: BriefEditProps) {
                 <div className="text-center mb-6">
                   <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
                   <h2 className="text-xl font-semibold text-neutral-100 mb-2">
-                    Brief aggiornato!
+                    Brief updated!
                   </h2>
                   <p className="text-sm text-neutral-400">
-                    Le modifiche sono state salvate con successo.
+                    Changes have been saved successfully.
                   </p>
                 </div>
 
@@ -445,13 +445,13 @@ export default function BriefEdit({ briefSlug }: BriefEditProps) {
                     variant="outline"
                     className="flex-1 border-neutral-600 text-neutral-300 hover:bg-neutral-700 rounded-xl h-11"
                   >
-                    Vedi Brief
+                    View Brief
                   </Button>
                   <Button
                     onClick={() => navigate(`/design-lab/execute/${brief.id}`)}
                     className="flex-1 bg-accent hover:bg-accent/90 text-black font-medium rounded-xl h-11"
                   >
-                    Genera Contenuto
+                    Generate Content
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </div>

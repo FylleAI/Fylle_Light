@@ -15,7 +15,7 @@ class BriefService:
     # ── Utility ──
 
     def generate_slug(self, name: str) -> str:
-        """Genera slug URL-safe dal nome."""
+        """Generate URL-safe slug from name."""
         slug = re.sub(r'[^a-z0-9]+', '-', name.lower()).strip('-')
         existing = self.db.table("briefs").select("id").eq("slug", slug).execute().data
         if existing:
@@ -23,7 +23,7 @@ class BriefService:
         return slug
 
     def compile_brief(self, questions: list, answers: dict) -> str:
-        """Compila answers in markdown per injection nei prompt."""
+        """Compile answers into markdown for prompt injection."""
         lines = ["# Brief\n"]
         for q in questions:
             answer = answers.get(q["id"], "")
@@ -55,7 +55,7 @@ class BriefService:
                   .single()
                   .execute())
         if not result.data:
-            raise NotFoundException("Brief non trovato")
+            raise NotFoundException("Brief not found")
         return result.data
 
     def get_by_slug(self, slug: str, user_id: UUID) -> dict:
@@ -66,18 +66,18 @@ class BriefService:
                   .single()
                   .execute())
         if not result.data:
-            raise NotFoundException("Brief non trovato")
+            raise NotFoundException("Brief not found")
         return result.data
 
     def create(self, user_id: UUID, data) -> dict:
-        """Crea brief: pack lookup + slug gen + compile + insert."""
+        """Create brief: pack lookup + slug gen + compile + insert."""
         pack = (self.db.table("agent_packs")
                 .select("brief_questions")
                 .eq("id", str(data.pack_id))
                 .single()
                 .execute())
         if not pack.data:
-            raise NotFoundException("Pack non trovato")
+            raise NotFoundException("Pack not found")
 
         slug = self.generate_slug(data.name)
         questions = pack.data["brief_questions"]
@@ -94,10 +94,10 @@ class BriefService:
         }).execute().data[0]
 
     def update(self, brief_id: UUID, user_id: UUID, data) -> list:
-        """Aggiorna brief, ricompila se le risposte cambiano."""
+        """Update brief, recompile if answers change."""
         update_data = data.model_dump(exclude_none=True)
         if not update_data:
-            raise ValidationException("Nessun campo da aggiornare")
+            raise ValidationException("No fields to update")
 
         if "answers" in update_data:
             brief = (self.db.table("briefs")
@@ -119,9 +119,9 @@ class BriefService:
         logger.info("Deleted brief %s", brief_id)
 
     def duplicate(self, brief_id: UUID, user_id: UUID) -> dict:
-        """Duplica brief con nuovo nome e slug."""
+        """Duplicate brief with new name and slug."""
         original = self.get(brief_id, user_id)
-        new_name = f"{original['name']} (copia)"
+        new_name = f"{original['name']} (copy)"
         new_slug = self.generate_slug(new_name)
 
         logger.info("Duplicating brief %s as '%s'", brief_id, new_name)

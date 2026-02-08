@@ -14,11 +14,11 @@ interface Props {
 }
 
 const sourceLabels: Record<string, string> = {
-  customer_feedback: "Clienti",
+  customer_feedback: "Customers",
   team_feedback: "Team",
   ab_test: "A/B Test",
   analytics: "Analytics",
-  other: "Altro",
+  other: "Other",
 };
 
 const priorityStyles: Record<string, string> = {
@@ -61,7 +61,7 @@ export default function FeedbackRenderer({ title, content }: Props) {
         {content.details && (
           <div>
             <h4 className="text-xs text-neutral-500 uppercase tracking-wide mb-1">
-              Dettagli
+              Details
             </h4>
             <p className="text-sm text-neutral-400 whitespace-pre-wrap">
               {content.details}

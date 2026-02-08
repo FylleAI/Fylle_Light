@@ -26,17 +26,17 @@ const statusConfig: Record<
   { label: string; bg: string; text: string }
 > = {
   da_approvare: {
-    label: "Da approvare",
+    label: "To review",
     bg: "bg-yellow-500/10",
     text: "text-yellow-400",
   },
   completato: {
-    label: "Completato",
+    label: "Completed",
     bg: "bg-green-500/10",
     text: "text-green-400",
   },
   adattato: {
-    label: "Adattato",
+    label: "Adapted",
     bg: "bg-blue-500/10",
     text: "text-blue-400",
   },
@@ -98,13 +98,13 @@ export default function ContentView({ packType, contentId }: ContentViewProps) {
   if (!output) {
     return (
       <div className="text-center py-20">
-        <p className="text-neutral-500">Contenuto non trovato</p>
+        <p className="text-neutral-500">Content not found</p>
         <Button
           variant="ghost"
           onClick={() => navigate(`/design-lab/outputs/${packType}`)}
           className="mt-4 text-accent"
         >
-          Torna alla lista
+          Back to list
         </Button>
       </div>
     );
@@ -140,7 +140,7 @@ export default function ContentView({ packType, contentId }: ContentViewProps) {
               className="border-neutral-700 text-neutral-400 hover:text-accent hover:border-accent/30 rounded-xl h-9"
             >
               <MessageSquare className="w-4 h-4 mr-2" />
-              Apri Chat
+              Open Chat
             </Button>
           )}
         </div>
@@ -165,7 +165,7 @@ export default function ContentView({ packType, contentId }: ContentViewProps) {
             )}
           </div>
           <h1 className="text-2xl font-bold text-neutral-100">
-            {output.title || `Contenuto #${output.number}`}
+            {output.title || `Content #${output.number}`}
           </h1>
           <p className="text-sm text-neutral-500">
             {formatDate(output.created_at)} • {output.author || "AI"} •{" "}
@@ -186,7 +186,7 @@ export default function ContentView({ packType, contentId }: ContentViewProps) {
               <div className="text-center py-12">
                 <Info className="w-8 h-8 text-neutral-600 mx-auto mb-2" />
                 <p className="text-neutral-500 text-sm">
-                  Nessun contenuto testuale disponibile.
+                  No text content available.
                 </p>
               </div>
             )}

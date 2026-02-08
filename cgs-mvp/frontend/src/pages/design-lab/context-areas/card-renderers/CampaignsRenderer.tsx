@@ -38,7 +38,7 @@ export default function CampaignsRenderer({ title, content }: Props) {
         {content.objective && (
           <div>
             <h4 className="text-xs text-neutral-500 uppercase tracking-wide mb-1">
-              Obiettivo
+              Objective
             </h4>
             <p className="text-sm text-neutral-300">{content.objective}</p>
           </div>
@@ -47,7 +47,7 @@ export default function CampaignsRenderer({ title, content }: Props) {
         {content.tone && (
           <div>
             <h4 className="text-xs text-neutral-500 uppercase tracking-wide mb-1">
-              Tono
+              Tone
             </h4>
             <span className="text-xs bg-purple-500/10 text-purple-400 px-2.5 py-1 rounded-full">
               {content.tone}
@@ -58,7 +58,7 @@ export default function CampaignsRenderer({ title, content }: Props) {
         {content.keyMessages && content.keyMessages.length > 0 && (
           <div>
             <h4 className="text-xs text-neutral-500 uppercase tracking-wide mb-2">
-              Messaggi Chiave
+              Key Messages
             </h4>
             <ul className="space-y-1">
               {content.keyMessages.map((m, i) => (
@@ -74,7 +74,7 @@ export default function CampaignsRenderer({ title, content }: Props) {
         {content.results && content.results.length > 0 && (
           <div>
             <h4 className="text-xs text-neutral-500 uppercase tracking-wide mb-2">
-              Risultati
+              Results
             </h4>
             <div className="grid grid-cols-2 gap-2">
               {content.results.map((r, i) => (

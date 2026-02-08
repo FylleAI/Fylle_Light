@@ -155,11 +155,11 @@ export default function Onboarding() {
       setResearchProgress(0);
       setCurrentStep("email");
       toast({
-        title: "Errore nell'analisi",
+        title: "Analysis error",
         description:
           err instanceof Error
             ? err.message
-            : "Impossibile contattare il server. Verifica che il backend sia attivo.",
+            : "Unable to contact the server. Please verify the backend is running.",
         variant: "destructive",
       });
     }
@@ -211,11 +211,11 @@ export default function Onboarding() {
       setCurrentStep("quiz");
       setCurrentQuestionIndex(0);
       toast({
-        title: "Errore nella generazione",
+        title: "Generation error",
         description:
           err instanceof Error
             ? err.message
-            : "Impossibile generare il contesto. Riprova.",
+            : "Unable to generate the context. Please try again.",
         variant: "destructive",
       });
     }
@@ -233,7 +233,7 @@ export default function Onboarding() {
     content: React.ReactNode,
     showBack: boolean = true,
     showNext: boolean = true,
-    nextLabel: string = "Continua",
+    nextLabel: string = "Continue",
     onNext?: () => void,
     isOptional: boolean = false,
     nextDisabled: boolean = false
@@ -264,7 +264,7 @@ export default function Onboarding() {
                 className="flex-1 h-11 text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 rounded-xl"
                 onClick={handleBack}
               >
-                Indietro
+                Back
               </Button>
             )}
             {isOptional && (
@@ -273,7 +273,7 @@ export default function Onboarding() {
                 className="flex-1 h-11 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-xl"
                 onClick={onNext || handleNext}
               >
-                Salta
+                Skip
               </Button>
             )}
             {showNext && (
@@ -294,12 +294,12 @@ export default function Onboarding() {
   // ── Step: Brand Name ──
   const renderBrandName = () =>
     renderStepCard(
-      "Come si chiama la tua azienda?",
-      "Inserisci il nome del tuo brand",
+      "What is your company name?",
+      "Enter your brand name",
       <Input
         value={brandName}
         onChange={(e) => setBrandName(e.target.value)}
-        placeholder="Es. Fylle AI"
+        placeholder="E.g. Fylle AI"
         className="h-12 text-base bg-neutral-50 border-neutral-200 text-neutral-900 placeholder:text-neutral-400 focus:border-neutral-300 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-xl"
         autoFocus
       />,
@@ -309,19 +309,19 @@ export default function Onboarding() {
   // ── Step: Website ──
   const renderWebsite = () =>
     renderStepCard(
-      "Qual è il sito web?",
-      "Opzionale — ci aiuta a capire meglio il tuo brand",
+      "What is the website?",
+      "Optional — helps us better understand your brand",
       <Input
         value={website}
         onChange={(e) => setWebsite(e.target.value)}
-        placeholder="https://esempio.com"
+        placeholder="https://example.com"
         type="url"
         className="h-12 text-base bg-neutral-50 border-neutral-200 text-neutral-900 placeholder:text-neutral-400 focus:border-neutral-300 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-xl"
         autoFocus
       />,
       true,
       true,
-      "Continua",
+      "Continue",
       undefined,
       true // optional
     );
@@ -329,26 +329,26 @@ export default function Onboarding() {
   // ── Step: Email ──
   const renderEmail = () =>
     renderStepCard(
-      "Qual è la tua email?",
-      "La useremo per il tuo profilo",
+      "What is your email?",
+      "We'll use it for your profile",
       <div className="space-y-2">
         <Input
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="tuonome@azienda.com"
+          placeholder="yourname@company.com"
           type="email"
           className="h-12 text-base bg-neutral-50 border-neutral-200 text-neutral-900 placeholder:text-neutral-400 focus:border-neutral-300 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-xl"
           autoFocus
         />
         {email.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && (
           <p className="text-sm text-amber-600">
-            Inserisci un indirizzo email valido
+            Please enter a valid email address
           </p>
         )}
       </div>,
       true,
       true,
-      "Avvia Analisi",
+      "Start Analysis",
       handleStartOnboarding,
       false,
       startOnboarding.isPending
@@ -371,10 +371,10 @@ export default function Onboarding() {
               <Loader2 className="w-8 h-8 animate-spin mx-auto text-neutral-400" />
             </div>
             <h2 className="text-xl font-semibold text-neutral-900 mb-1">
-              Analisi in corso
+              Analysis in progress
             </h2>
             <p className="text-neutral-500 text-sm mb-8">
-              Stiamo analizzando {brandName}
+              Analyzing {brandName}
             </p>
 
             <div className="space-y-3">
@@ -387,20 +387,20 @@ export default function Onboarding() {
                 />
               </div>
               <p className="text-xs text-neutral-400">
-                {researchProgress < 30 && "Raccolta informazioni..."}
+                {researchProgress < 30 && "Gathering information..."}
                 {researchProgress >= 30 &&
                   researchProgress < 60 &&
-                  "Analisi del brand..."}
+                  "Analyzing brand..."}
                 {researchProgress >= 60 &&
                   researchProgress < 90 &&
-                  "Sintesi dei dati..."}
-                {researchProgress >= 90 && "Preparazione domande..."}
+                  "Synthesizing data..."}
+                {researchProgress >= 90 && "Preparing questions..."}
               </p>
             </div>
 
             {researchSummary && (
               <div className="text-left bg-neutral-50 rounded-xl p-4 border border-neutral-100 mt-6">
-                <p className="text-xs text-neutral-400 mb-1">Trovato:</p>
+                <p className="text-xs text-neutral-400 mb-1">Found:</p>
                 <p className="text-neutral-700 text-sm line-clamp-3">
                   {researchSummary}
                 </p>
@@ -448,13 +448,13 @@ export default function Onboarding() {
           <CardContent className="pt-10 pb-8 px-8">
             <div className="mb-8">
               <p className="text-neutral-400 text-xs mb-2">
-                Domanda {currentQuestionIndex + 1} di {questions.length}
+                Question {currentQuestionIndex + 1} of {questions.length}
               </p>
               <h2 className="text-xl font-semibold text-neutral-900 mb-1">
                 {question.question}
               </h2>
               {!question.required && (
-                <p className="text-neutral-400 text-sm">Opzionale</p>
+                <p className="text-neutral-400 text-sm">Optional</p>
               )}
             </div>
 
@@ -502,7 +502,7 @@ export default function Onboarding() {
                       [question.id]: e.target.value,
                     }))
                   }
-                  placeholder="La tua risposta..."
+                  placeholder="Your answer..."
                   className="h-12 text-base bg-neutral-50 border-neutral-200 text-neutral-900 placeholder:text-neutral-400 focus:border-neutral-300 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-xl"
                   autoFocus
                 />
@@ -516,7 +516,7 @@ export default function Onboarding() {
                 onClick={handleQuestionBack}
                 disabled={currentQuestionIndex === 0}
               >
-                Indietro
+                Back
               </Button>
 
               {!question.required && !hasAnswer && (
@@ -525,7 +525,7 @@ export default function Onboarding() {
                   className="flex-1 h-11 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-xl"
                   onClick={handleQuestionNext}
                 >
-                  Salta
+                  Skip
                 </Button>
               )}
 
@@ -540,12 +540,12 @@ export default function Onboarding() {
                 {submitAnswers.isPending ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Invio...
+                    Submitting...
                   </>
                 ) : isLastQuestion ? (
-                  "Genera"
+                  "Generate"
                 ) : (
-                  "Continua"
+                  "Continue"
                 )}
               </Button>
             </div>
@@ -572,10 +572,10 @@ export default function Onboarding() {
               <Loader2 className="w-8 h-8 animate-spin mx-auto text-neutral-400" />
             </div>
             <h2 className="text-xl font-semibold text-neutral-900 mb-1">
-              Generazione in corso
+              Generation in progress
             </h2>
             <p className="text-neutral-500 text-sm mb-8">
-              Stiamo creando il tuo contesto e le cards
+              Creating your context and cards
             </p>
 
             <div className="space-y-3">
@@ -588,14 +588,14 @@ export default function Onboarding() {
                 />
               </div>
               <p className="text-xs text-neutral-400">
-                {generateProgress < 30 && "Elaborazione risposte..."}
+                {generateProgress < 30 && "Processing answers..."}
                 {generateProgress >= 30 &&
                   generateProgress < 60 &&
-                  "Generazione contesto..."}
+                  "Generating context..."}
                 {generateProgress >= 60 &&
                   generateProgress < 90 &&
-                  "Creazione cards..."}
-                {generateProgress >= 90 && "Finalizzazione..."}
+                  "Creating cards..."}
+                {generateProgress >= 90 && "Finalizing..."}
               </p>
             </div>
           </div>
@@ -619,10 +619,10 @@ export default function Onboarding() {
           <div className="text-center mb-8">
             <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-neutral-900 mb-1">
-              Completato!
+              Complete!
             </h2>
             <p className="text-neutral-500 text-sm">
-              Abbiamo creato {cardsCount || 8} cards per{" "}
+              We created {cardsCount || 8} cards for{" "}
               <strong>{brandName}</strong>
             </p>
           </div>
@@ -630,19 +630,19 @@ export default function Onboarding() {
           <div className="bg-neutral-50 rounded-xl p-4 border border-neutral-100 mb-6">
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-neutral-500">Azienda</span>
+                <span className="text-neutral-500">Company</span>
                 <span className="text-neutral-900 font-medium">
                   {brandName}
                 </span>
               </div>
               {website && (
                 <div className="flex justify-between">
-                  <span className="text-neutral-500">Sito web</span>
+                  <span className="text-neutral-500">Website</span>
                   <span className="text-neutral-900">{website}</span>
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="text-neutral-500">Cards create</span>
+                <span className="text-neutral-500">Cards created</span>
                 <span className="text-neutral-900 font-medium">
                   {cardsCount || 8}
                 </span>
@@ -654,7 +654,7 @@ export default function Onboarding() {
             className="w-full h-11 bg-neutral-900 text-white hover:bg-neutral-800 rounded-xl font-medium"
             onClick={handleViewCards}
           >
-            Rivedi le tue Cards →
+            Review your Cards →
           </Button>
         </CardContent>
       </Card>
@@ -662,7 +662,7 @@ export default function Onboarding() {
   );
 
   return (
-    <>
+    <div className="w-full max-w-lg mx-auto">
       {/* Progress dots */}
       <div className="flex justify-center gap-1.5 mb-6">
         {ALL_STEPS.map((step, idx) => (
@@ -686,6 +686,6 @@ export default function Onboarding() {
         {currentStep === "generate" && renderGenerate()}
         {currentStep === "result" && renderResult()}
       </AnimatePresence>
-    </>
+    </div>
   );
 }

@@ -66,14 +66,36 @@ export interface ContentItem {
 }
 
 // ── CHAT ──
-export type ChatAction = "approve" | "request_change";
+// Matches backend ChatMessage model (chat_messages table)
+export type ChatActionType = "edit_output" | "update_context" | "update_brief";
 
 export interface ChatMessage {
   id: string;
-  type: "user" | "system";
-  text: string;
-  timestamp: string;
-  action?: ChatAction;
+  output_id: string;
+  user_id: string;
+  role: "user" | "assistant";
+  content: string;
+  action_type?: ChatActionType | null;
+  action_data?: Record<string, unknown> | null;
+  created_at: string;
+}
+
+export interface ChatResponse {
+  message: ChatMessage;
+  updated_output?: ContentItem | null;
+  context_changes?: Record<string, unknown> | null;
+  brief_changes?: Record<string, unknown> | null;
+}
+
+// ── REVIEW ──
+export type ReviewStatus = "approved" | "rejected";
+
+export interface ReviewRequest {
+  status: ReviewStatus;
+  feedback?: string;
+  feedback_categories?: string[];
+  is_reference?: boolean;
+  reference_notes?: string;
 }
 
 // ── CONTEXT AREA ──

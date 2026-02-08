@@ -1,7 +1,11 @@
+import logging
 from uuid import UUID
 import json
 from app.config.supabase import get_supabase_admin
 from app.infrastructure.llm.factory import get_llm_adapter
+from app.exceptions import NotFoundException, LLMException
+
+logger = logging.getLogger("cgs-mvp.chat")
 
 CHAT_SYSTEM_PROMPT = """Sei un editor AI esperto. Puoi fare 3 cose:
 
@@ -25,8 +29,12 @@ class ChatService:
         self.llm = get_llm_adapter()
 
     async def chat(self, output_id: UUID, user_id: UUID, user_message: str) -> dict:
+        logger.info("Chat request | output=%s user=%s", output_id, user_id)
+
         # Carica output e contesto
         output = self.db.table("outputs").select("*").eq("id", str(output_id)).single().execute().data
+        if not output:
+            raise NotFoundException("Output non trovato", context={"output_id": str(output_id)})
         run = self.db.table("workflow_runs").select("*").eq("id", output["run_id"]).single().execute().data
         brief = self.db.table("briefs").select("*").eq("id", run["brief_id"]).single().execute().data
         context = self.db.table("contexts").select("*").eq("id", brief["context_id"]).single().execute().data
@@ -65,7 +73,11 @@ BRIEF (name: {brief['name']}):
         messages.append({"role": "user", "content": user_message})
 
         # Chiama LLM
-        response = await self.llm.generate(messages, temperature=0.5)
+        try:
+            response = await self.llm.generate(messages, temperature=0.5)
+        except Exception as e:
+            logger.error("LLM call failed | output=%s error=%s", output_id, str(e))
+            raise LLMException("Errore nella generazione della risposta")
 
         # Parsing sicuro con fallback
         try:
@@ -89,6 +101,8 @@ BRIEF (name: {brief['name']}):
         brief_changes = None
 
         # Esegui azione
+        if action_type:
+            logger.info("Chat action: %s | output=%s", action_type, output_id)
         if action_type == "edit_output" and parsed.get("edited_content"):
             new_output = self.db.table("outputs").insert({
                 "run_id": output["run_id"],
@@ -139,6 +153,8 @@ BRIEF (name: {brief['name']}):
             "action_type": action_type,
             "action_data": action_data or None,
         }).execute().data[0]
+
+        logger.info("Chat completed | output=%s action=%s", output_id, action_type or "none")
 
         return {
             "message": assistant_msg,

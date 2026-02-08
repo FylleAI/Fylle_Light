@@ -191,12 +191,22 @@ export default function BriefDetail({ briefSlug }: BriefDetailProps) {
         <Button
           variant="outline"
           onClick={() =>
+            navigate(`/design-lab/brief/${briefSlug}/edit`)
+          }
+          className="border-neutral-600 text-neutral-300 hover:bg-neutral-700 rounded-xl h-11"
+        >
+          <FileEdit className="w-4 h-4 mr-2" />
+          Modifica Brief
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() =>
             navigate(`/design-lab/brief/create/${brief.pack_id}`)
           }
           className="border-neutral-600 text-neutral-300 hover:bg-neutral-700 rounded-xl h-11"
         >
           <Copy className="w-4 h-4 mr-2" />
-          Modifica Brief
+          Duplica Brief
         </Button>
         <Button
           onClick={() =>

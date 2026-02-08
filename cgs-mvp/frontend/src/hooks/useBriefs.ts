@@ -112,3 +112,19 @@ export function useDuplicateBrief() {
     },
   });
 }
+
+/**
+ * Delete a brief.
+ */
+export function useDeleteBrief() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiRequest(`/api/v1/briefs/${id}`, { method: "DELETE" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["briefs"] });
+      queryClient.invalidateQueries({ queryKey: ["context-summary"] });
+    },
+  });
+}

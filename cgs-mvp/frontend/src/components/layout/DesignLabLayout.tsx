@@ -5,6 +5,7 @@ import {
   Home,
   Layers,
   FileOutput,
+  Archive,
   LogOut,
   ChevronRight,
 } from "lucide-react";
@@ -18,6 +19,7 @@ const NAV_ITEMS = [
   { path: "/design-lab", label: "Home", icon: Home },
   { path: "/design-lab/context", label: "Contesto", icon: Layers },
   { path: "/design-lab/outputs", label: "Outputs", icon: FileOutput },
+  { path: "/design-lab/archive", label: "Archivio", icon: Archive },
 ];
 
 export default function DesignLabLayout({ children }: DesignLabLayoutProps) {

@@ -1,8 +1,12 @@
+import logging
 from uuid import UUID, uuid4
 from app.config.supabase import get_supabase_admin
 from app.infrastructure.tools.perplexity import PerplexityTool
 from app.infrastructure.llm.factory import get_llm_adapter
+from app.exceptions import LLMException, ExternalServiceException
 import json
+
+logger = logging.getLogger("cgs-mvp.onboarding")
 
 
 class OnboardingService:
@@ -13,6 +17,7 @@ class OnboardingService:
 
     async def start(self, user_id: UUID, data: dict) -> dict:
         """Avvia onboarding: research + genera domande."""
+        logger.info("Onboarding start | user=%s brand=%s", user_id, data.get("brand_name"))
         session_id = uuid4()
 
         # Crea sessione
@@ -29,7 +34,11 @@ class OnboardingService:
         {'Sito web: ' + data['website'] if data.get('website') else ''}
         Fornisci: descrizione, settore, prodotti/servizi, target, competitors, tone of voice."""
 
-        research = await self.perplexity.search(research_query)
+        try:
+            research = await self.perplexity.search(research_query)
+        except Exception as e:
+            logger.error("Perplexity research failed | session=%s error=%s", session_id, str(e))
+            raise ExternalServiceException("Errore nella ricerca aziendale")
 
         # 2. Genera domande con LLM
         questions_prompt = f"""Basandoti su questa ricerca:
@@ -72,6 +81,7 @@ Rispondi in JSON: [{{"id":"q1","question":"...","type":"select","options":["A","
 
     async def process_answers(self, session_id: UUID, user_id: UUID, answers: dict) -> dict:
         """Processa risposte e crea Context + 8 Cards."""
+        logger.info("Processing answers | session=%s user=%s", session_id, user_id)
         session = self.db.table("onboarding_sessions").select("*").eq("id", str(session_id)).single().execute()
         session = session.data
 
@@ -160,6 +170,7 @@ Rispondi con JSON: {{"context": {{...}}, "cards": [{{type, title, content: {{...
             "context_id": context_id,
         }).eq("id", str(session_id)).execute()
 
+        logger.info("Onboarding completed | session=%s context=%s cards=%d", session_id, context_id, len(cards))
         return {"context_id": context_id, "cards_count": len(cards)}
 
     @staticmethod

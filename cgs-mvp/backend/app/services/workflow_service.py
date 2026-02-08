@@ -1,3 +1,4 @@
+import logging
 from uuid import UUID, uuid4
 from datetime import datetime
 import json
@@ -11,6 +12,8 @@ from app.infrastructure.storage.supabase_storage import StorageService
 from app.infrastructure.logging.tracker import RunTracker
 from app.db.repositories.archive_repo import ArchiveRepository
 from app.db.repositories.output_repo import OutputRepository
+
+logger = logging.getLogger("cgs-mvp.workflow")
 
 
 class WorkflowService:

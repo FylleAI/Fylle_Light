@@ -67,3 +67,18 @@ export function useMarkAsSeen() {
     },
   });
 }
+
+/**
+ * Delete an output.
+ */
+export function useDeleteOutput() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiRequest(`/api/v1/outputs/${id}`, { method: "DELETE" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["outputs"] });
+    },
+  });
+}

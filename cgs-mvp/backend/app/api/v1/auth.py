@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 from app.config.supabase import get_supabase_client
+from app.middleware.rate_limit import limiter
 
 router = APIRouter()
 
@@ -11,7 +12,8 @@ class AuthRequest(BaseModel):
 
 
 @router.post("/register")
-async def register(req: AuthRequest):
+@limiter.limit("10/minute")
+async def register(request: Request, req: AuthRequest):
     try:
         result = get_supabase_client().auth.sign_up({"email": req.email, "password": req.password})
         return {"user_id": result.user.id, "email": result.user.email}
@@ -20,7 +22,8 @@ async def register(req: AuthRequest):
 
 
 @router.post("/login")
-async def login(req: AuthRequest):
+@limiter.limit("10/minute")
+async def login(request: Request, req: AuthRequest):
     try:
         result = get_supabase_client().auth.sign_in_with_password({"email": req.email, "password": req.password})
         return {

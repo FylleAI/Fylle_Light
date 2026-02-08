@@ -1,16 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from uuid import UUID
 import json
 from app.api.deps import get_current_user, get_db
 from app.domain.models import RunCreate
 from app.services.workflow_service import WorkflowService
+from app.middleware.rate_limit import limiter
 
 router = APIRouter()
 
 
 @router.post("")
-async def start_execution(data: RunCreate, user_id: UUID = Depends(get_current_user), db=Depends(get_db)):
+@limiter.limit("10/minute")
+async def start_execution(request: Request, data: RunCreate, user_id: UUID = Depends(get_current_user), db=Depends(get_db)):
     # Verifica che il brief appartenga all'utente
     brief = (db.table("briefs")
              .select("id")

@@ -2,6 +2,7 @@ import { Route, Switch, Redirect } from "wouter";
 import { useAppStore } from "@/lib/store";
 import { useAuth } from "@/hooks/useAuth";
 import { Toaster } from "@/components/ui/toast";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Loader2 } from "lucide-react";
 
 // Layouts
@@ -25,7 +26,10 @@ import PackOutputs from "@/pages/design-lab/PackOutputs";
 import ContentView from "@/pages/design-lab/ContentView";
 import BriefCreate from "@/pages/design-lab/BriefCreate";
 import BriefDetail from "@/pages/design-lab/BriefDetail";
+import BriefEdit from "@/pages/design-lab/BriefEdit";
 import Execute from "@/pages/design-lab/Execute";
+import ArchiveHub from "@/pages/design-lab/ArchiveHub";
+import ArchiveDetail from "@/pages/design-lab/ArchiveDetail";
 
 function LoadingScreen() {
   return (
@@ -71,7 +75,7 @@ export default function App() {
   }
 
   return (
-    <>
+    <ErrorBoundary>
       <Switch>
         {/* ── Public routes ── */}
         <Route path="/login" component={Login} />
@@ -128,6 +132,15 @@ export default function App() {
             </ProtectedRoute>
           )}
         </Route>
+        <Route path="/design-lab/brief/:briefSlug/edit">
+          {(params) => (
+            <ProtectedRoute requireContext>
+              <DesignLabLayout>
+                <BriefEdit briefSlug={params.briefSlug} />
+              </DesignLabLayout>
+            </ProtectedRoute>
+          )}
+        </Route>
         <Route path="/design-lab/brief/:briefSlug">
           {(params) => (
             <ProtectedRoute requireContext>
@@ -179,12 +192,30 @@ export default function App() {
           )}
         </Route>
 
+        {/* Archive routes */}
+        <Route path="/design-lab/archive">
+          <ProtectedRoute requireContext>
+            <DesignLabLayout>
+              <ArchiveHub />
+            </DesignLabLayout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/design-lab/archive/:outputId">
+          {(params) => (
+            <ProtectedRoute requireContext>
+              <DesignLabLayout>
+                <ArchiveDetail outputId={params.outputId} />
+              </DesignLabLayout>
+            </ProtectedRoute>
+          )}
+        </Route>
+
         {/* ── Default redirect ── */}
         <Route>
           <Redirect to="/login" />
         </Route>
       </Switch>
       <Toaster />
-    </>
+    </ErrorBoundary>
   );
 }

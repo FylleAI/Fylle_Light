@@ -16,11 +16,11 @@ class OnboardingService:
         self.llm = get_llm_adapter()
 
     async def start(self, user_id: UUID, data: dict) -> dict:
-        """Avvia onboarding: research + genera domande."""
+        """Start onboarding: research + generate questions."""
         logger.info("Onboarding start | user=%s brand=%s", user_id, data.get("brand_name"))
         session_id = uuid4()
 
-        # Crea sessione
+        # Create session
         self.db.table("onboarding_sessions").insert({
             "id": str(session_id),
             "user_id": str(user_id),
@@ -29,38 +29,38 @@ class OnboardingService:
             "initial_input": data,
         }).execute()
 
-        # 1. Research con Perplexity
-        research_query = f"""Analizza l'azienda "{data['brand_name']}".
-        {'Sito web: ' + data['website'] if data.get('website') else ''}
-        Fornisci: descrizione, settore, prodotti/servizi, target, competitors, tone of voice."""
+        # 1. Research with Perplexity
+        research_query = f"""Analyze the company "{data['brand_name']}".
+        {'Website: ' + data['website'] if data.get('website') else ''}
+        Provide: description, industry, products/services, target audience, competitors, tone of voice."""
 
         try:
             research = await self.perplexity.search(research_query)
         except Exception as e:
             logger.error("Perplexity research failed | session=%s error=%s", session_id, str(e))
-            raise ExternalServiceException("Errore nella ricerca aziendale")
+            raise ExternalServiceException("Company research error")
 
-        # 2. Genera domande con LLM
-        questions_prompt = f"""Basandoti su questa ricerca:
+        # 2. Generate questions with LLM
+        questions_prompt = f"""Based on this research:
 {research}
 
-Genera 5-8 domande clarificatorie per completare il profilo dell'azienda "{data['brand_name']}".
-Ogni domanda deve avere: id, question, type (select/text), options (se select), required (bool).
+Generate 5-8 clarifying questions to complete the company profile for "{data['brand_name']}".
+Each question must have: id, question, type (select/text), options (if select), required (bool).
 
-Rispondi in JSON: [{{"id":"q1","question":"...","type":"select","options":["A","B","C"],"required":true}}]"""
+Reply in JSON: [{{"id":"q1","question":"...","type":"select","options":["A","B","C"],"required":true}}]"""
 
         response = await self.llm.generate([
-            {"role": "system", "content": "Sei un business analyst. Genera domande pertinenti in italiano. Rispondi SOLO con JSON valido."},
+            {"role": "system", "content": "You are a business analyst. Generate relevant questions. IMPORTANT: All questions and text MUST be in English. Reply ONLY with valid JSON."},
             {"role": "user", "content": questions_prompt},
         ])
 
-        # Parsing sicuro con retry
+        # Safe parsing with retry
         questions = self._safe_json_parse(response.content)
         if questions is None:
-            # Retry con prompt più esplicito
+            # Retry with more explicit prompt
             retry_response = await self.llm.generate([
-                {"role": "system", "content": "Rispondi ESCLUSIVAMENTE con un array JSON valido, senza testo aggiuntivo."},
-                {"role": "user", "content": f"Converti in JSON array valido:\n{response.content}"},
+                {"role": "system", "content": "Reply EXCLUSIVELY with a valid JSON array, no additional text."},
+                {"role": "user", "content": f"Convert to a valid JSON array:\n{response.content}"},
             ], temperature=0.3)
             questions = self._safe_json_parse(retry_response.content)
             if questions is None:
@@ -80,7 +80,7 @@ Rispondi in JSON: [{{"id":"q1","question":"...","type":"select","options":["A","
         }
 
     async def process_answers(self, session_id: UUID, user_id: UUID, answers: dict) -> dict:
-        """Processa risposte e crea Context + 8 Cards."""
+        """Process answers and create Context + 8 Cards."""
         logger.info("Processing answers | session=%s user=%s", session_id, user_id)
         session = self.db.table("onboarding_sessions").select("*").eq("id", str(session_id)).single().execute()
         session = session.data
@@ -91,19 +91,19 @@ Rispondi in JSON: [{{"id":"q1","question":"...","type":"select","options":["A","
             "answers": answers,
         }).eq("id", str(session_id)).execute()
 
-        # Genera Context con LLM
-        context_prompt = f"""Basandoti sulla ricerca aziendale e le risposte dell'utente, genera un profilo completo.
+        # Generate Context with LLM
+        context_prompt = f"""Based on the company research and user answers, generate a complete profile.
 
-RICERCA: {json.dumps(session['research_data'])}
-DOMANDE E RISPOSTE: {json.dumps(dict(zip([q['question'] for q in session['questions']], [answers.get(q['id']) for q in session['questions']])))}
+RESEARCH: {json.dumps(session['research_data'])}
+QUESTIONS AND ANSWERS: {json.dumps(dict(zip([q['question'] for q in session['questions']], [answers.get(q['id']) for q in session['questions']])))}
 
-Genera un JSON con:
+Generate a JSON with:
 - company_info: {{name, description, products, usp, values, industry}}
 - audience_info: {{primary_segment, secondary_segments, pain_points, demographics}}
 - voice_info: {{tone, personality, dos, donts, style_guidelines}}
 - goals_info: {{primary_goal, kpis, content_pillars}}
 
-E per ciascuno degli 8 tipi di card, genera il contenuto:
+And for each of the 8 card types, generate the content:
 - product: {{valueProposition, features[], differentiators[], useCases[], performanceMetrics[]}}
 - target: {{icpName, description, painPoints[], goals[], preferredLanguage, communicationChannels[]}}
 - brand_voice: {{toneDescription, styleGuidelines[], dosExamples[], dontsExamples[], termsToUse[], termsToAvoid[]}}
@@ -113,19 +113,19 @@ E per ciascuno degli 8 tipi di card, genera il contenuto:
 - performance: {{period, metrics[], topPerformingContent[], insights[]}}
 - feedback: {{source, summary, details, actionItems[], priority}}
 
-Rispondi con JSON: {{"context": {{...}}, "cards": [{{type, title, content: {{...}}}}]}}"""
+Reply with JSON: {{"context": {{...}}, "cards": [{{type, title, content: {{...}}}}]}}"""
 
         response = await self.llm.generate([
-            {"role": "system", "content": "Sei un business strategist esperto. Genera profili aziendali dettagliati. Rispondi SOLO con JSON valido."},
+            {"role": "system", "content": "You are an expert business strategist. Generate detailed company profiles. IMPORTANT: All generated content MUST be in English, regardless of the company's language or country. Reply ONLY with valid JSON."},
             {"role": "user", "content": context_prompt},
         ], max_tokens=8000)
 
-        # Parsing sicuro con retry
+        # Safe parsing with retry
         result = self._safe_json_parse(response.content)
         if result is None:
             retry_response = await self.llm.generate([
-                {"role": "system", "content": "Rispondi ESCLUSIVAMENTE con JSON valido, senza testo aggiuntivo."},
-                {"role": "user", "content": f"Correggi e restituisci come JSON valido:\n{response.content[:4000]}"},
+                {"role": "system", "content": "Reply EXCLUSIVELY with valid JSON, no additional text."},
+                {"role": "user", "content": f"Fix and return as valid JSON:\n{response.content[:4000]}"},
             ], temperature=0.3)
             result = self._safe_json_parse(retry_response.content)
             if result is None:
@@ -135,7 +135,7 @@ Rispondi con JSON: {{"context": {{...}}, "cards": [{{type, title, content: {{...
                 }).eq("id", str(session_id)).execute()
                 raise ValueError("Failed to parse context generation response")
 
-        # Crea Context
+        # Create Context
         brand_name = session["initial_input"]["brand_name"]
         context_data = result.get("context", {})
         context = self.db.table("contexts").insert({
@@ -153,7 +153,7 @@ Rispondi con JSON: {{"context": {{...}}, "cards": [{{type, title, content: {{...
         }).execute()
         context_id = context.data[0]["id"]
 
-        # Crea 8 Cards
+        # Create 8 Cards
         cards = result.get("cards", [])
         for i, card_data in enumerate(cards):
             self.db.table("cards").insert({
@@ -175,12 +175,12 @@ Rispondi con JSON: {{"context": {{...}}, "cards": [{{type, title, content: {{...
 
     @staticmethod
     def _safe_json_parse(text: str):
-        """Parsing JSON sicuro: prova testo grezzo, poi estrae blocco JSON."""
+        """Safe JSON parsing: try raw text, then extract JSON block."""
         try:
             return json.loads(text)
         except json.JSONDecodeError:
             pass
-        # Prova ad estrarre il primo blocco JSON valido
+        # Try to extract the first valid JSON block
         for start_char, end_char in [("{", "}"), ("[", "]")]:
             start = text.find(start_char)
             end = text.rfind(end_char)

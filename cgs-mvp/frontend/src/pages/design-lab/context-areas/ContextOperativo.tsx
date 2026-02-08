@@ -44,7 +44,7 @@ export default function ContextOperativo() {
   if (operativeCards.length === 0) {
     return (
       <p className="text-neutral-500 text-sm italic py-4">
-        Nessuna card operativa disponibile. Le card vengono create durante l'onboarding.
+        No operational cards available. Cards are created during onboarding.
       </p>
     );
   }
@@ -59,7 +59,7 @@ export default function ContextOperativo() {
   return (
     <div className="space-y-8">
       <p className="text-neutral-400 text-sm">
-        Cards operative: prodotto, target, campagne, topic, performance e feedback.
+        Operational cards: product, target, campaigns, topics, performance and feedback.
       </p>
 
       {grouped.map((group) => (

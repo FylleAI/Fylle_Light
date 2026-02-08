@@ -35,7 +35,7 @@ export default function Login() {
       await login(email, password);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Credenziali non valide"
+        err instanceof Error ? err.message : "Invalid credentials"
       );
     } finally {
       setIsLoading(false);
@@ -60,10 +60,10 @@ export default function Login() {
         <Card className="bg-white border-neutral-200 shadow-sm rounded-3xl">
           <CardContent className="pt-8 pb-8 px-8">
             <h2 className="text-xl font-semibold text-neutral-900 mb-1">
-              Accedi
+              Login
             </h2>
             <p className="text-neutral-500 text-sm mb-6">
-              Inserisci le tue credenziali
+              Enter your credentials
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -74,7 +74,7 @@ export default function Login() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="tuonome@azienda.com"
+                  placeholder="yourname@company.com"
                   className="h-12 bg-neutral-50 border-neutral-200 text-neutral-900 placeholder:text-neutral-400 rounded-xl"
                   required
                   autoFocus
@@ -108,22 +108,22 @@ export default function Login() {
                 {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Accesso in corso...
+                    Signing in...
                   </>
                 ) : (
-                  "Accedi"
+                  "Login"
                 )}
               </Button>
             </form>
 
             <div className="mt-6 text-center">
               <p className="text-sm text-neutral-500">
-                Non hai un account?{" "}
+                Don't have an account?{" "}
                 <button
                   onClick={() => navigate("/register")}
                   className="text-neutral-900 font-medium hover:underline"
                 >
-                  Registrati
+                  Sign Up
                 </button>
               </p>
             </div>

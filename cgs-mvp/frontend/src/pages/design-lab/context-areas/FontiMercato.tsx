@@ -32,7 +32,7 @@ export default function FontiMercato() {
   if (!hasData) {
     return (
       <p className="text-neutral-500 text-sm italic py-4">
-        Nessun dato di mercato disponibile. I dati vengono popolati durante l'onboarding.
+        No market data available. Data is populated during onboarding.
       </p>
     );
   }
@@ -40,7 +40,7 @@ export default function FontiMercato() {
   return (
     <div className="space-y-6">
       <p className="text-neutral-400 text-sm">
-        Dati di mercato, trend e analisi competitor da Perplexity.
+        Market data, trends and competitor analysis from Perplexity.
       </p>
 
       {Object.keys(researchData).length > 0 && (
@@ -48,7 +48,7 @@ export default function FontiMercato() {
           <CardContent className="p-5 space-y-3">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-lg">📈</span>
-              <h3 className="text-sm font-medium text-neutral-200">Ricerca di Mercato</h3>
+              <h3 className="text-sm font-medium text-neutral-200">Market Research</h3>
             </div>
             {Object.entries(researchData).map(([key, value]) => (
               <div key={key}>
@@ -105,7 +105,7 @@ export default function FontiMercato() {
                     {c.strengths && c.strengths.length > 0 && (
                       <div>
                         <h4 className="text-xs text-green-400 uppercase tracking-wide mb-1">
-                          Punti di forza
+                          Strengths
                         </h4>
                         <ul className="space-y-0.5">
                           {c.strengths.map((s, i) => (
@@ -121,7 +121,7 @@ export default function FontiMercato() {
                     {c.weaknesses && c.weaknesses.length > 0 && (
                       <div>
                         <h4 className="text-xs text-red-400 uppercase tracking-wide mb-1">
-                          Debolezze
+                          Weaknesses
                         </h4>
                         <ul className="space-y-0.5">
                           {c.weaknesses.map((w, i) => (
@@ -137,7 +137,7 @@ export default function FontiMercato() {
                     {c.differentiationOpportunities && c.differentiationOpportunities.length > 0 && (
                       <div>
                         <h4 className="text-xs text-amber-400 uppercase tracking-wide mb-1">
-                          Opportunità
+                          Opportunities
                         </h4>
                         <ul className="space-y-0.5">
                           {c.differentiationOpportunities.map((d, i) => (

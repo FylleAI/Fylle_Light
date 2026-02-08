@@ -36,7 +36,7 @@ export default function PerformanceRenderer({ title, content }: Props) {
         {content.metrics && content.metrics.length > 0 && (
           <div>
             <h4 className="text-xs text-neutral-500 uppercase tracking-wide mb-2">
-              Metriche per Canale
+              Metrics by Channel
             </h4>
             <div className="space-y-2">
               {content.metrics.map((m, i) => (

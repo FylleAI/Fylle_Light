@@ -191,7 +191,7 @@ class Output(BaseModel):
     version: int = 1
     parent_output_id: Optional[UUID] = None
     # Design Lab fields
-    status: OutputStatus = OutputStatus.DA_APPROVARE
+    status: OutputStatus = OutputStatus.PENDING_REVIEW
     is_new: bool = True
     number: Optional[int] = None
     author: Optional[str] = None

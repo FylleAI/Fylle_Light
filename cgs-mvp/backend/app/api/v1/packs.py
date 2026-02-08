@@ -7,13 +7,13 @@ router = APIRouter()
 
 @router.get("")
 async def list_packs(user_id: UUID = Depends(get_current_user), db=Depends(get_db)):
-    """Lista pack con user_status calcolato dalla presenza di brief dell'utente."""
+    """List packs with user_status calculated from user's briefs."""
     packs = (db.table("agent_packs")
              .select("*")
              .eq("is_active", True)
              .order("sort_order")
              .execute().data)
-    # Per ogni pack, conta i brief dell'utente
+    # For each pack, count user's briefs
     briefs = db.table("briefs").select("pack_id").eq("user_id", str(user_id)).execute().data
     user_pack_ids = {b["pack_id"] for b in briefs}
 

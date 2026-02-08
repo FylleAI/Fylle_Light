@@ -73,7 +73,7 @@ export default function PackOutputs({ packType }: PackOutputsProps) {
             {pack?.name || packType}
           </h1>
           <p className="text-neutral-400 text-sm">
-            {pack?.outcome || "Contenuti generati"}
+            {pack?.outcome || "Generated content"}
           </p>
         </div>
       </div>
@@ -91,10 +91,10 @@ export default function PackOutputs({ packType }: PackOutputsProps) {
           <CardContent className="p-12 text-center">
             <FileText className="w-12 h-12 text-neutral-600 mx-auto mb-4" />
             <h2 className="text-lg font-medium text-neutral-300 mb-2">
-              Nessun brief configurato
+              No briefs configured
             </h2>
             <p className="text-sm text-neutral-500 mb-6">
-              Crea un brief per iniziare a generare contenuti.
+              Create a brief to start generating content.
             </p>
             {pack && (
               <Button
@@ -104,7 +104,7 @@ export default function PackOutputs({ packType }: PackOutputsProps) {
                 className="bg-accent hover:bg-accent/90 text-black font-medium rounded-xl h-11"
               >
                 <Sparkles className="w-4 h-4 mr-2" />
-                Crea Brief
+                Create Brief
               </Button>
             )}
           </CardContent>
@@ -127,8 +127,7 @@ export default function PackOutputs({ packType }: PackOutputsProps) {
                     {brief.name}
                   </h2>
                   <span className="text-xs text-neutral-500">
-                    ({outputs.length} contenut
-                    {outputs.length === 1 ? "o" : "i"})
+                    ({outputs.length} item{outputs.length === 1 ? "" : "s"})
                   </span>
                 </div>
                 <Button
@@ -140,7 +139,7 @@ export default function PackOutputs({ packType }: PackOutputsProps) {
                   className="text-accent hover:text-accent/80 text-xs rounded-lg"
                 >
                   <Sparkles className="w-3 h-3 mr-1" />
-                  Genera
+                  Generate
                 </Button>
               </div>
 
@@ -165,14 +164,14 @@ export default function PackOutputs({ packType }: PackOutputsProps) {
                 <Card className="bg-surface-elevated/50 border-0 rounded-xl">
                   <CardContent className="p-6 text-center">
                     <p className="text-sm text-neutral-500">
-                      Nessun contenuto ancora.{" "}
+                      No content yet.{" "}
                       <button
                         onClick={() =>
                           navigate(`/design-lab/execute/${brief.id}`)
                         }
                         className="text-accent hover:underline"
                       >
-                        Genera il primo →
+                        Generate the first one →
                       </button>
                     </p>
                   </CardContent>
@@ -192,7 +191,7 @@ export default function PackOutputs({ packType }: PackOutputsProps) {
             }
             className="border-neutral-600 text-neutral-300 hover:bg-neutral-700 rounded-xl h-10 text-sm"
           >
-            + Nuovo Brief
+            + New Brief
           </Button>
         </div>
       )}

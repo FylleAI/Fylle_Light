@@ -49,10 +49,10 @@ export default function ContextHub() {
     <div className="space-y-6">
       <div>
         <h1 className="text-xl font-bold text-neutral-100">
-          Contesto Operativo
+          Operational Context
         </h1>
         <p className="text-neutral-400 text-sm mt-1">
-          Le 5 aree che definiscono il contesto del tuo brand
+          The 5 areas that define your brand context
         </p>
       </div>
 

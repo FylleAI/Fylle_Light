@@ -7,19 +7,19 @@ from app.exceptions import NotFoundException, LLMException
 
 logger = logging.getLogger("cgs-mvp.chat")
 
-CHAT_SYSTEM_PROMPT = """Sei un editor AI esperto. Puoi fare 3 cose:
+CHAT_SYSTEM_PROMPT = """You are an expert AI editor. You can do 3 things:
 
-1. EDIT_OUTPUT: Modifica il contenuto. Rispondi con il contenuto aggiornato completo.
-2. UPDATE_CONTEXT: Se l'utente ti dice qualcosa sull'identita del brand, suggerisci aggiornamento al Context.
-3. UPDATE_BRIEF: Se l'utente ti dice qualcosa su come vuole il contenuto, suggerisci aggiornamento al Brief.
+1. EDIT_OUTPUT: Edit the content. Reply with the complete updated content.
+2. UPDATE_CONTEXT: If the user tells you something about the brand identity, suggest a Context update.
+3. UPDATE_BRIEF: If the user tells you something about how they want the content, suggest a Brief update.
 
-Rispondi SEMPRE con JSON valido:
+ALWAYS reply with valid JSON:
 {
-    "message": "la tua risposta all'utente",
+    "message": "your response to the user",
     "action": null | "edit_output" | "update_context" | "update_brief",
-    "edited_content": "contenuto modificato completo (solo se action=edit_output)" | null,
-    "context_update": {"campo": "valore"} | null,
-    "brief_update": {"campo": "valore"} | null
+    "edited_content": "complete edited content (only if action=edit_output)" | null,
+    "context_update": {"field": "value"} | null,
+    "brief_update": {"field": "value"} | null
 }"""
 
 
@@ -31,22 +31,22 @@ class ChatService:
     async def chat(self, output_id: UUID, user_id: UUID, user_message: str) -> dict:
         logger.info("Chat request | output=%s user=%s", output_id, user_id)
 
-        # Carica output e contesto
+        # Load output and context
         output = self.db.table("outputs").select("*").eq("id", str(output_id)).single().execute().data
         if not output:
-            raise NotFoundException("Output non trovato", context={"output_id": str(output_id)})
+            raise NotFoundException("Output not found", context={"output_id": str(output_id)})
         run = self.db.table("workflow_runs").select("*").eq("id", output["run_id"]).single().execute().data
         brief = self.db.table("briefs").select("*").eq("id", run["brief_id"]).single().execute().data
         context = self.db.table("contexts").select("*").eq("id", brief["context_id"]).single().execute().data
 
-        # Carica history
+        # Load history
         history = (self.db.table("chat_messages")
                    .select("*")
                    .eq("output_id", str(output_id))
                    .order("created_at")
                    .execute().data)
 
-        # Salva messaggio utente
+        # Save user message
         self.db.table("chat_messages").insert({
             "output_id": str(output_id),
             "user_id": str(user_id),
@@ -54,11 +54,11 @@ class ChatService:
             "content": user_message,
         }).execute()
 
-        # Costruisci messages per LLM
+        # Build messages for LLM
         messages = [
             {"role": "system", "content": CHAT_SYSTEM_PROMPT + f"""
 
-CONTENUTO ATTUALE:
+CURRENT CONTENT:
 {output.get('text_content', '')}
 
 CONTEXT (brand: {context['brand_name']}):
@@ -68,22 +68,22 @@ BRIEF (name: {brief['name']}):
 {json.dumps(brief.get('answers', {}), indent=2)}"""},
         ]
 
-        for msg in history[-10:]:  # Ultimi 10 messaggi
+        for msg in history[-10:]:  # Last 10 messages
             messages.append({"role": msg["role"], "content": msg["content"]})
         messages.append({"role": "user", "content": user_message})
 
-        # Chiama LLM
+        # Call LLM
         try:
             response = await self.llm.generate(messages, temperature=0.5)
         except Exception as e:
             logger.error("LLM call failed | output=%s error=%s", output_id, str(e))
-            raise LLMException("Errore nella generazione della risposta")
+            raise LLMException("Error generating response")
 
-        # Parsing sicuro con fallback
+        # Safe parsing with fallback
         try:
             parsed = json.loads(response.content)
         except json.JSONDecodeError:
-            # Prova ad estrarre JSON dal testo
+            # Try to extract JSON from text
             start = response.content.find("{")
             end = response.content.rfind("}")
             if start != -1 and end != -1:
@@ -100,7 +100,7 @@ BRIEF (name: {brief['name']}):
         context_changes = None
         brief_changes = None
 
-        # Esegui azione
+        # Execute action
         if action_type:
             logger.info("Chat action: %s | output=%s", action_type, output_id)
         if action_type == "edit_output" and parsed.get("edited_content"):
@@ -119,7 +119,7 @@ BRIEF (name: {brief['name']}):
                 "number": output.get("number"),
                 "author": output.get("author"),
             }).execute().data[0]
-            # Aggiorna lo status dell'output originale (radice della chain)
+            # Update the status of the original (root) output
             root_id = output.get("parent_output_id") or str(output_id)
             self.db.table("outputs").update({"status": "adattato"}).eq("id", root_id).execute()
             action_data = {"new_output_id": new_output["id"]}
@@ -144,7 +144,7 @@ BRIEF (name: {brief['name']}):
             brief_changes = updates
             action_data = {"brief_id": brief["id"], "changes": updates}
 
-        # Salva messaggio assistant
+        # Save assistant message
         assistant_msg = self.db.table("chat_messages").insert({
             "output_id": str(output_id),
             "user_id": str(user_id),

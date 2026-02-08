@@ -1,8 +1,8 @@
 -- =============================================================
--- Fylle MVP — Schema Supabase Completo
+-- Fylle MVP — Complete Supabase Schema
 -- =============================================================
--- Migration 001: Tutte le tabelle, indici, trigger, RLS
--- Eseguire nel SQL Editor di Supabase o via CLI
+-- Migration 001: All tables, indexes, triggers, RLS
+-- Run in Supabase SQL Editor or via CLI
 -- =============================================================
 
 -- EXTENSIONS
@@ -10,19 +10,19 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "vector";
 
 -- =============================================================
--- 1. PROFILES (estende auth.users di Supabase)
+-- 1. PROFILES (extends Supabase auth.users)
 -- =============================================================
 CREATE TABLE public.profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     email TEXT NOT NULL,
     full_name TEXT,
     avatar_url TEXT,
-    settings JSONB DEFAULT '{"theme":"light","language":"it"}'::jsonb,
+    settings JSONB DEFAULT '{"theme":"light","language":"en"}'::jsonb,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Trigger: crea profilo automaticamente quando un utente si registra
+-- Trigger: automatically create profile when a user signs up
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -41,7 +41,7 @@ CREATE TRIGGER on_auth_user_created
     FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- =============================================================
--- 2. CONTENT TYPES (tipologie di contenuto generabile)
+-- 2. CONTENT TYPES (types of generatable content)
 -- =============================================================
 CREATE TABLE public.content_types (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -57,7 +57,7 @@ CREATE TABLE public.content_types (
 );
 
 -- =============================================================
--- 3. CONTEXTS (Pilastro 1 — Identità del brand)
+-- 3. CONTEXTS (Pillar 1 — Brand Identity)
 -- =============================================================
 CREATE TABLE public.contexts (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -77,7 +77,7 @@ CREATE TABLE public.contexts (
 );
 
 -- =============================================================
--- 4. CARDS (8 tipologie per context)
+-- 4. CARDS (8 types per context)
 -- =============================================================
 CREATE TABLE public.cards (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -97,7 +97,7 @@ CREATE TABLE public.cards (
 );
 
 -- =============================================================
--- 5. AGENT PACKS (template di workflow per tipo contenuto)
+-- 5. AGENT PACKS (workflow templates per content type)
 -- =============================================================
 CREATE TABLE public.agent_packs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -122,7 +122,7 @@ CREATE TABLE public.agent_packs (
 );
 
 -- =============================================================
--- 6. BRIEFS (Pilastro 2 — Come vuoi il contenuto)
+-- 6. BRIEFS (Pillar 2 — How you want the content)
 -- =============================================================
 CREATE TABLE public.briefs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -142,7 +142,7 @@ CREATE TABLE public.briefs (
 );
 
 -- =============================================================
--- 7. WORKFLOW RUNS (esecuzioni)
+-- 7. WORKFLOW RUNS (executions)
 -- =============================================================
 CREATE TABLE public.workflow_runs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -165,7 +165,7 @@ CREATE TABLE public.workflow_runs (
 );
 
 -- =============================================================
--- 8. OUTPUTS (Multi-formato: testo, immagini, audio, video)
+-- 8. OUTPUTS (Multi-format: text, images, audio, video)
 -- =============================================================
 CREATE TABLE public.outputs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -191,7 +191,7 @@ CREATE TABLE public.outputs (
 );
 
 -- =============================================================
--- 9. ARCHIVE (Pilastro 3 — Learning Loop)
+-- 9. ARCHIVE (Pillar 3 — Learning Loop)
 -- =============================================================
 CREATE TABLE public.archive (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -231,7 +231,7 @@ CREATE TABLE public.chat_messages (
 );
 
 -- =============================================================
--- 11. ONBOARDING SESSIONS (stato wizard onboarding/brief)
+-- 11. ONBOARDING SESSIONS (onboarding/brief wizard state)
 -- =============================================================
 CREATE TABLE public.onboarding_sessions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -254,7 +254,7 @@ CREATE TABLE public.onboarding_sessions (
 );
 
 -- =============================================================
--- 12. RUN LOGS (logging strutturato per debug)
+-- 12. RUN LOGS (structured logging for debug)
 -- =============================================================
 CREATE TABLE public.run_logs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -347,6 +347,6 @@ CREATE POLICY "own_logs" ON public.run_logs FOR ALL USING (
     EXISTS (SELECT 1 FROM public.workflow_runs WHERE id = run_logs.run_id AND user_id = auth.uid())
 );
 
--- Content types e agent packs sono pubblici (lettura)
+-- Content types and agent packs are public (read-only)
 CREATE POLICY "public_content_types" ON public.content_types FOR SELECT USING (TRUE);
 CREATE POLICY "public_packs" ON public.agent_packs FOR SELECT USING (TRUE);

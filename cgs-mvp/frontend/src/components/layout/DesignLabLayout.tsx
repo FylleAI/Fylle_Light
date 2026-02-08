@@ -17,9 +17,9 @@ interface DesignLabLayoutProps {
 
 const NAV_ITEMS = [
   { path: "/design-lab", label: "Home", icon: Home },
-  { path: "/design-lab/context", label: "Contesto", icon: Layers },
+  { path: "/design-lab/context", label: "Context", icon: Layers },
   { path: "/design-lab/outputs", label: "Outputs", icon: FileOutput },
-  { path: "/design-lab/archive", label: "Archivio", icon: Archive },
+  { path: "/design-lab/archive", label: "Archive", icon: Archive },
 ];
 
 export default function DesignLabLayout({ children }: DesignLabLayoutProps) {
@@ -84,7 +84,7 @@ export default function DesignLabLayout({ children }: DesignLabLayoutProps) {
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-neutral-400 hover:text-white hover:bg-neutral-800/50 transition-colors"
               >
                 <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">Esci</span>
+                <span className="hidden sm:inline">Logout</span>
               </button>
             </div>
           </div>

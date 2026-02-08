@@ -150,7 +150,7 @@ export default function OnboardingCards() {
               {updateCard.isPending ? (
                 <Loader2 className="w-3 h-3 animate-spin mr-1" />
               ) : null}
-              Salva
+              Save
             </Button>
             <Button
               size="sm"
@@ -158,7 +158,7 @@ export default function OnboardingCards() {
               onClick={handleCancelEdit}
               className="text-neutral-500 hover:text-neutral-700 rounded-lg text-xs"
             >
-              Annulla
+              Cancel
             </Button>
           </div>
         </div>
@@ -177,7 +177,7 @@ export default function OnboardingCards() {
           <p className="text-neutral-900 flex-1">
             {value || (
               <span className="text-neutral-300 italic">
-                Clicca per aggiungere
+                Click to add
               </span>
             )}
           </p>
@@ -234,17 +234,17 @@ export default function OnboardingCards() {
             )}
             {renderListField(
               (content.differentiators as string[]) || [],
-              "Differenziatori"
+              "Differentiators"
             )}
             {renderListField(
               (content.useCases as string[]) || [],
-              "Casi d'uso"
+              "Use Cases"
             )}
             {(content.performanceMetrics as { metric: string; value: string }[])
               ?.length > 0 && (
               <div className="space-y-2">
                 <label className="text-xs text-neutral-400 uppercase tracking-wide">
-                  Metriche
+                  Metrics
                 </label>
                 <div className="grid grid-cols-3 gap-3">
                   {(
@@ -276,29 +276,29 @@ export default function OnboardingCards() {
               ct,
               "icpName",
               (content.icpName as string) || "",
-              "Nome ICP"
+              "ICP Name"
             )}
             {renderEditableField(
               ct,
               "description",
               (content.description as string) || "",
-              "Descrizione",
+              "Description",
               true
             )}
             {renderListField(
               (content.painPoints as string[]) || [],
               "Pain Points"
             )}
-            {renderListField((content.goals as string[]) || [], "Obiettivi")}
+            {renderListField((content.goals as string[]) || [], "Goals")}
             {renderEditableField(
               ct,
               "preferredLanguage",
               (content.preferredLanguage as string) || "",
-              "Linguaggio preferito"
+              "Preferred Language"
             )}
             {renderListField(
               (content.communicationChannels as string[]) || [],
-              "Canali"
+              "Channels"
             )}
           </div>
         );
@@ -310,12 +310,12 @@ export default function OnboardingCards() {
               ct,
               "toneDescription",
               (content.toneDescription as string) || "",
-              "Descrizione tono",
+              "Tone Description",
               true
             )}
             {renderListField(
               (content.styleGuidelines as string[]) || [],
-              "Linee guida stilistiche"
+              "Style Guidelines"
             )}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -352,7 +352,7 @@ export default function OnboardingCards() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-xs text-neutral-400 uppercase tracking-wide">
-                  Termini da usare
+                  Terms to Use
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {((content.termsToUse as string[]) || []).map((t, i) => (
@@ -367,7 +367,7 @@ export default function OnboardingCards() {
               </div>
               <div className="space-y-2">
                 <label className="text-xs text-neutral-400 uppercase tracking-wide">
-                  Termini da evitare
+                  Terms to Avoid
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {((content.termsToAvoid as string[]) || []).map((t, i) => (
@@ -397,30 +397,30 @@ export default function OnboardingCards() {
               ct,
               "positioning",
               (content.positioning as string) || "",
-              "Posizionamento",
+              "Positioning",
               true
             )}
             {renderListField(
               (content.keyMessages as string[]) || [],
-              "Messaggi chiave"
+              "Key Messages"
             )}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 {renderListField(
                   (content.strengths as string[]) || [],
-                  "Punti di forza"
+                  "Strengths"
                 )}
               </div>
               <div>
                 {renderListField(
                   (content.weaknesses as string[]) || [],
-                  "Punti deboli"
+                  "Weaknesses"
                 )}
               </div>
             </div>
             {renderListField(
               (content.differentiationOpportunities as string[]) || [],
-              "Opportunità"
+              "Opportunities"
             )}
           </div>
         );
@@ -432,22 +432,22 @@ export default function OnboardingCards() {
               ct,
               "objective",
               (content.objective as string) || "",
-              "Obiettivo",
+              "Objective",
               true
             )}
             {renderListField(
               (content.keyMessages as string[]) || [],
-              "Messaggi chiave"
+              "Key Messages"
             )}
             {renderEditableField(
               ct,
               "tone",
               (content.tone as string) || "",
-              "Tono"
+              "Tone"
             )}
             {renderListField(
               (content.learnings as string[]) || [],
-              "Apprendimenti"
+              "Learnings"
             )}
           </div>
         );
@@ -459,7 +459,7 @@ export default function OnboardingCards() {
               ct,
               "description",
               (content.description as string) || "",
-              "Descrizione",
+              "Description",
               true
             )}
             {(content.keywords as string[])?.length > 0 && (
@@ -481,7 +481,7 @@ export default function OnboardingCards() {
             )}
             {renderListField(
               (content.angles as string[]) || [],
-              "Angolazioni"
+              "Angles"
             )}
           </div>
         );
@@ -493,7 +493,7 @@ export default function OnboardingCards() {
               ct,
               "period",
               (content.period as string) || "",
-              "Periodo"
+              "Period"
             )}
             {renderListField(
               (content.insights as string[]) || [],
@@ -515,26 +515,26 @@ export default function OnboardingCards() {
                     : "bg-neutral-100 text-neutral-600"
                 }`}
               >
-                Priorità {(content.priority as string) || "medium"}
+                Priority {(content.priority as string) || "medium"}
               </span>
             </div>
             {renderEditableField(
               ct,
               "summary",
               (content.summary as string) || "",
-              "Sommario",
+              "Summary",
               true
             )}
             {renderEditableField(
               ct,
               "details",
               (content.details as string) || "",
-              "Dettagli",
+              "Details",
               true
             )}
             {renderListField(
               (content.actionItems as string[]) || [],
-              "Azioni"
+              "Actions"
             )}
           </div>
         );
@@ -553,7 +553,7 @@ export default function OnboardingCards() {
     return (
       <div className="text-center py-12">
         <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-neutral-400" />
-        <p className="text-neutral-500 text-sm">Caricamento cards...</p>
+        <p className="text-neutral-500 text-sm">Loading cards...</p>
       </div>
     );
   }
@@ -563,18 +563,18 @@ export default function OnboardingCards() {
       <Card className="bg-white border-neutral-200 shadow-sm rounded-3xl">
         <CardContent className="pt-10 pb-8 px-8 text-center">
           <h2 className="text-xl font-semibold text-neutral-900 mb-2">
-            {isError ? "Errore" : "Nessuna card"}
+            {isError ? "Error" : "No cards"}
           </h2>
           <p className="text-neutral-500 mb-6">
             {isError
-              ? "Impossibile caricare le cards"
-              : "Non ci sono cards disponibili"}
+              ? "Unable to load cards"
+              : "No cards available"}
           </p>
           <Button
             onClick={() => navigate("/onboarding")}
             className="bg-neutral-900 text-white hover:bg-neutral-800 rounded-xl"
           >
-            Vai all'Onboarding
+            Go to Onboarding
           </Button>
         </CardContent>
       </Card>
@@ -595,10 +595,10 @@ export default function OnboardingCards() {
           >
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-neutral-900 mb-1">
-                Le tue Cards
+                Your Cards
               </h2>
               <p className="text-neutral-500 text-sm">
-                Rivedi e personalizza il contesto del tuo brand
+                Review and customize your brand context
               </p>
             </div>
 
@@ -632,7 +632,7 @@ export default function OnboardingCards() {
                       )}
                       {!card && (
                         <p className="text-xs text-neutral-300 italic">
-                          Non disponibile
+                          Not available
                         </p>
                       )}
                     </CardContent>
@@ -646,7 +646,7 @@ export default function OnboardingCards() {
                 className="h-11 bg-neutral-900 text-white hover:bg-neutral-800 rounded-xl px-8 font-medium"
                 onClick={() => navigate("/design-lab")}
               >
-                Vai al Design Lab →
+                Go to Design Lab →
               </Button>
             </div>
           </motion.div>
@@ -669,7 +669,7 @@ export default function OnboardingCards() {
                     className="text-sm text-neutral-500 hover:text-neutral-700 flex items-center gap-1"
                   >
                     <ArrowLeft className="w-4 h-4" />
-                    Tutte le cards
+                    All cards
                   </button>
                   <div className="flex items-center gap-2">
                     <button
@@ -715,7 +715,7 @@ export default function OnboardingCards() {
                     if (!card) {
                       return (
                         <p className="text-neutral-400 text-center py-8">
-                          Nessun dato disponibile per questa card.
+                          No data available for this card.
                         </p>
                       );
                     }

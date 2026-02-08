@@ -5,7 +5,7 @@ import { Lock, ArrowRight } from "lucide-react";
 import NotificationDot from "./NotificationDot";
 
 interface PackCardProps {
-  id?: string; // pack UUID — needed for "Attiva" navigation
+  id?: string; // pack UUID — needed for "Activate" navigation
   slug: string;
   name: string;
   description: string;
@@ -60,9 +60,9 @@ export default function PackCard({
               }`}
             >
               {status === "active"
-                ? "Attivo"
+                ? "Active"
                 : status === "available"
-                ? "Disponibile"
+                ? "Available"
                 : "Coming Soon"}
             </span>
           </div>
@@ -82,7 +82,7 @@ export default function PackCard({
             size="sm"
             className="w-full bg-accent hover:bg-accent/90 text-black font-medium rounded-xl h-9 text-sm"
           >
-            Vedi Contenuti
+            View Content
             <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
           </Button>
         )}
@@ -92,14 +92,14 @@ export default function PackCard({
             variant="outline"
             className="w-full border-neutral-600 text-neutral-300 hover:bg-neutral-700 hover:text-neutral-100 rounded-xl h-9 text-sm"
           >
-            Attiva Pack
+            Activate Pack
             <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
           </Button>
         )}
         {status === "coming_soon" && (
           <div className="flex items-center justify-center gap-1.5 text-neutral-500 text-sm py-1">
             <Lock className="w-3.5 h-3.5" />
-            <span>In arrivo</span>
+            <span>Coming Soon</span>
           </div>
         )}
       </CardContent>

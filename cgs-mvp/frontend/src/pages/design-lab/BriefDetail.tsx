@@ -28,21 +28,21 @@ function extractSections(brief: {
 
   // Standard field mapping
   const fieldMap: Record<string, string> = {
-    tone: "Tono di voce",
-    toneOfVoice: "Tono di voce",
-    tone_of_voice: "Tono di voce",
-    objective: "Obiettivo",
+    tone: "Tone of Voice",
+    toneOfVoice: "Tone of Voice",
+    tone_of_voice: "Tone of Voice",
+    objective: "Objective",
     target: "Target",
     targetAudience: "Target Audience",
     target_audience: "Target Audience",
-    frequency: "Frequenza",
-    length: "Lunghezza",
+    frequency: "Frequency",
+    length: "Length",
     topics: "Topics",
     keywords: "Keywords",
-    guidelines: "Linee guida",
+    guidelines: "Guidelines",
     cta: "Call to Action",
-    style: "Stile",
-    format: "Formato",
+    style: "Style",
+    format: "Format",
   };
 
   // Build sections from answers, using question text as label when available
@@ -82,20 +82,20 @@ export default function BriefDetail({ briefSlug }: BriefDetailProps) {
   if (!brief) {
     return (
       <div className="text-center py-20">
-        <p className="text-neutral-500">Brief non trovato</p>
+        <p className="text-neutral-500">Brief not found</p>
         <Button
           variant="ghost"
           onClick={() => navigate("/design-lab")}
           className="mt-4 text-accent"
         >
-          Torna alla Home
+          Back to Home
         </Button>
       </div>
     );
   }
 
   const sections = extractSections(brief);
-  const statusLabel = brief.status === "active" ? "Configurato" : "Bozza";
+  const statusLabel = brief.status === "active" ? "Configured" : "Draft";
   const statusColor =
     brief.status === "active" ? "text-green-400" : "text-yellow-400";
 
@@ -168,7 +168,7 @@ export default function BriefDetail({ briefSlug }: BriefDetailProps) {
         <Card className="bg-surface-elevated border-0 rounded-2xl">
           <CardContent className="p-5">
             <h3 className="text-xs text-neutral-500 uppercase tracking-wide mb-3">
-              Brief Compilato
+              Compiled Brief
             </h3>
             <div className="text-sm text-neutral-200 whitespace-pre-wrap">
               {brief.compiled_brief}
@@ -180,7 +180,7 @@ export default function BriefDetail({ briefSlug }: BriefDetailProps) {
           <CardContent className="p-8 text-center">
             <FileEdit className="w-8 h-8 text-neutral-600 mx-auto mb-2" />
             <p className="text-neutral-500 text-sm">
-              Nessuna sezione configurata.
+              No sections configured.
             </p>
           </CardContent>
         </Card>
@@ -196,7 +196,7 @@ export default function BriefDetail({ briefSlug }: BriefDetailProps) {
           className="border-neutral-600 text-neutral-300 hover:bg-neutral-700 rounded-xl h-11"
         >
           <FileEdit className="w-4 h-4 mr-2" />
-          Modifica Brief
+          Edit Brief
         </Button>
         <Button
           variant="outline"
@@ -206,7 +206,7 @@ export default function BriefDetail({ briefSlug }: BriefDetailProps) {
           className="border-neutral-600 text-neutral-300 hover:bg-neutral-700 rounded-xl h-11"
         >
           <Copy className="w-4 h-4 mr-2" />
-          Duplica Brief
+          Duplicate Brief
         </Button>
         <Button
           onClick={() =>
@@ -215,7 +215,7 @@ export default function BriefDetail({ briefSlug }: BriefDetailProps) {
           variant="outline"
           className="border-neutral-600 text-neutral-300 hover:bg-neutral-700 rounded-xl h-11"
         >
-          Vai ai contenuti
+          Go to content
           <ArrowRight className="w-4 h-4 ml-2" />
         </Button>
         <Button
@@ -223,7 +223,7 @@ export default function BriefDetail({ briefSlug }: BriefDetailProps) {
           className="bg-accent hover:bg-accent/90 text-black font-medium rounded-xl h-11"
         >
           <Sparkles className="w-4 h-4 mr-2" />
-          Genera contenuto
+          Generate content
         </Button>
       </div>
     </div>

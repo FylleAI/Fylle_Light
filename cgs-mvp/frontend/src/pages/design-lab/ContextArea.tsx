@@ -35,7 +35,7 @@ export default function ContextArea({ areaId }: ContextAreaProps) {
           className="text-neutral-400 hover:text-neutral-200 hover:bg-surface-elevated rounded-lg"
         >
           <ArrowLeft className="w-4 h-4 mr-1" />
-          Contesto
+          Context
         </Button>
       </div>
 
@@ -55,7 +55,7 @@ export default function ContextArea({ areaId }: ContextAreaProps) {
         <AreaComponent />
       ) : (
         <p className="text-neutral-500 text-sm italic">
-          Area non riconosciuta: {areaId}
+          Unrecognized area: {areaId}
         </p>
       )}
     </div>

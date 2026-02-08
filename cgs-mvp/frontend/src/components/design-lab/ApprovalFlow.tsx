@@ -18,12 +18,12 @@ interface ApprovalFlowProps {
 }
 
 const FEEDBACK_CATEGORIES = [
-  { id: "tone", label: "Tono" },
-  { id: "length", label: "Lunghezza" },
-  { id: "relevance", label: "Rilevanza" },
-  { id: "accuracy", label: "Accuratezza" },
-  { id: "structure", label: "Struttura" },
-  { id: "creativity", label: "Creativita" },
+  { id: "tone", label: "Tone" },
+  { id: "length", label: "Length" },
+  { id: "relevance", label: "Relevance" },
+  { id: "accuracy", label: "Accuracy" },
+  { id: "structure", label: "Structure" },
+  { id: "creativity", label: "Creativity" },
 ];
 
 export default function ApprovalFlow({
@@ -44,7 +44,7 @@ export default function ApprovalFlow({
       <div className="flex items-center gap-2 px-4 py-3 bg-green-500/5 border border-green-500/10 rounded-xl">
         <CheckCircle className="w-5 h-5 text-green-400" />
         <span className="text-sm text-green-400 font-medium">
-          Contenuto approvato
+          Content approved
         </span>
       </div>
     );
@@ -105,7 +105,7 @@ export default function ApprovalFlow({
             <Rocket className="w-6 h-6 text-accent animate-bounce" />
           </div>
         </div>
-        <p className="text-sm text-neutral-400">Invio in corso...</p>
+        <p className="text-sm text-neutral-400">Sending...</p>
         <div className="w-48 h-1 bg-neutral-800 rounded-full overflow-hidden">
           <div className="h-full bg-accent rounded-full animate-[progress_1.8s_ease-in-out_forwards]" />
         </div>
@@ -121,12 +121,12 @@ export default function ApprovalFlow({
           <CheckCircle className="w-7 h-7 text-green-400" />
         </div>
         <p className="text-sm font-medium text-green-400">
-          Contenuto approvato!
+          Content approved!
         </p>
         <p className="text-xs text-neutral-500">
           {isReference
-            ? "Salvato come reference per le prossime generazioni"
-            : "Archiviato come completato"}
+            ? "Saved as reference for future generations"
+            : "Archived as completed"}
         </p>
       </div>
     );
@@ -138,7 +138,7 @@ export default function ApprovalFlow({
       <div className="space-y-4 p-4 bg-surface-elevated rounded-xl border border-neutral-800">
         <div className="flex items-center justify-between">
           <h4 className="text-sm font-semibold text-neutral-200">
-            Feedback per il rifiuto
+            Rejection feedback
           </h4>
           <Button
             variant="ghost"
@@ -146,7 +146,7 @@ export default function ApprovalFlow({
             onClick={() => setShowRejectForm(false)}
             className="h-7 text-xs text-neutral-500"
           >
-            Annulla
+            Cancel
           </Button>
         </div>
 
@@ -171,7 +171,7 @@ export default function ApprovalFlow({
         <textarea
           value={feedback}
           onChange={(e) => setFeedback(e.target.value)}
-          placeholder="Spiega cosa non va e cosa vorresti diverso..."
+          placeholder="Explain what's wrong and what you'd like differently..."
           rows={3}
           className="w-full bg-surface text-neutral-200 text-sm rounded-xl px-4 py-3 resize-none border border-neutral-700 focus:border-red-500/50 focus:outline-none placeholder:text-neutral-600"
         />
@@ -186,7 +186,7 @@ export default function ApprovalFlow({
           ) : (
             <Send className="w-4 h-4 mr-2" />
           )}
-          Invia feedback
+          Submit feedback
         </Button>
       </div>
     );
@@ -207,7 +207,7 @@ export default function ApprovalFlow({
           {isReference && <Star className="w-2.5 h-2.5 text-white" />}
         </div>
         <span className="text-xs text-neutral-400 group-hover:text-neutral-300 transition-colors">
-          Salva come reference (migliora le prossime generazioni)
+          Save as reference (improves future generations)
         </span>
       </label>
 
@@ -219,7 +219,7 @@ export default function ApprovalFlow({
           className="flex-1 bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20 rounded-xl h-11"
         >
           <CheckCircle className="w-4 h-4 mr-2" />
-          Approva
+          Approve
         </Button>
 
         <Button
@@ -229,13 +229,13 @@ export default function ApprovalFlow({
           className="flex-1 border-neutral-700 text-neutral-400 hover:text-red-400 hover:border-red-500/30 rounded-xl h-11"
         >
           <XCircle className="w-4 h-4 mr-2" />
-          Rifiuta
+          Reject
         </Button>
       </div>
 
       {review.isError && (
         <p className="text-xs text-red-400">
-          Errore: {review.error.message}
+          Error: {review.error.message}
         </p>
       )}
     </div>

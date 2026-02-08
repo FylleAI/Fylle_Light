@@ -32,7 +32,7 @@ export default function BrandContext() {
   if (!hasData) {
     return (
       <p className="text-neutral-500 text-sm italic py-4">
-        Nessun dato brand disponibile. Le informazioni vengono popolate durante l'onboarding.
+        No brand data available. Information is populated during onboarding.
       </p>
     );
   }
@@ -40,7 +40,7 @@ export default function BrandContext() {
   return (
     <div className="space-y-6">
       <p className="text-neutral-400 text-sm">
-        Tono di voce, linee guida stilistiche e identità del brand.
+        Tone of voice, style guidelines and brand identity.
       </p>
 
       {Object.keys(voiceInfo).length > 0 && (
@@ -48,7 +48,7 @@ export default function BrandContext() {
           <CardContent className="p-5 space-y-3">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-lg">🎨</span>
-              <h3 className="text-sm font-medium text-neutral-200">Voce del Brand</h3>
+              <h3 className="text-sm font-medium text-neutral-200">Brand Voice</h3>
             </div>
             {Object.entries(voiceInfo).map(([key, value]) => (
               <div key={key}>
@@ -93,7 +93,7 @@ export default function BrandContext() {
               {c.toneDescription && (
                 <div>
                   <h4 className="text-xs text-neutral-500 uppercase tracking-wide mb-1">
-                    Tono
+                    Tone
                   </h4>
                   <p className="text-sm text-neutral-300">{c.toneDescription}</p>
                 </div>
@@ -102,7 +102,7 @@ export default function BrandContext() {
               {c.styleGuidelines && c.styleGuidelines.length > 0 && (
                 <div>
                   <h4 className="text-xs text-neutral-500 uppercase tracking-wide mb-2">
-                    Linee Guida
+                    Guidelines
                   </h4>
                   <ul className="space-y-1">
                     {c.styleGuidelines.map((g, i) => (
@@ -155,7 +155,7 @@ export default function BrandContext() {
                   {c.termsToUse && c.termsToUse.length > 0 && (
                     <div>
                       <h4 className="text-xs text-neutral-500 uppercase tracking-wide mb-2">
-                        Termini da Usare
+                        Terms to Use
                       </h4>
                       <div className="flex flex-wrap gap-2">
                         {c.termsToUse.map((t, i) => (
@@ -172,7 +172,7 @@ export default function BrandContext() {
                   {c.termsToAvoid && c.termsToAvoid.length > 0 && (
                     <div>
                       <h4 className="text-xs text-neutral-500 uppercase tracking-wide mb-2">
-                        Termini da Evitare
+                        Terms to Avoid
                       </h4>
                       <div className="flex flex-wrap gap-2">
                         {c.termsToAvoid.map((t, i) => (

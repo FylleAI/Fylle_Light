@@ -21,19 +21,19 @@ class WorkflowService:
         self.db = get_supabase_admin()
 
     async def execute(self, run_id: UUID, user_id: UUID) -> AsyncGenerator[dict, None]:
-        """Esegue un workflow, yield SSE events per progress."""
+        """Execute a workflow, yield SSE events for progress."""
         tracker = RunTracker(run_id)
         start_time = time.time()
 
         try:
-            # Carica tutto il contesto
+            # Load all context
             run = self.db.table("workflow_runs").select("*").eq("id", str(run_id)).single().execute().data
             brief = self.db.table("briefs").select("*").eq("id", run["brief_id"]).single().execute().data
             context = self.db.table("contexts").select("*").eq("id", brief["context_id"]).single().execute().data
             pack = self.db.table("agent_packs").select("*").eq("id", brief["pack_id"]).single().execute().data
             cards = self.db.table("cards").select("*").eq("context_id", brief["context_id"]).execute().data
 
-            # Carica Archive (learning loop)
+            # Load Archive (learning loop)
             archive_repo = ArchiveRepository(self.db)
             references = archive_repo.get_references(UUID(brief["context_id"]))
             guardrails = archive_repo.get_guardrails(UUID(brief["context_id"]))
@@ -42,7 +42,7 @@ class WorkflowService:
             tracker.update_run(status="running", started_at=datetime.utcnow().isoformat())
             yield {"type": "status", "data": {"status": "running"}}
 
-            # Prepara execution context
+            # Prepare execution context
             exec_context = self._build_execution_context(context, brief, cards, run["topic"])
             archive_prompt = self._build_archive_prompt(references, guardrails)
 
@@ -52,7 +52,7 @@ class WorkflowService:
             total_tokens = 0
             total_cost = 0.0
 
-            # Esegui agenti in sequenza
+            # Execute agents in sequence
             for i, agent in enumerate(agents):
                 agent_name = agent["name"]
                 agent_role = agent["role"]
@@ -61,29 +61,30 @@ class WorkflowService:
 
                 yield {"type": "progress", "data": {"progress": progress, "step": agent_name, "agent": agent_role}}
                 tracker.update_run(progress=progress, current_step=agent_name)
-                tracker.info(f"Avvio agente: {agent_name}", agent_name=agent_name, step_number=i)
+                tracker.info(f"Starting agent: {agent_name}", agent_name=agent_name, step_number=i)
 
-                # Esegui tools se necessario
+                # Execute tools if necessary
                 tool_results = {}
                 for tool_name in agent_tools:
                     result = await self._execute_tool(tool_name, run["topic"], exec_context, user_id, run_id)
                     tool_results[tool_name] = result
 
-                # Costruisci prompt
-                system_prompt = pack["prompt_templates"].get(agent_name, f"Sei un {agent_role}.")
+                # Build prompt
+                system_prompt = pack["prompt_templates"].get(agent_name, f"You are a {agent_role}.")
+                system_prompt += "\n\nIMPORTANT: All generated content MUST be in English."
                 system_prompt += f"\n\n{exec_context}\n\n{archive_prompt}"
 
                 if tool_results:
-                    system_prompt += f"\n\nRISULTATI RICERCA:\n" + "\n".join(
+                    system_prompt += f"\n\nSEARCH RESULTS:\n" + "\n".join(
                         f"- {k}: {v[:2000]}" for k, v in tool_results.items()
                     )
 
                 if agent_outputs:
-                    system_prompt += f"\n\nOUTPUT AGENTI PRECEDENTI:\n" + "\n".join(
+                    system_prompt += f"\n\nPREVIOUS AGENT OUTPUTS:\n" + "\n".join(
                         f"- {k}: {v[:2000]}" for k, v in agent_outputs.items()
                     )
 
-                # Chiama LLM
+                # Call LLM
                 llm = get_llm_adapter(pack.get("default_llm_provider", "openai"))
                 response = await llm.generate(
                     messages=[
@@ -98,7 +99,7 @@ class WorkflowService:
                 total_cost += response.cost_usd
 
                 tracker.info(
-                    f"Agente {agent_name} completato",
+                    f"Agent {agent_name} completed",
                     agent_name=agent_name,
                     tokens_used=response.tokens_in + response.tokens_out,
                     cost_usd=float(response.cost_usd),
@@ -106,11 +107,11 @@ class WorkflowService:
 
                 yield {"type": "agent_complete", "data": {"agent": agent_name, "tokens": response.tokens_in + response.tokens_out}}
 
-            # Calcola numero progressivo per questo brief
+            # Calculate next sequential number for this brief
             output_repo = OutputRepository(self.db)
             next_number = output_repo.get_next_number(UUID(brief["id"]))
 
-            # Salva output finale
+            # Save final output
             final_output = agent_outputs.get(agents[-1]["name"], "")
             last_agent_name = agents[-1].get("name", "AI")
             output_data = {
@@ -130,7 +131,7 @@ class WorkflowService:
             }
             output = self.db.table("outputs").insert(output_data).execute().data[0]
 
-            # Crea entry in archive (pending review)
+            # Create archive entry (pending review)
             self.db.table("archive").insert({
                 "output_id": output["id"],
                 "run_id": str(run_id),
@@ -189,30 +190,30 @@ class WorkflowService:
             return ""
         lines = []
         if references:
-            lines.append("## REFERENCE POSITIVE (usa come guida)")
+            lines.append("## POSITIVE REFERENCES (use as guide)")
             for ref in references[:3]:
                 lines.append(f"- Topic: {ref['topic']}")
                 if ref.get("reference_notes"):
                     lines.append(f"  Note: {ref['reference_notes']}")
                 if ref.get("outputs") and ref["outputs"].get("text_content"):
-                    lines.append(f"  Esempio: {ref['outputs']['text_content'][:300]}...")
+                    lines.append(f"  Example: {ref['outputs']['text_content'][:300]}...")
         if guardrails:
-            lines.append("\n## GUARDRAIL (evita questi errori)")
+            lines.append("\n## GUARDRAILS (avoid these mistakes)")
             for g in guardrails[:3]:
                 lines.append(f"- Topic: {g['topic']}")
                 lines.append(f"  Feedback: {g.get('feedback', 'N/A')}")
                 if g.get("feedback_categories"):
-                    lines.append(f"  Categorie: {', '.join(g['feedback_categories'])}")
+                    lines.append(f"  Categories: {', '.join(g['feedback_categories'])}")
         return "\n".join(lines)
 
     async def _execute_tool(self, tool_name, topic, exec_context, user_id, run_id):
         if tool_name == "perplexity_search":
             tool = PerplexityTool()
-            return await tool.search(f"{topic} - ricerca approfondita")
+            return await tool.search(f"{topic} - deep research")
         elif tool_name == "image_generation":
             tool = ImageGenerationTool()
             result = await tool.generate(topic)
-            # Salva immagine su storage
+            # Save image to storage
             storage = StorageService()
             image_bytes = tool.decode_image(result["b64_data"])
             file_path = await storage.upload_file(
@@ -221,7 +222,7 @@ class WorkflowService:
                 file_name=f"{run_id}_image.png",
                 content_type="image/png",
             )
-            # Crea output immagine
+            # Create image output
             self.db.table("outputs").insert({
                 "run_id": str(run_id),
                 "user_id": str(user_id),
@@ -231,5 +232,5 @@ class WorkflowService:
                 "file_size_bytes": len(image_bytes),
                 "title": result["revised_prompt"],
             }).execute()
-            return f"[Immagine generata: {result['revised_prompt']}]"
+            return f"[Generated image: {result['revised_prompt']}]"
         return ""

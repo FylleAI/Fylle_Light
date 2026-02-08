@@ -25,7 +25,7 @@ export default function DesignLabHome() {
           break;
         case "fonti-mercato":
           description = summary.fonti_mercato?.has_data
-            ? "Dati di mercato disponibili"
+            ? "Market data available"
             : area.description;
           break;
         case "brand":
@@ -62,10 +62,10 @@ export default function DesignLabHome() {
       {/* ── Hero ── */}
       <section className="text-center pt-4">
         <h1 className="text-2xl md:text-3xl font-bold text-neutral-100 mb-2">
-          Benvenuto{user?.full_name ? `, ${user.full_name}` : ""}.
+          Welcome{user?.full_name ? `, ${user.full_name}` : ""}.
         </h1>
         <p className="text-neutral-400 text-base">
-          Scegli un Agent Pack per iniziare a generare contenuti
+          Choose an Agent Pack to start generating content
         </p>
       </section>
 
@@ -97,10 +97,10 @@ export default function DesignLabHome() {
         )}
       </section>
 
-      {/* ── Contesto Operativo ── */}
+      {/* ── Operational Context ── */}
       <section>
         <h2 className="text-sm font-medium text-neutral-500 uppercase tracking-wider mb-4">
-          Contesto Operativo
+          Operational Context
         </h2>
 
         {summaryLoading ? (

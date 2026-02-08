@@ -7,7 +7,7 @@ class OutputRepository(BaseRepository):
         super().__init__(db, "outputs")
 
     def list_by_brief(self, brief_id: UUID, user_id: UUID):
-        """Solo output radice (no versioni intermedie)."""
+        """Root outputs only (no intermediate versions)."""
         return (self.db.table(self.table)
                 .select("*")
                 .eq("brief_id", str(brief_id))
@@ -17,7 +17,7 @@ class OutputRepository(BaseRepository):
                 .execute().data)
 
     def get_latest_version(self, output_id: UUID):
-        """Risale la chain fino all'ultima versione."""
+        """Traverse the chain to the latest version."""
         current = self.get_by_id(output_id)
         if not current:
             return None
@@ -33,7 +33,7 @@ class OutputRepository(BaseRepository):
             current = child[0]
 
     def get_next_number(self, brief_id: UUID) -> int:
-        """Prossimo numero progressivo per un brief."""
+        """Next sequential number for a brief."""
         res = (self.db.table(self.table)
                .select("number")
                .eq("brief_id", str(brief_id))

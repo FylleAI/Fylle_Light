@@ -140,9 +140,9 @@ export type Card =
   | FeedbackCard;
 
 export const CardTypeLabels: Record<CardType, string> = {
-  [CardType.PRODUCT]: "Prodotto/Servizio",
+  [CardType.PRODUCT]: "Product/Service",
   [CardType.TARGET]: "Target",
-  [CardType.CAMPAIGNS]: "Campagne",
+  [CardType.CAMPAIGNS]: "Campaigns",
   [CardType.TOPIC]: "Topic",
   [CardType.BRAND_VOICE]: "Brand Voice",
   [CardType.COMPETITOR]: "Competitor",
@@ -151,14 +151,14 @@ export const CardTypeLabels: Record<CardType, string> = {
 };
 
 export const CardTypeDescriptions: Record<CardType, string> = {
-  [CardType.PRODUCT]: "Value proposition, features, differenziatori, casi d'uso e metriche",
-  [CardType.TARGET]: "Profilo ICP, pain points, obiettivi, linguaggio e canali",
-  [CardType.CAMPAIGNS]: "Obiettivi, messaggi chiave, tonalità, asset e risultati",
-  [CardType.TOPIC]: "Argomenti ricorrenti, keyword, angolazioni e trend",
-  [CardType.BRAND_VOICE]: "Linee guida stilistiche, tono, esempi do/don't",
-  [CardType.COMPETITOR]: "Posizionamento, messaging, gap e opportunità",
-  [CardType.PERFORMANCE]: "CTR, engagement, conversioni per contenuto e canale",
-  [CardType.FEEDBACK]: "Apprendimenti da clienti, team e A/B test",
+  [CardType.PRODUCT]: "Value proposition, features, differentiators, use cases and metrics",
+  [CardType.TARGET]: "ICP profile, pain points, goals, language and channels",
+  [CardType.CAMPAIGNS]: "Objectives, key messages, tone, assets and results",
+  [CardType.TOPIC]: "Recurring topics, keywords, angles and trends",
+  [CardType.BRAND_VOICE]: "Style guidelines, tone, do/don't examples",
+  [CardType.COMPETITOR]: "Positioning, messaging, gaps and opportunities",
+  [CardType.PERFORMANCE]: "CTR, engagement, conversions by content and channel",
+  [CardType.FEEDBACK]: "Learnings from customers, team and A/B tests",
 };
 
 export const CardTypeIcons: Record<CardType, string> = {

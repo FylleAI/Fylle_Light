@@ -24,15 +24,15 @@ function formatTime(dateStr: string): string {
 function ActionBadge({ actionType }: { actionType: string }) {
   const config: Record<string, { label: string; className: string }> = {
     edit_output: {
-      label: "Contenuto modificato",
+      label: "Content edited",
       className: "bg-blue-500/10 text-blue-400",
     },
     update_context: {
-      label: "Contesto aggiornato",
+      label: "Context updated",
       className: "bg-purple-500/10 text-purple-400",
     },
     update_brief: {
-      label: "Brief aggiornato",
+      label: "Brief updated",
       className: "bg-amber-500/10 text-amber-400",
     },
   };
@@ -148,14 +148,13 @@ export default function ChatPanel({
           <div className="text-center py-8">
             <Sparkles className="w-6 h-6 text-neutral-600 mx-auto mb-2" />
             <p className="text-sm text-neutral-500">
-              Chiedi modifiche al contenuto, aggiornamenti al contesto o al
-              brief.
+              Ask for content edits, context updates, or brief changes.
             </p>
             <div className="mt-4 space-y-2">
               {[
-                "Rendi il tono piu formale",
-                "Aggiungi una call to action",
-                "Accorcia il testo",
+                "Make the tone more formal",
+                "Add a call to action",
+                "Shorten the text",
               ].map((suggestion) => (
                 <button
                   key={suggestion}
@@ -179,7 +178,7 @@ export default function ChatPanel({
                   <span className="w-1.5 h-1.5 bg-neutral-500 rounded-full animate-bounce [animation-delay:150ms]" />
                   <span className="w-1.5 h-1.5 bg-neutral-500 rounded-full animate-bounce [animation-delay:300ms]" />
                 </div>
-                <span className="text-xs text-neutral-500">Sta pensando...</span>
+                <span className="text-xs text-neutral-500">Thinking...</span>
               </div>
             </div>
           </div>
@@ -191,7 +190,7 @@ export default function ChatPanel({
       {/* Error */}
       {sendMessage.isError && (
         <div className="px-4 py-2 text-xs text-red-400 bg-red-500/5 border-t border-red-500/10">
-          Errore: {sendMessage.error.message}
+          Error: {sendMessage.error.message}
         </div>
       )}
 
@@ -203,7 +202,7 @@ export default function ChatPanel({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Scrivi un messaggio..."
+            placeholder="Type a message..."
             rows={1}
             className="flex-1 bg-surface-elevated text-neutral-200 text-sm rounded-xl px-4 py-2.5 resize-none border border-neutral-700 focus:border-accent focus:outline-none placeholder:text-neutral-600 max-h-24 overflow-y-auto"
           />

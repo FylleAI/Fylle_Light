@@ -69,6 +69,7 @@ async def create_brief(data: BriefCreate, user_id: UUID = Depends(get_current_us
         "slug": slug,
         "questions": questions,
         "compiled_brief": compiled_brief,
+        "status": "active",
     }).execute().data[0]
 
 

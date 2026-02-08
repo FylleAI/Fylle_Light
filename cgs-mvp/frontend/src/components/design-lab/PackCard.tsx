@@ -5,6 +5,7 @@ import { Lock, ArrowRight } from "lucide-react";
 import NotificationDot from "./NotificationDot";
 
 interface PackCardProps {
+  id?: string; // pack UUID — needed for "Attiva" navigation
   slug: string;
   name: string;
   description: string;
@@ -15,6 +16,7 @@ interface PackCardProps {
 }
 
 export default function PackCard({
+  id,
   slug,
   name,
   description,
@@ -28,8 +30,8 @@ export default function PackCard({
   const handleClick = () => {
     if (status === "active") {
       navigate(`/design-lab/outputs/${slug}`);
-    } else if (status === "available") {
-      navigate(`/design-lab/brief/${slug}`);
+    } else if (status === "available" && id) {
+      navigate(`/design-lab/brief/create/${id}`);
     }
   };
 

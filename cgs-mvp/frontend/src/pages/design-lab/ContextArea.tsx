@@ -226,48 +226,88 @@ export default function ContextArea({ areaId }: ContextAreaProps) {
             </p>
             {packs && packs.length > 0 ? (
               <div className="space-y-4">
-                {packs.map((pack) => (
-                  <Card
-                    key={pack.id}
-                    className="bg-surface-elevated border-0 rounded-2xl"
-                  >
-                    <CardContent className="p-5">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="text-2xl">{pack.icon}</span>
-                        <div>
-                          <h3 className="text-sm font-medium text-neutral-200">
-                            {pack.name}
-                          </h3>
-                          <span
-                            className={`text-xs ${
-                              pack.status === "active"
-                                ? "text-accent"
-                                : pack.status === "available"
-                                ? "text-neutral-400"
-                                : "text-neutral-600"
-                            }`}
-                          >
-                            {pack.status === "active"
-                              ? "Attivo"
-                              : pack.status === "available"
-                              ? "Disponibile"
-                              : "Coming Soon"}
-                          </span>
+                {packs.map((pack) => {
+                  const packStatus = (pack as { user_status?: string }).user_status || pack.status;
+                  const packBriefs = summary?.agent_pack?.briefs?.filter(
+                    (b: { pack_id: string }) => b.pack_id === pack.id
+                  ) || [];
+
+                  return (
+                    <Card
+                      key={pack.id}
+                      className="bg-surface-elevated border-0 rounded-2xl"
+                    >
+                      <CardContent className="p-5">
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="text-2xl">{pack.icon}</span>
+                          <div className="flex-1">
+                            <h3 className="text-sm font-medium text-neutral-200">
+                              {pack.name}
+                            </h3>
+                            <span
+                              className={`text-xs ${
+                                packStatus === "active"
+                                  ? "text-accent"
+                                  : packStatus === "available"
+                                  ? "text-neutral-400"
+                                  : "text-neutral-600"
+                              }`}
+                            >
+                              {packStatus === "active"
+                                ? "Attivo"
+                                : packStatus === "available"
+                                ? "Disponibile"
+                                : "Coming Soon"}
+                            </span>
+                          </div>
+                          {packStatus === "available" && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => navigate(`/design-lab/brief/create/${pack.id}`)}
+                              className="text-xs border-neutral-600 text-neutral-300 hover:bg-neutral-700 rounded-lg h-7 px-2"
+                            >
+                              Attiva →
+                            </Button>
+                          )}
                         </div>
-                      </div>
-                      {summary?.agent_pack?.briefs
-                        ?.filter((b) => b.pack_id === pack.id)
-                        .map((brief) => (
+                        {packBriefs.map((brief: { id: string; name: string; slug?: string }) => (
                           <div
                             key={brief.id}
-                            className="bg-surface rounded-lg p-3 mt-2 text-sm text-neutral-400"
+                            className="flex items-center justify-between bg-surface rounded-lg p-3 mt-2 cursor-pointer hover:bg-surface/80 transition-colors"
+                            onClick={() =>
+                              navigate(
+                                brief.slug
+                                  ? `/design-lab/brief/${brief.slug}`
+                                  : `/design-lab/context/agent-pack`
+                              )
+                            }
                           >
-                            📝 {brief.name}
+                            <span className="text-sm text-neutral-300">
+                              📝 {brief.name}
+                            </span>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/design-lab/execute/${brief.id}`);
+                              }}
+                              className="text-xs text-accent hover:text-accent/80 h-6 px-2 rounded-md"
+                            >
+                              Genera →
+                            </Button>
                           </div>
                         ))}
-                    </CardContent>
-                  </Card>
-                ))}
+                        {packBriefs.length === 0 && packStatus === "active" && (
+                          <p className="text-xs text-neutral-600 mt-2 italic">
+                            Nessun brief visibile dal context summary
+                          </p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             ) : (
               <p className="text-neutral-500 text-sm italic">

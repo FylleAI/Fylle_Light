@@ -84,6 +84,7 @@ export default function DesignLabHome() {
             {sortedPacks.map((pack: AgentPack) => (
               <PackCard
                 key={pack.id}
+                id={pack.id}
                 slug={pack.slug}
                 name={pack.name}
                 description={pack.description}

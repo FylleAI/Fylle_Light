@@ -23,7 +23,9 @@ import ContextArea from "@/pages/design-lab/ContextArea";
 import OutputsHub from "@/pages/design-lab/OutputsHub";
 import PackOutputs from "@/pages/design-lab/PackOutputs";
 import ContentView from "@/pages/design-lab/ContentView";
+import BriefCreate from "@/pages/design-lab/BriefCreate";
 import BriefDetail from "@/pages/design-lab/BriefDetail";
+import Execute from "@/pages/design-lab/Execute";
 
 function LoadingScreen() {
   return (
@@ -115,6 +117,17 @@ export default function App() {
             </ProtectedRoute>
           )}
         </Route>
+
+        {/* Brief routes */}
+        <Route path="/design-lab/brief/create/:packId">
+          {(params) => (
+            <ProtectedRoute requireContext>
+              <DesignLabLayout>
+                <BriefCreate packId={params.packId} />
+              </DesignLabLayout>
+            </ProtectedRoute>
+          )}
+        </Route>
         <Route path="/design-lab/brief/:briefSlug">
           {(params) => (
             <ProtectedRoute requireContext>
@@ -124,6 +137,19 @@ export default function App() {
             </ProtectedRoute>
           )}
         </Route>
+
+        {/* Execute route */}
+        <Route path="/design-lab/execute/:briefId">
+          {(params) => (
+            <ProtectedRoute requireContext>
+              <DesignLabLayout>
+                <Execute briefId={params.briefId} />
+              </DesignLabLayout>
+            </ProtectedRoute>
+          )}
+        </Route>
+
+        {/* Outputs routes */}
         <Route path="/design-lab/outputs">
           <ProtectedRoute requireContext>
             <DesignLabLayout>

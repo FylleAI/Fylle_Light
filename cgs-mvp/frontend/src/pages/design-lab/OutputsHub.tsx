@@ -1,12 +1,36 @@
 import { useLocation } from "wouter";
+import { useOutputsSummary } from "@/hooks/useOutputs";
+import { usePacks } from "@/hooks/usePacks";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Package } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Loader2,
+  Package,
+  Sparkles,
+} from "lucide-react";
+import NotificationDot from "@/components/design-lab/NotificationDot";
+import type { AgentPack } from "@/types/design-lab";
 
 export default function OutputsHub() {
   const [, navigate] = useLocation();
+  const { data: summary, isLoading } = useOutputsSummary();
+  const { data: packs } = usePacks();
+
+  // Build pack lookup for icons
+  const packMap: Record<string, AgentPack> = {};
+  if (packs) {
+    for (const p of packs) {
+      packMap[p.id] = p;
+    }
+  }
+
+  const hasOutputs = summary && summary.length > 0;
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center gap-3">
         <Button
           variant="ghost"
@@ -19,19 +43,115 @@ export default function OutputsHub() {
         </Button>
       </div>
 
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="w-16 h-16 bg-surface-elevated rounded-2xl flex items-center justify-center mb-6">
-          <Package className="w-8 h-8 text-neutral-500" />
-        </div>
-        <h1 className="text-xl font-bold text-neutral-100 mb-2">
-          Outputs Hub
+      <div>
+        <h1 className="text-2xl font-bold text-neutral-100">
+          Lavoro consegnato
         </h1>
-        <p className="text-neutral-500 text-sm max-w-md">
-          Qui troverai tutti i contenuti generati dai tuoi Agent Pack.
-          <br />
-          <span className="text-neutral-600">Coming in FASE 3</span>
+        <p className="text-neutral-400 text-sm mt-1">
+          Tutti i contenuti generati dai tuoi Agent Pack
         </p>
       </div>
+
+      {/* Loading */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-6 h-6 animate-spin text-neutral-500" />
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!isLoading && !hasOutputs && (
+        <Card className="bg-surface-elevated border-0 rounded-2xl">
+          <CardContent className="p-12 text-center">
+            <Package className="w-12 h-12 text-neutral-600 mx-auto mb-4" />
+            <h2 className="text-lg font-medium text-neutral-300 mb-2">
+              Nessun contenuto generato
+            </h2>
+            <p className="text-sm text-neutral-500 mb-6">
+              Attiva un Agent Pack e genera il primo contenuto.
+            </p>
+            <Button
+              onClick={() => navigate("/design-lab")}
+              className="bg-accent hover:bg-accent/90 text-black font-medium rounded-xl h-11"
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              Vai alla Home
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Pack list with brief counters */}
+      {!isLoading && hasOutputs && (
+        <div className="space-y-4">
+          {summary!.map((packSummary) => {
+            const pack = packMap[packSummary.pack_id];
+            const totalContent = packSummary.briefs.reduce(
+              (sum, b) => sum + b.count,
+              0
+            );
+            const hasNew = packSummary.briefs.some((b) => b.hasNew);
+
+            return (
+              <Card
+                key={packSummary.pack_id}
+                className="bg-surface-elevated border-0 rounded-2xl hover:bg-surface-elevated/80 transition-all cursor-pointer"
+                onClick={() =>
+                  navigate(
+                    `/design-lab/outputs/${packSummary.pack_slug}`
+                  )
+                }
+              >
+                <CardContent className="p-5">
+                  {/* Pack header */}
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-2xl">
+                      {pack?.icon || "📦"}
+                    </span>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-base font-semibold text-neutral-100">
+                          {packSummary.pack_name}
+                        </h2>
+                        {hasNew && <NotificationDot />}
+                      </div>
+                      <p className="text-xs text-neutral-500">
+                        {totalContent} contenut
+                        {totalContent === 1 ? "o" : "i"} •{" "}
+                        {packSummary.briefs.length} brief
+                      </p>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-neutral-600" />
+                  </div>
+
+                  {/* Brief list */}
+                  <div className="space-y-2">
+                    {packSummary.briefs.map((brief) => (
+                      <div
+                        key={brief.id}
+                        className="flex items-center justify-between text-sm bg-surface/50 rounded-lg px-3 py-2"
+                      >
+                        <span className="text-neutral-300">{brief.name}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-neutral-500">
+                            {brief.count} contenut
+                            {brief.count === 1 ? "o" : "i"}
+                          </span>
+                          {brief.hasNew && (
+                            <span className="text-[10px] font-medium text-accent bg-accent/10 px-1.5 py-0.5 rounded-full">
+                              NUOVO
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

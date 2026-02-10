@@ -20,6 +20,12 @@ export interface AgentPack {
   sort_order: number;
   is_active: boolean;
   content_type_id?: string;
+
+  // Context-specific pack fields
+  context_id?: string | null; // NULL = template pack
+  user_id?: string | null; // NULL = global template
+  is_template?: boolean; // Computed: context_id === null
+  is_editable?: boolean; // Computed: user_id === current user
 }
 
 // ── BRIEF ──
@@ -131,6 +137,22 @@ export interface ContentReviewState {
   chatMessages: ChatMessage[];
   feedbackText: string;
   approvalPhase: ApprovalPhase;
+}
+
+// ── DOCUMENT ──
+export interface Document {
+  id: string;
+  context_id?: string;
+  brief_id?: string;
+  user_id: string;
+  file_name: string;
+  file_path: string;
+  file_size_bytes: number;
+  mime_type: string;
+  description?: string;
+  text_content?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 // ── CONTEXT AREAS DATA (constant, matches backend summary endpoint) ──

@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from typing import Optional, Any
+from pydantic import BaseModel, Field, validator
+from typing import Optional, Any, List, Dict
 from uuid import UUID
 from datetime import datetime
 from app.domain.enums import (
@@ -261,3 +261,58 @@ class OnboardingStart(BaseModel):
     website: Optional[str] = None
     email: str
     additional_context: Optional[str] = None
+
+
+# ─── Context Import/Export ───────────────────────────
+
+class CardImport(BaseModel):
+    """Schema for importing a single card"""
+    card_type: str
+    title: str
+    subtitle: Optional[str] = None
+    content: Dict[str, Any]
+    sort_order: int = 0
+    is_visible: bool = True
+
+    @validator('card_type')
+    def validate_card_type(cls, v):
+        valid_types = [
+            'product', 'target', 'brand_voice', 'competitor',
+            'topic', 'campaigns', 'performance', 'feedback'
+        ]
+        if v not in valid_types:
+            raise ValueError(f'Invalid card_type: {v}. Must be one of {valid_types}')
+        return v
+
+
+class ContextImport(BaseModel):
+    """Schema for importing a complete context via template"""
+    version: str = "1.0"
+    template_type: str = "context"
+
+    context: Dict[str, Any] = Field(
+        ...,
+        description="Context metadata including company_info, audience_info, etc."
+    )
+
+    cards: List[CardImport] = Field(
+        ...,
+        min_items=1,
+        max_items=8,
+        description="Card data (1-8 cards)"
+    )
+
+    @validator('context')
+    def validate_context_structure(cls, v):
+        required_fields = ['brand_name', 'name']
+        for field in required_fields:
+            if field not in v:
+                raise ValueError(f'Missing required field in context: {field}')
+        return v
+
+    @validator('cards')
+    def validate_unique_card_types(cls, v):
+        card_types = [card.card_type for card in v]
+        if len(card_types) != len(set(card_types)):
+            raise ValueError('Duplicate card_type found. Each card_type must be unique.')
+        return v

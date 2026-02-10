@@ -38,6 +38,7 @@ class Settings(BaseSettings):
     # Storage
     output_bucket: str = "outputs"
     preview_bucket: str = "previews"
+    document_bucket: str = "documents"
     max_upload_size_mb: int = 50
 
     @property

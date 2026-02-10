@@ -3,6 +3,12 @@ import { useCards } from "@/hooks/useCards";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { CardType } from "@/types/cards";
+import { DocumentUpload } from "@/components/design-lab/DocumentUpload";
+import {
+  useContextDocuments,
+  useUploadContextDocument,
+  useDeleteDocument,
+} from "@/hooks/useDocuments";
 
 interface BrandVoiceContent {
   toneDescription?: string;
@@ -16,6 +22,22 @@ interface BrandVoiceContent {
 export default function BrandContext() {
   const { data: context, isLoading: contextLoading } = useContextData();
   const { cards, isLoading: cardsLoading } = useCards();
+
+  // Document management
+  const { data: documents = [], isLoading: docsLoading } = useContextDocuments(
+    context?.id
+  );
+  const uploadMutation = useUploadContextDocument();
+  const deleteMutation = useDeleteDocument();
+
+  const handleUpload = async (file: File) => {
+    if (!context?.id) return;
+    await uploadMutation.mutateAsync({ contextId: context.id, file });
+  };
+
+  const handleDelete = async (id: string) => {
+    await deleteMutation.mutateAsync({ id, type: "context" });
+  };
 
   if (contextLoading || cardsLoading) {
     return (
@@ -42,6 +64,14 @@ export default function BrandContext() {
       <p className="text-neutral-400 text-sm">
         Tone of voice, style guidelines and brand identity.
       </p>
+
+      {/* Document Upload Section */}
+      <DocumentUpload
+        documents={documents}
+        isLoading={docsLoading}
+        onUpload={handleUpload}
+        onDelete={handleDelete}
+      />
 
       {Object.keys(voiceInfo).length > 0 && (
         <Card className="bg-surface-elevated border-0 rounded-2xl">

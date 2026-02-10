@@ -1,0 +1,304 @@
+{
+  "version": "1.0",
+  "template_type": "context",
+  "context": {
+    "brand_name": "Acme Corp",
+    "name": "Context - Acme Corp",
+    "website": "https://acme.com",
+    "industry": "SaaS / Marketing Automation",
+    "company_info": {
+      "name": "Acme Corp",
+      "description": "Marketing automation platform for small and medium businesses",
+      "products": [
+        "Email Marketing Suite",
+        "CRM Integration Tool",
+        "Analytics Dashboard"
+      ],
+      "usp": "Easiest marketing automation for non-technical users",
+      "values": [
+        "Simplicity",
+        "Accessibility",
+        "Innovation",
+        "Customer Success"
+      ],
+      "industry": "SaaS"
+    },
+    "audience_info": {
+      "primary_segment": "Small Business Owners",
+      "secondary_segments": [
+        "Marketing Managers",
+        "Solopreneurs",
+        "Startup Founders"
+      ],
+      "pain_points": [
+        "Complex tools requiring technical expertise",
+        "High cost of enterprise marketing solutions",
+        "Time-consuming manual marketing tasks",
+        "Lack of integration between tools"
+      ],
+      "demographics": {
+        "ageRange": "30-50",
+        "location": "North America, Europe",
+        "role": "Business Owner / Marketing Manager",
+        "companySize": "10-50 employees"
+      }
+    },
+    "voice_info": {
+      "tone": "Friendly, approachable, expert without jargon",
+      "personality": [
+        "Helpful",
+        "Encouraging",
+        "Professional",
+        "Empathetic"
+      ],
+      "dos": [
+        "Use simple, clear language",
+        "Focus on benefits over features",
+        "Use real-world examples",
+        "Be encouraging and supportive"
+      ],
+      "donts": [
+        "Use technical jargon",
+        "Make exaggerated claims",
+        "Talk down to the audience",
+        "Use corporate buzzwords"
+      ],
+      "style_guidelines": [
+        "Active voice preferred",
+        "Short paragraphs (2-3 sentences)",
+        "Bullet points for easy scanning",
+        "Conversational but professional"
+      ]
+    },
+    "goals_info": {
+      "primary_goal": "Increase market share in SMB segment by 25% in 12 months",
+      "kpis": [
+        "Customer acquisition rate",
+        "Content engagement metrics",
+        "Trial-to-paid conversion rate",
+        "Brand awareness in target segment"
+      ],
+      "content_pillars": [
+        "Marketing best practices for SMBs",
+        "Small business growth strategies",
+        "Automation tips and tricks",
+        "Customer success stories"
+      ]
+    }
+  },
+  "cards": [
+    {
+      "card_type": "product",
+      "title": "Email Marketing Suite",
+      "content": {
+        "features": [
+          "Drag-and-drop email builder",
+          "A/B testing capabilities",
+          "Real-time analytics",
+          "Contact segmentation",
+          "Automation workflows"
+        ],
+        "differentiators": [
+          "Easiest UI in the market",
+          "No coding required",
+          "Built-in templates library",
+          "24/7 customer support"
+        ],
+        "use_cases": [
+          "Newsletter campaigns",
+          "Lead nurturing sequences",
+          "Product announcements",
+          "Customer onboarding"
+        ],
+        "metrics": {
+          "users": "50,000+",
+          "satisfaction": "4.8/5",
+          "retention": "92%"
+        }
+      }
+    },
+    {
+      "card_type": "target",
+      "title": "Small Business Owners",
+      "content": {
+        "icp": "SMB owners, 10-50 employees, limited marketing budget, need simple automation",
+        "pain_points": [
+          "Time constraints managing business + marketing",
+          "Limited technical skills",
+          "Budget constraints",
+          "Need measurable ROI"
+        ],
+        "goals": [
+          "Grow customer base efficiently",
+          "Automate repetitive marketing tasks",
+          "Improve customer engagement",
+          "Save time on marketing"
+        ],
+        "channels": [
+          "Email",
+          "LinkedIn",
+          "Company blog",
+          "Industry forums"
+        ]
+      }
+    },
+    {
+      "card_type": "brand_voice",
+      "title": "Friendly Expert",
+      "content": {
+        "tone": "Approachable but professional, like a helpful colleague",
+        "guidelines": [
+          "Avoid jargon, explain concepts simply",
+          "Use examples from real small businesses",
+          "Be encouraging - celebrate small wins",
+          "Acknowledge challenges but focus on solutions"
+        ],
+        "examples_do": [
+          "Set up your first campaign in 5 minutes",
+          "Here's how Sarah grew her bakery's email list by 300%",
+          "No marketing degree needed"
+        ],
+        "examples_dont": [
+          "Leverage synergies to optimize your funnel",
+          "Implement sophisticated segmentation algorithms",
+          "Enterprise-grade capabilities"
+        ],
+        "terminology": {
+          "preferred": "customers",
+          "avoid": "users, leads, prospects"
+        }
+      }
+    },
+    {
+      "card_type": "competitor",
+      "title": "Mailchimp, HubSpot, ActiveCampaign",
+      "content": {
+        "names": [
+          "Mailchimp",
+          "HubSpot",
+          "ActiveCampaign",
+          "Constant Contact"
+        ],
+        "positioning": "Simpler alternative to enterprise tools, more powerful than basic email senders",
+        "strengths": [
+          "Lower price point than enterprise solutions",
+          "Easier to use than competitors",
+          "Better customer support",
+          "Faster time to value"
+        ],
+        "weaknesses": [
+          "Fewer integrations than HubSpot",
+          "Less advanced features than enterprise tools",
+          "Smaller template library than Mailchimp"
+        ],
+        "opportunities": [
+          "Target non-technical users frustrated with complex tools",
+          "Focus on excellent onboarding experience",
+          "Emphasize personal customer support"
+        ]
+      }
+    },
+    {
+      "card_type": "topic",
+      "title": "Email Marketing Best Practices",
+      "content": {
+        "keywords": [
+          "email marketing",
+          "marketing automation",
+          "SMB growth",
+          "customer engagement",
+          "email campaigns"
+        ],
+        "angles": [
+          "How-to guides for beginners",
+          "Case studies from real customers",
+          "Tips & tricks for better engagement",
+          "Industry trends and insights"
+        ],
+        "related": [
+          "Lead generation strategies",
+          "Customer retention tactics",
+          "Content marketing for SMBs",
+          "CRM basics"
+        ],
+        "trends": [
+          "AI-powered personalization",
+          "Mobile-first design",
+          "Interactive email content",
+          "Privacy-first marketing"
+        ]
+      }
+    },
+    {
+      "card_type": "campaigns",
+      "title": "Q1 2024 Product Launch",
+      "content": {
+        "objective": "Launch new CRM integration feature to existing customers and prospects",
+        "messages": [
+          "Seamless CRM sync saves hours weekly",
+          "Your contacts, always up to date",
+          "One platform for all customer data"
+        ],
+        "tone": "Excited but professional, emphasizing time savings",
+        "assets": [
+          "Product demo video (2 min)",
+          "Blog post series (5 articles)",
+          "Email announcement sequence",
+          "Social media graphics",
+          "Customer testimonial videos"
+        ],
+        "learnings": [
+          "Video content performed best (3x engagement)",
+          "Customer stories more effective than feature lists",
+          "Tuesday morning emails had highest open rates"
+        ]
+      }
+    },
+    {
+      "card_type": "performance",
+      "title": "Content Performance Metrics",
+      "content": {
+        "metrics": {
+          "email_open_rate": "28%",
+          "ctr": "4.2%",
+          "engagement_rate": "12%",
+          "avg_time_on_page": "3:45"
+        },
+        "channels": {
+          "email": {
+            "performance": "strong",
+            "trend": "growing +15% MoM"
+          },
+          "blog": {
+            "performance": "moderate",
+            "trend": "stable"
+          },
+          "linkedin": {
+            "performance": "excellent",
+            "trend": "growing +25% MoM"
+          }
+        },
+        "conversions": {
+          "trial_signups": "450/month",
+          "paid_conversions": "18%",
+          "demo_requests": "85/month"
+        }
+      }
+    },
+    {
+      "card_type": "feedback",
+      "title": "Customer Feedback Summary",
+      "content": {
+        "source": "Customer surveys (monthly), support tickets, user interviews",
+        "summary": "Customers love the simplicity and ease of use. Main request: more integrations with popular tools",
+        "action_items": [
+          "Add Salesforce integration (Q2 2024)",
+          "Improve onboarding flow for first-time users",
+          "Create more video tutorials",
+          "Expand template library"
+        ],
+        "priority": "high"
+      }
+    }
+  ]
+}

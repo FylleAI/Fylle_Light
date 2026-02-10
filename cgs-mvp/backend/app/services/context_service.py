@@ -1,8 +1,9 @@
 import logging
 from uuid import UUID
+from typing import Dict, Any
 from app.config.supabase import get_supabase_admin
 from app.db.repositories.context_repo import ContextRepository
-from app.exceptions import NotFoundException
+from app.exceptions import NotFoundException, ConflictException
 
 logger = logging.getLogger("cgs-mvp.context")
 
@@ -100,4 +101,67 @@ class ContextService:
                 "briefs": briefs,
                 "count": len(briefs),
             },
+        }
+
+    def import_from_template(
+        self,
+        user_id: UUID,
+        template_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Import a complete context from a JSON/YAML template.
+
+        Args:
+            user_id: User creating the context
+            template_data: Parsed template data (already validated by Pydantic)
+
+        Returns:
+            Created context with all cards
+
+        Raises:
+            ValidationError: If template structure is invalid
+            ConflictException: If context with same brand_name already exists
+        """
+        repo = ContextRepository(self.db)
+
+        # Extract context metadata
+        context_data = template_data['context']
+        context_data['user_id'] = str(user_id)
+        context_data['status'] = 'active'
+
+        # Check for duplicate brand_name
+        existing = repo.list_by_user(user_id)
+        if any(c['brand_name'] == context_data['brand_name'] for c in existing):
+            raise ConflictException(
+                f"Context with brand_name '{context_data['brand_name']}' already exists"
+            )
+
+        # Create context
+        context = repo.create(context_data)
+        context_id = context['id']
+
+        # Create cards
+        cards_created = []
+        for card_data in template_data['cards']:
+            card = {
+                'context_id': context_id,
+                'card_type': card_data['card_type'],
+                'title': card_data['title'],
+                'subtitle': card_data.get('subtitle'),
+                'content': card_data['content'],
+                'sort_order': card_data.get('sort_order', 0),
+                'is_visible': card_data.get('is_visible', True)
+            }
+            created_card = self.db.table('cards').insert(card).execute()
+            cards_created.append(created_card.data[0])
+
+        logger.info(
+            "Context imported from template | user=%s context=%s cards=%d",
+            user_id, context_id, len(cards_created)
+        )
+
+        return {
+            'context': context,
+            'cards': cards_created,
+            'cards_count': len(cards_created)
         }

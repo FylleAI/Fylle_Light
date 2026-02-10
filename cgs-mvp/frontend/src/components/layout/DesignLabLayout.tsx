@@ -10,6 +10,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import ContextSelector from "@/components/design-lab/ContextSelector";
 
 interface DesignLabLayoutProps {
   children: React.ReactNode;
@@ -76,6 +77,9 @@ export default function DesignLabLayout({ children }: DesignLabLayoutProps) {
 
             {/* User menu */}
             <div className="flex items-center gap-4">
+              {/* Context Selector */}
+              <ContextSelector />
+
               <span className="text-sm text-neutral-400 hidden sm:block">
                 {user?.full_name || user?.email}
               </span>

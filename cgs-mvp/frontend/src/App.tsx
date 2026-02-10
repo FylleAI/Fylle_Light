@@ -21,6 +21,7 @@ import OnboardingCards from "@/pages/OnboardingCards";
 import DesignLabHome from "@/pages/design-lab/DesignLabHome";
 import ContextHub from "@/pages/design-lab/ContextHub";
 import ContextArea from "@/pages/design-lab/ContextArea";
+import ContextImportExport from "@/pages/design-lab/ContextImportExport";
 import OutputsHub from "@/pages/design-lab/OutputsHub";
 import PackOutputs from "@/pages/design-lab/PackOutputs";
 import ContentView from "@/pages/design-lab/ContentView";
@@ -109,6 +110,13 @@ export default function App() {
           <ProtectedRoute requireContext>
             <DesignLabLayout>
               <ContextHub />
+            </DesignLabLayout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/design-lab/context/import">
+          <ProtectedRoute>
+            <DesignLabLayout>
+              <ContextImportExport />
             </DesignLabLayout>
           </ProtectedRoute>
         </Route>

@@ -26,6 +26,24 @@ export interface AgentPack {
   user_id?: string | null; // NULL = global template
   is_template?: boolean; // Computed: context_id === null
   is_editable?: boolean; // Computed: user_id === current user
+
+  // JSONB workflow fields
+  agents_config?: Array<{
+    name: string;
+    prompt: string;
+    provider?: string;
+    model?: string;
+  }>;
+  brief_questions?: Array<{
+    id: string;
+    question: string;
+    type?: string;
+    default?: unknown;
+  }>;
+  tools_config?: Record<string, unknown>;
+  prompt_templates?: Record<string, string>;
+  default_llm_provider?: string;
+  default_llm_model?: string;
 }
 
 // ── BRIEF ──

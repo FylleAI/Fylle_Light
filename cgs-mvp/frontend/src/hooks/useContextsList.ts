@@ -30,10 +30,10 @@ export function useCreateContext() {
     mutationFn: (brandName: string) =>
       apiRequest("/api/v1/contexts", {
         method: "POST",
-        body: JSON.stringify({
+        body: {
           name: brandName,
           brand_name: brandName
-        }),
+        },
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contexts-list"] });

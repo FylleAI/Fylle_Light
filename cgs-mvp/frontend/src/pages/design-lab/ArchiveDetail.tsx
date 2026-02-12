@@ -1,6 +1,7 @@
 import { useLocation } from "wouter";
 import { useOutput } from "@/hooks/useOutputs";
 import { useArchive } from "@/hooks/useArchive";
+import { useAppStore } from "@/lib/store";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -52,8 +53,9 @@ const categoryLabels: Record<string, string> = {
 
 export default function ArchiveDetail({ outputId }: ArchiveDetailProps) {
   const [, navigate] = useLocation();
+  const contextId = useAppStore((s) => s.contextId);
   const { data: output, isLoading: outputLoading } = useOutput(outputId);
-  const { data: archiveItems, isLoading: archiveLoading } = useArchive();
+  const { data: archiveItems, isLoading: archiveLoading } = useArchive(contextId ?? undefined);
 
   // Find the archive entry for this output
   const archiveItem = archiveItems?.find((a) => a.output_id === outputId);

@@ -1,0 +1,336 @@
+{
+  "version": "1.0",
+  "template_type": "context",
+  "context": {
+    "brand_name": "Siebert Financial2",
+    "name": "Context - Siebert Financial",
+    "website": "https://siebert.com",
+    "industry": "Financial Services / Brokerage & Wealth Management",
+    "company_info": {
+      "name": "Siebert Financial Corporation",
+      "description": "Siebert Financial Corporation is a diversified U.S. financial services firm offering a comprehensive range of solutions for individual investors, corporate clients, and institutions. Its services include full-service and self-directed brokerage, online and professional trading across equities, fixed income, ETFs, structured products, and margin lending; personalized financial advice and wealth management with portfolio construction, monitoring, and long-term financial planning; investment banking and capital markets services such as capital raising, underwriting, and M&A advisory; corporate services including equity compensation and stock plan administration; access to a broad set of investment products such as bonds, CDs, IPOs, and alternative instruments; as well as insurance and protection solutions delivered through affiliated partners. Through the integration of technology, advisory expertise, and education, Siebert aims to provide end-to-end financial solutions tailored to diverse investment needs.",
+      "products": [
+        "Full-Service Brokerage",
+        "Self-Directed Online Trading",
+        "Wealth Management & Financial Planning",
+        "Investment Banking & Capital Markets",
+        "Corporate Services & Equity Compensation",
+        "Fixed Income & Structured Products",
+        "Insurance & Protection Solutions"
+      ],
+      "usp": "End-to-end financial solutions combining technology, advisory expertise, and financial education for diverse investment needs",
+      "values": [
+        "Empowerment",
+        "Inclusivity",
+        "Trust",
+        "Education",
+        "Innovation"
+      ],
+      "industry": "Financial Services"
+    },
+    "audience_info": {
+      "primary_segment": "Individual Investors",
+      "secondary_segments": [
+        "Corporate Clients",
+        "Institutional Investors",
+        "First-Time Investors",
+        "High-Net-Worth Individuals"
+      ],
+      "pain_points": [
+        "Complexity of financial products and services",
+        "Lack of accessible financial education",
+        "Distrust towards traditional financial institutions",
+        "Difficulty navigating investment decisions without advice"
+      ],
+      "demographics": {
+        "ageRange": "25-65",
+        "location": "United States",
+        "role": "Individual Investor / Corporate Client / Institutional Manager",
+        "investmentRange": "From beginner to sophisticated portfolios"
+      }
+    },
+    "voice_info": {
+      "tone": "Empowering, inclusive, and aspirational. The tone should feel like listening to a charismatic, knowledgeable friend: confident, vibrant, and trustworthy. Communication should be conversational, clear, and engaging, never condescending, never overly corporate.",
+      "personality": [
+        "Empowering",
+        "Inclusive",
+        "Aspirational",
+        "Trustworthy",
+        "Vibrant"
+      ],
+      "dos": [
+        "Use clear, concise language and short sentences",
+        "Speak in the first person ('we') when referring to the brand",
+        "Prioritize clarity, empowerment, and trust over promotion",
+        "Be conversational and engaging"
+      ],
+      "donts": [
+        "Use jargon unless strictly necessary, and always explain it",
+        "Never provide direct financial advice, only observations, education, or opinion",
+        "Never be condescending",
+        "Never be overly corporate"
+      ],
+      "style_guidelines": [
+        "Use clear, concise language and short sentences",
+        "Avoid jargon unless strictly necessary and always explain it",
+        "Never provide direct financial advice, only observations, education, or opinion",
+        "Speak in the first person ('we') when referring to the brand",
+        "Always prioritize clarity, empowerment, and trust over promotion"
+      ]
+    },
+    "goals_info": {
+      "primary_goal": "Grow brand awareness and trust among diverse investor audiences through educational, empowering financial content",
+      "kpis": [
+        "Content engagement rate",
+        "Newsletter open rate and CTR",
+        "Blog organic traffic growth",
+        "Brand trust and sentiment metrics",
+        "Lead generation from content"
+      ],
+      "content_pillars": [
+        "Financial education and literacy",
+        "Investment strategies and insights",
+        "Market analysis and trends",
+        "Empowerment and inclusive investing",
+        "Founder legacy and company story"
+      ]
+    }
+  },
+  "cards": [
+    {
+      "card_type": "product",
+      "title": "Siebert Financial Services Suite",
+      "sort_order": 0,
+      "content": {
+        "features": [
+          "Full-service and self-directed brokerage",
+          "Online and professional trading (equities, fixed income, ETFs, structured products)",
+          "Personalized wealth management and financial planning",
+          "Investment banking, capital raising, underwriting, M&A advisory",
+          "Corporate equity compensation and stock plan administration",
+          "Access to bonds, CDs, IPOs, and alternative instruments",
+          "Insurance and protection solutions through affiliated partners",
+          "Margin lending"
+        ],
+        "differentiators": [
+          "End-to-end financial solutions under one roof",
+          "Integration of technology, advisory expertise, and education",
+          "Legacy of pioneering inclusive finance (founded by Muriel Siebert)",
+          "Both self-directed and full-service options for all investor levels"
+        ],
+        "use_cases": [
+          "Individual investors building long-term wealth",
+          "Corporate clients managing equity compensation programs",
+          "Institutions seeking capital markets advisory",
+          "Beginner investors seeking education and guided investing"
+        ],
+        "metrics": {
+          "founded": "1967",
+          "type": "Publicly traded (NASDAQ: SIEB)",
+          "reach": "U.S. nationwide"
+        }
+      }
+    },
+    {
+      "card_type": "target",
+      "title": "Individual & Institutional Investors",
+      "sort_order": 1,
+      "content": {
+        "icp": "Individual investors across all experience levels, corporate clients needing equity services, and institutions seeking capital markets advisory",
+        "pain_points": [
+          "Financial products feel too complex and inaccessible",
+          "Lack of trustworthy, unbiased financial education",
+          "Traditional firms feel impersonal or exclusionary",
+          "Difficulty choosing between self-directed and managed investing"
+        ],
+        "goals": [
+          "Build wealth through informed investment decisions",
+          "Access clear, empowering financial education",
+          "Find a trustworthy financial partner",
+          "Navigate markets with confidence"
+        ],
+        "channels": [
+          "Company blog",
+          "Email newsletters",
+          "Social media (LinkedIn, Instagram, X)",
+          "Financial media and publications",
+          "Webinars and educational events"
+        ]
+      }
+    },
+    {
+      "card_type": "brand_voice",
+      "title": "Empowering Financial Friend",
+      "sort_order": 2,
+      "content": {
+        "tone": "Empowering, inclusive, and aspirational. Like a charismatic, knowledgeable friend: confident, vibrant, and trustworthy.",
+        "guidelines": [
+          "Use clear, concise language and short sentences",
+          "Avoid jargon unless strictly necessary, always explain it",
+          "Never provide direct financial advice, only observations, education, or opinion",
+          "Speak in 'we' when referring to the brand",
+          "Prioritize clarity, empowerment, and trust over promotion"
+        ],
+        "examples_do": [
+          "Understanding ETFs doesn't have to be complicated. Here's what you need to know.",
+          "We believe everyone deserves access to smart financial tools.",
+          "Markets had a volatile week. Here's what it means for your portfolio outlook."
+        ],
+        "examples_dont": [
+          "Utilize our synergistic portfolio optimization algorithms",
+          "You should invest in X stock for maximum returns",
+          "Our enterprise-grade institutional solutions leverage cutting-edge fintech"
+        ],
+        "visual_assets": "Photography focused on real people, real stories, and authentic moments. Strong typographic statements, editorial-style layouts, and bold graphic elements. Recurring references include founder legacy, cultural trailblazers, everyday financial journeys, and clear educational visuals.",
+        "terminology": {
+          "preferred": "investors, clients, community",
+          "avoid": "users, accounts, targets"
+        }
+      }
+    },
+    {
+      "card_type": "competitor",
+      "title": "Schwab, Fidelity, Robinhood, E*Trade",
+      "sort_order": 3,
+      "content": {
+        "names": [
+          "Charles Schwab",
+          "Fidelity Investments",
+          "Robinhood",
+          "E*Trade (Morgan Stanley)",
+          "Interactive Brokers"
+        ],
+        "positioning": "A heritage financial firm that combines the trust and expertise of a full-service institution with the accessibility and innovation of modern fintech",
+        "strengths": [
+          "Unique founder legacy (Muriel Siebert, first woman on NYSE)",
+          "Full spectrum of services from self-directed to full-service",
+          "Strong commitment to financial education and inclusivity",
+          "Personal advisory relationships, not just algorithmic"
+        ],
+        "weaknesses": [
+          "Smaller brand recognition compared to Schwab/Fidelity",
+          "Less mainstream consumer marketing budget",
+          "Fewer physical branch locations"
+        ],
+        "opportunities": [
+          "Position as the empowering, inclusive alternative to big-box brokerages",
+          "Leverage founder story for brand differentiation",
+          "Content-driven education to build trust with younger investors",
+          "Focus on underserved investor demographics"
+        ]
+      }
+    },
+    {
+      "card_type": "topic",
+      "title": "Financial Education & Market Insights",
+      "sort_order": 4,
+      "content": {
+        "keywords": [
+          "investing education",
+          "financial literacy",
+          "market analysis",
+          "wealth management",
+          "portfolio strategy",
+          "ETFs",
+          "fixed income",
+          "retirement planning"
+        ],
+        "angles": [
+          "Beginner-friendly investment explainers",
+          "Weekly market commentary and analysis",
+          "Investment strategy deep-dives",
+          "Financial empowerment stories",
+          "Industry trends and regulatory updates"
+        ],
+        "related": [
+          "Personal finance fundamentals",
+          "Retirement and estate planning",
+          "Tax-efficient investing",
+          "ESG and responsible investing",
+          "Women in finance and investing"
+        ],
+        "trends": [
+          "AI-driven portfolio management",
+          "Democratization of financial services",
+          "Rise of self-directed investing among millennials/Gen Z",
+          "Regulatory changes impacting retail investors",
+          "Alternative investments going mainstream"
+        ]
+      }
+    },
+    {
+      "card_type": "campaigns",
+      "title": "Content Strategy 2025",
+      "sort_order": 5,
+      "content": {
+        "objective": "Build brand awareness and trust through consistent, educational financial content across blog and newsletter channels",
+        "messages": [
+          "Investing made accessible for everyone",
+          "Your financial journey, empowered by knowledge",
+          "Trusted guidance for every market condition"
+        ],
+        "tone": "Educational, empowering, conversational",
+        "assets": [
+          "Weekly blog posts on financial education",
+          "Bi-weekly email newsletters with market insights",
+          "Social media content series",
+          "Educational video content",
+          "Founder legacy storytelling"
+        ],
+        "learnings": [
+          "Educational content performs better than promotional",
+          "Storytelling around real investor journeys drives engagement",
+          "Market commentary newsletters have highest open rates"
+        ]
+      }
+    },
+    {
+      "card_type": "performance",
+      "title": "Content Performance Baseline",
+      "sort_order": 6,
+      "content": {
+        "metrics": {
+          "newsletter_open_rate": "TBD",
+          "blog_organic_traffic": "TBD",
+          "engagement_rate": "TBD",
+          "avg_time_on_page": "TBD"
+        },
+        "channels": {
+          "blog": {
+            "performance": "establishing baseline",
+            "trend": "new channel"
+          },
+          "newsletter": {
+            "performance": "establishing baseline",
+            "trend": "new channel"
+          },
+          "social": {
+            "performance": "establishing baseline",
+            "trend": "new channel"
+          }
+        },
+        "conversions": {
+          "newsletter_signups": "TBD",
+          "account_inquiries": "TBD",
+          "content_downloads": "TBD"
+        }
+      }
+    },
+    {
+      "card_type": "feedback",
+      "title": "Initial Content Direction",
+      "sort_order": 7,
+      "content": {
+        "source": "Brand guidelines, strategic planning, market positioning analysis",
+        "summary": "Focus on empowering, educational content that builds trust and positions Siebert as an accessible, knowledgeable financial partner. Content should leverage the unique founder legacy and commitment to inclusive finance.",
+        "action_items": [
+          "Establish consistent blog publication cadence",
+          "Launch newsletter with market insights and education",
+          "Develop content templates for recurring series",
+          "Build content reference library from approved outputs"
+        ],
+        "priority": "high"
+      }
+    }
+  ]
+}

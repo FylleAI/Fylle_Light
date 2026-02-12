@@ -4,7 +4,7 @@ Handles context-specific packs and template packs.
 """
 
 import logging
-from uuid import UUID
+from uuid import UUID, uuid4
 from typing import Optional, List, Dict, Any
 
 from app.config.supabase import get_supabase_admin
@@ -140,7 +140,7 @@ class PackService:
         if not context.data:
             raise NotFoundException("Context not found or access denied")
 
-        # Create new pack with all fields from source
+        # Create new pack with all fields from source (including JSONB)
         new_pack = {
             "context_id": str(context_id),
             "user_id": str(user_id),
@@ -153,6 +153,14 @@ class PackService:
             "content_type_id": source.get("content_type_id"),
             "sort_order": source.get("sort_order", 0),
             "is_active": True,
+
+            # ← COPY JSONB fields from source
+            "agents_config": source.get("agents_config", []),
+            "brief_questions": source.get("brief_questions", []),
+            "tools_config": source.get("tools_config", []),
+            "prompt_templates": source.get("prompt_templates", {}),
+            "default_llm_provider": source.get("default_llm_provider", "openai"),
+            "default_llm_model": source.get("default_llm_model", "gpt-4o"),
         }
 
         result = self.db.table("agent_packs").insert(new_pack).execute()
@@ -290,3 +298,68 @@ class PackService:
         # Delete pack
         self.db.table("agent_packs").delete().eq("id", str(pack_id)).execute()
         logger.info(f"Deleted pack {pack_id}")
+
+    def import_from_template(
+        self, user_id: UUID, context_id: Optional[UUID], template_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Import pack from JSON/YAML template.
+
+        Args:
+            user_id: ID of the user
+            context_id: Optional context ID (None for global template)
+            template_data: Parsed template data (already validated by Pydantic)
+
+        Returns:
+            Dict containing the created pack record
+
+        Raises:
+            NotFoundException: If context not found (when context_id provided)
+        """
+        # Verify context ownership if provided
+        if context_id:
+            context = (
+                self.db.table("contexts")
+                .select("id")
+                .eq("id", str(context_id))
+                .eq("user_id", str(user_id))
+                .single()
+                .execute()
+            )
+            if not context.data:
+                raise NotFoundException("Context not found or access denied")
+
+        # Generate unique slug
+        slug = template_data.get("slug")
+        if not slug:
+            slug = template_data["name"].lower().replace(" ", "-").replace("_", "-")
+            slug = f"{slug}-{uuid4().hex[:6]}"
+
+        # Build pack data
+        pack_data = {
+            "user_id": str(user_id),
+            "context_id": str(context_id) if context_id else None,
+            "slug": slug,
+            "name": template_data["name"],
+            "description": template_data.get("description", ""),
+            "icon": template_data.get("icon", "package"),
+            "outcome": template_data.get("outcome", "content"),
+            "status": "active",
+            "is_active": True,
+
+            # JSONB fields from template
+            "agents_config": template_data.get("agents", []),
+            "brief_questions": template_data.get("brief_questions", []),
+            "tools_config": template_data.get("tools_config", []),
+            "prompt_templates": template_data.get("prompt_templates", {}),
+            "default_llm_provider": template_data.get("default_llm_provider", "openai"),
+            "default_llm_model": template_data.get("default_llm_model", "gpt-4o"),
+        }
+
+        result = self.db.table("agent_packs").insert(pack_data).execute()
+
+        logger.info(
+            f"Imported pack template '{template_data['name']}' for "
+            f"{'context ' + str(context_id) if context_id else 'global templates'}: {result.data[0]['id']}"
+        )
+        return result.data[0]

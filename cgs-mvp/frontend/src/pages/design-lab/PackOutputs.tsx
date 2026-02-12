@@ -32,8 +32,8 @@ export default function PackOutputs({ packType }: PackOutputsProps) {
     pack?.id
   );
 
-  // Load all outputs for the user (we'll group by brief)
-  const { data: allOutputs, isLoading: outputsLoading } = useOutputs();
+  // Load all outputs for the user (we'll group by brief), filtered by context
+  const { data: allOutputs, isLoading: outputsLoading } = useOutputs(undefined, contextId || undefined);
 
   const isLoading = briefsLoading || outputsLoading;
 

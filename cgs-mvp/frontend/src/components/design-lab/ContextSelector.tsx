@@ -130,7 +130,7 @@ export default function ContextSelector() {
                     size="sm"
                     variant="outline"
                     onClick={() => setIsCreating(true)}
-                    className="w-full justify-center border-neutral-600 text-neutral-300 hover:bg-neutral-700"
+                    className="w-full justify-center border-accent/40 text-neutral-100 hover:bg-accent/10 hover:border-accent/60"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     New Context
@@ -142,7 +142,7 @@ export default function ContextSelector() {
                       setIsOpen(false);
                       navigate("/design-lab/context/import");
                     }}
-                    className="w-full justify-center border-neutral-600 text-neutral-300 hover:bg-neutral-700"
+                    className="w-full justify-center border-accent/40 text-neutral-100 hover:bg-accent/10 hover:border-accent/60"
                   >
                     <Upload className="w-4 h-4 mr-2" />
                     Import / Export
@@ -175,7 +175,7 @@ export default function ContextSelector() {
                         setIsCreating(false);
                         setNewContextName("");
                       }}
-                      className="flex-1 border-neutral-600 text-neutral-300 hover:bg-neutral-700"
+                      className="flex-1 border-neutral-500 text-neutral-100 hover:bg-neutral-700 hover:text-white"
                     >
                       Cancel
                     </Button>
@@ -183,7 +183,7 @@ export default function ContextSelector() {
                       type="submit"
                       size="sm"
                       disabled={!newContextName.trim() || createContext.isPending}
-                      className="flex-1 bg-accent text-white hover:bg-accent/90"
+                      className="flex-1 bg-accent text-white hover:bg-accent/90 font-medium"
                     >
                       {createContext.isPending ? "Creating..." : "Create"}
                     </Button>

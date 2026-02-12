@@ -9,15 +9,15 @@ router = APIRouter()
 
 
 @router.get("")
-async def list_outputs(brief_id: Optional[UUID] = None, user_id: UUID = Depends(get_current_user)):
-    """Lista outputs. Con ?brief_id=X filtra per brief (Design Lab)."""
-    return OutputService().list(user_id, brief_id)
+async def list_outputs(brief_id: Optional[UUID] = None, context_id: Optional[UUID] = None, user_id: UUID = Depends(get_current_user)):
+    """Lista outputs. ?brief_id=X filtra per brief, ?context_id=X filtra per contesto."""
+    return OutputService().list(user_id, brief_id, context_id)
 
 
 @router.get("/summary")
-async def outputs_summary(user_id: UUID = Depends(get_current_user)):
-    """Vista aggregata per pack: contatori brief + flag nuovi."""
-    return OutputService().get_summary(user_id)
+async def outputs_summary(context_id: Optional[UUID] = None, user_id: UUID = Depends(get_current_user)):
+    """Vista aggregata per pack. ?context_id=X filtra per contesto."""
+    return OutputService().get_summary(user_id, context_id)
 
 
 @router.get("/{output_id}")

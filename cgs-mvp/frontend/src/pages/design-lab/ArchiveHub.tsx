@@ -42,8 +42,8 @@ const statusConfig = {
 export default function ArchiveHub() {
   const [, navigate] = useLocation();
   const contextId = useAppStore((s) => s.contextId);
-  const { data: items, isLoading } = useArchive();
-  const { data: stats } = useArchiveStats();
+  const { data: items, isLoading } = useArchive(contextId ?? undefined);
+  const { data: stats } = useArchiveStats(contextId ?? undefined);
   const searchMutation = useArchiveSearch();
 
   const [filter, setFilter] = useState<FilterTab>("all");

@@ -3,13 +3,16 @@ import { apiRequest } from "@/lib/api";
 import type { ContentItem, OutputPackSummary } from "@/types/design-lab";
 
 /**
- * Fetch outputs list, optionally filtered by brief_id.
+ * Fetch outputs list, optionally filtered by brief_id and context_id.
  * Only returns root outputs (no intermediate versions).
  */
-export function useOutputs(briefId?: string) {
-  const qs = briefId ? `?brief_id=${briefId}` : "";
+export function useOutputs(briefId?: string, contextId?: string) {
+  const params = new URLSearchParams();
+  if (briefId) params.set("brief_id", briefId);
+  if (contextId) params.set("context_id", contextId);
+  const qs = params.toString() ? `?${params}` : "";
   return useQuery<ContentItem[]>({
-    queryKey: ["outputs", { briefId }],
+    queryKey: ["outputs", { briefId, contextId }],
     queryFn: () => apiRequest<ContentItem[]>(`/api/v1/outputs${qs}`),
     staleTime: 1000 * 60,
   });
@@ -17,11 +20,13 @@ export function useOutputs(briefId?: string) {
 
 /**
  * Fetch aggregated outputs summary: packs with brief counters and new flags.
+ * Optionally filtered by context_id.
  */
-export function useOutputsSummary() {
+export function useOutputsSummary(contextId?: string) {
+  const qs = contextId ? `?context_id=${contextId}` : "";
   return useQuery<OutputPackSummary[]>({
-    queryKey: ["outputs", "summary"],
-    queryFn: () => apiRequest<OutputPackSummary[]>("/api/v1/outputs/summary"),
+    queryKey: ["outputs", "summary", { contextId }],
+    queryFn: () => apiRequest<OutputPackSummary[]>(`/api/v1/outputs/summary${qs}`),
     staleTime: 1000 * 60,
   });
 }

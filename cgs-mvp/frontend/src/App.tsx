@@ -31,6 +31,7 @@ import BriefEdit from "@/pages/design-lab/BriefEdit";
 import Execute from "@/pages/design-lab/Execute";
 import ArchiveHub from "@/pages/design-lab/ArchiveHub";
 import ArchiveDetail from "@/pages/design-lab/ArchiveDetail";
+import PacksManager from "@/pages/design-lab/PacksManager";
 
 function LoadingScreen() {
   return (
@@ -117,6 +118,13 @@ export default function App() {
           <ProtectedRoute>
             <DesignLabLayout>
               <ContextImportExport />
+            </DesignLabLayout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/design-lab/packs/manager">
+          <ProtectedRoute>
+            <DesignLabLayout>
+              <PacksManager />
             </DesignLabLayout>
           </ProtectedRoute>
         </Route>

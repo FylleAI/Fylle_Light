@@ -147,7 +147,7 @@ export default function ChatPanel({
         ) : (
           <div className="text-center py-8">
             <Sparkles className="w-6 h-6 text-neutral-600 mx-auto mb-2" />
-            <p className="text-sm text-neutral-500">
+            <p className="text-sm text-neutral-400">
               Ask for content edits, context updates, or brief changes.
             </p>
             <div className="mt-4 space-y-2">
@@ -159,7 +159,7 @@ export default function ChatPanel({
                 <button
                   key={suggestion}
                   onClick={() => setInput(suggestion)}
-                  className="block w-full text-left text-xs text-neutral-400 hover:text-neutral-200 bg-surface-elevated hover:bg-neutral-800 rounded-lg px-3 py-2 transition-colors"
+                  className="block w-full text-left text-xs text-neutral-200 hover:text-white bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 hover:border-neutral-600 rounded-lg px-3 py-2.5 transition-colors"
                 >
                   {suggestion}
                 </button>

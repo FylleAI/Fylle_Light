@@ -14,22 +14,26 @@ class OutputService:
     def __init__(self):
         self.db = get_supabase_admin()
 
-    def list(self, user_id: UUID, brief_id: Optional[UUID] = None) -> list:
+    def list(self, user_id: UUID, brief_id: Optional[UUID] = None, context_id: Optional[UUID] = None) -> list:
         query = (self.db.table("outputs")
                  .select("*")
                  .eq("user_id", str(user_id))
                  .is_("parent_output_id", "null"))
         if brief_id:
             query = query.eq("brief_id", str(brief_id))
+        if context_id:
+            query = query.eq("context_id", str(context_id))
         return query.order("number", desc=True).execute().data
 
-    def get_summary(self, user_id: UUID) -> list:
+    def get_summary(self, user_id: UUID, context_id: Optional[UUID] = None) -> list:
         """Aggregated view by pack: brief counters + new flags."""
-        briefs = (self.db.table("briefs")
+        briefs_query = (self.db.table("briefs")
                   .select("id, name, slug, pack_id")
                   .eq("user_id", str(user_id))
-                  .eq("status", "active")
-                  .execute().data)
+                  .eq("status", "active"))
+        if context_id:
+            briefs_query = briefs_query.eq("context_id", str(context_id))
+        briefs = briefs_query.execute().data
         if not briefs:
             return []
 

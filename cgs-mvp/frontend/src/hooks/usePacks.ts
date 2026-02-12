@@ -51,7 +51,7 @@ export function useClonePack() {
     }) =>
       apiRequest<AgentPack>(`/api/v1/packs/${packId}/clone`, {
         method: "POST",
-        body: JSON.stringify({ context_id: contextId, name }),
+        body: { context_id: contextId, name },
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["packs"] });
@@ -79,7 +79,7 @@ export function useCreatePack() {
     }) =>
       apiRequest<AgentPack>("/api/v1/packs", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: data,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["packs"] });
@@ -103,7 +103,7 @@ export function useUpdatePack() {
     }) =>
       apiRequest<AgentPack>(`/api/v1/packs/${packId}`, {
         method: "PATCH",
-        body: JSON.stringify(updates),
+        body: updates,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["packs"] });
@@ -124,6 +124,86 @@ export function useDeletePack() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["packs"] });
+    },
+  });
+}
+
+/**
+ * Import pack from JSON/YAML template file.
+ */
+export function useImportPack() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      file,
+      contextId,
+    }: {
+      file: File;
+      contextId?: string;
+    }) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      if (contextId) {
+        formData.append("context_id", contextId);
+      }
+
+      // Get auth token from Supabase session
+      const { supabase } = await import("@/lib/supabase");
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        throw new Error("Not authenticated");
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || "http://localhost:8000"}/api/v1/packs/import`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || "Import failed");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["packs"] });
+    },
+  });
+}
+
+/**
+ * Export pack as JSON template.
+ */
+export function useExportPack() {
+  return useMutation({
+    mutationFn: async (packId: string) => {
+      const data = await apiRequest<any>(`/api/v1/packs/${packId}/export`);
+
+      // Create downloadable file
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${data.name || "pack"}-template.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      return data;
     },
   });
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useLocation } from "wouter";
 import { useOutput, useLatestVersion, useMarkAsSeen } from "@/hooks/useOutputs";
 import { usePacks } from "@/hooks/usePacks";
@@ -9,9 +9,13 @@ import {
   Loader2,
   MessageSquare,
   Info,
+  Code,
+  Eye,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import DOMPurify from "dompurify";
 import ChatPanel from "@/components/design-lab/ChatPanel";
 import ApprovalFlow from "@/components/design-lab/ApprovalFlow";
 import type { ContentStatus, AgentPack, ChatResponse } from "@/types/design-lab";
@@ -62,6 +66,7 @@ export default function ContentView({ packType, contentId }: ContentViewProps) {
   const markAsSeen = useMarkAsSeen();
   const { data: packs } = usePacks();
   const [chatOpen, setChatOpen] = useState(false);
+  const [viewSource, setViewSource] = useState(false);
 
   const pack = packs?.find((p: AgentPack) => p.slug === packType);
 
@@ -79,7 +84,6 @@ export default function ContentView({ packType, contentId }: ContentViewProps) {
   }, [output?.is_new, contentId]);
 
   const handleOutputUpdated = (_data: ChatResponse) => {
-    // Refresh output data to show updated content/status
     refetchOutput();
   };
 
@@ -87,6 +91,31 @@ export default function ContentView({ packType, contentId }: ContentViewProps) {
     refetchOutput();
   };
 
+  // Derive content values (safe even when output is null)
+  const currentContent = displayOutput?.text_content || output?.text_content || "";
+
+  // Detect if content is HTML (newsletter-style) vs plain Markdown
+  const isHtmlContent = useMemo(() => {
+    if (!currentContent) return false;
+    const trimmed = currentContent.trim();
+    return (
+      /^<!DOCTYPE/i.test(trimmed) ||
+      /^<html/i.test(trimmed) ||
+      (/<(table|div|section|header|footer|style|head|body)\b/i.test(trimmed) &&
+      (trimmed.match(/<[^>]+>/g)?.length || 0) > 5)
+    );
+  }, [currentContent]);
+
+  // Sanitize HTML content
+  const sanitizedHtml = useMemo(() => {
+    if (!currentContent || !isHtmlContent) return "";
+    return DOMPurify.sanitize(currentContent, {
+      ADD_TAGS: ["style", "link"],
+      ADD_ATTR: ["target", "rel", "style", "class", "align", "bgcolor", "cellpadding", "cellspacing", "width", "height", "border", "valign"],
+    });
+  }, [currentContent, isHtmlContent]);
+
+  // Early returns AFTER all hooks
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -113,7 +142,6 @@ export default function ContentView({ packType, contentId }: ContentViewProps) {
   const status = (displayOutput?.status || output.status) as ContentStatus;
   const config = statusConfig[status] || statusConfig.da_approvare;
   const currentVersion = displayOutput?.version || output.version;
-  const currentContent = displayOutput?.text_content || output.text_content;
 
   return (
     <div className={`flex gap-0 ${chatOpen ? "h-[calc(100vh-8rem)]" : ""}`}>
@@ -137,7 +165,7 @@ export default function ContentView({ packType, contentId }: ContentViewProps) {
               variant="outline"
               size="sm"
               onClick={() => setChatOpen(true)}
-              className="border-neutral-700 text-neutral-400 hover:text-accent hover:border-accent/30 rounded-xl h-9"
+              className="border-neutral-600 text-neutral-200 hover:text-accent hover:border-accent/40 hover:bg-accent/5 rounded-xl h-9"
             >
               <MessageSquare className="w-4 h-4 mr-2" />
               Open Chat
@@ -167,31 +195,87 @@ export default function ContentView({ packType, contentId }: ContentViewProps) {
           <h1 className="text-2xl font-bold text-neutral-100">
             {output.title || `Content #${output.number}`}
           </h1>
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-neutral-400">
             {formatDate(output.created_at)} • {output.author || "AI"} •{" "}
             v{currentVersion}
           </p>
         </div>
 
-        {/* Content preview (Markdown) */}
-        <Card className="bg-surface-elevated border-0 rounded-2xl">
-          <CardContent className="p-6 md:p-8">
-            {currentContent ? (
-              <article className="prose prose-invert prose-sm max-w-none prose-headings:text-neutral-100 prose-p:text-neutral-300 prose-li:text-neutral-300 prose-strong:text-neutral-200 prose-a:text-accent prose-blockquote:border-neutral-700 prose-blockquote:text-neutral-400 prose-code:text-accent prose-code:bg-neutral-800 prose-code:px-1 prose-code:rounded prose-pre:bg-neutral-900 prose-hr:border-neutral-700">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {currentContent}
-                </ReactMarkdown>
-              </article>
-            ) : (
-              <div className="text-center py-12">
-                <Info className="w-8 h-8 text-neutral-600 mx-auto mb-2" />
-                <p className="text-neutral-500 text-sm">
-                  No text content available.
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        {/* Content preview */}
+        <div className="space-y-2">
+          {/* View toggle */}
+          {currentContent && (
+            <div className="flex items-center justify-end gap-1">
+              <button
+                onClick={() => setViewSource(false)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  !viewSource
+                    ? "bg-neutral-800 text-white"
+                    : "text-neutral-500 hover:text-neutral-300"
+                }`}
+              >
+                <Eye className="w-3.5 h-3.5" />
+                Preview
+              </button>
+              <button
+                onClick={() => setViewSource(true)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  viewSource
+                    ? "bg-neutral-800 text-white"
+                    : "text-neutral-500 hover:text-neutral-300"
+                }`}
+              >
+                <Code className="w-3.5 h-3.5" />
+                Source
+              </button>
+              {isHtmlContent && (
+                <span className="ml-2 text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400">
+                  HTML
+                </span>
+              )}
+            </div>
+          )}
+
+          <Card className="bg-surface-elevated border-0 rounded-2xl overflow-hidden">
+            <CardContent className="p-0">
+              {currentContent ? (
+                viewSource ? (
+                  /* Source view */
+                  <pre className="p-6 md:p-8 text-xs text-neutral-300 font-mono whitespace-pre-wrap break-words overflow-x-auto max-h-[70vh] overflow-y-auto bg-neutral-900/50">
+                    {currentContent}
+                  </pre>
+                ) : isHtmlContent ? (
+                  /* HTML rendered view (newsletter) - white background for email preview */
+                  <div className="bg-white rounded-xl m-3 md:m-4 overflow-hidden shadow-inner">
+                    <div
+                      className="p-6 md:p-8 [&_*]:max-w-full [&_img]:h-auto"
+                      dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
+                    />
+                  </div>
+                ) : (
+                  /* Markdown rendered view */
+                  <div className="p-6 md:p-8">
+                    <article className="prose prose-invert max-w-none prose-headings:text-white prose-headings:font-bold prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-p:text-neutral-100 prose-p:leading-relaxed prose-li:text-neutral-100 prose-strong:text-white prose-strong:font-semibold prose-a:text-accent prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-accent/40 prose-blockquote:text-neutral-300 prose-blockquote:italic prose-code:text-accent prose-code:bg-neutral-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-pre:bg-neutral-900 prose-pre:rounded-xl prose-hr:border-neutral-700 prose-img:rounded-xl">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        rehypePlugins={[rehypeRaw]}
+                      >
+                        {currentContent}
+                      </ReactMarkdown>
+                    </article>
+                  </div>
+                )
+              ) : (
+                <div className="text-center py-12">
+                  <Info className="w-8 h-8 text-neutral-600 mx-auto mb-2" />
+                  <p className="text-neutral-500 text-sm">
+                    No text content available.
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Approval Flow */}
         <ApprovalFlow

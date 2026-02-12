@@ -8,6 +8,7 @@ import {
   Archive,
   LogOut,
   ChevronRight,
+  Package,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import ContextSelector from "@/components/design-lab/ContextSelector";
@@ -19,6 +20,7 @@ interface DesignLabLayoutProps {
 const NAV_ITEMS = [
   { path: "/design-lab", label: "Home", icon: Home },
   { path: "/design-lab/context", label: "Context", icon: Layers },
+  { path: "/design-lab/packs/manager", label: "Packs", icon: Package },
   { path: "/design-lab/outputs", label: "Outputs", icon: FileOutput },
   { path: "/design-lab/archive", label: "Archive", icon: Archive },
 ];
@@ -27,6 +29,7 @@ export default function DesignLabLayout({ children }: DesignLabLayoutProps) {
   const [location, navigate] = useLocation();
   const { logout } = useAuth();
   const user = useAppStore((s) => s.user);
+  const contextId = useAppStore((s) => s.contextId);
 
   // Build breadcrumbs from current path
   const pathParts = location.split("/").filter(Boolean);
@@ -59,7 +62,13 @@ export default function DesignLabLayout({ children }: DesignLabLayoutProps) {
                   return (
                     <button
                       key={item.path}
-                      onClick={() => navigate(item.path)}
+                      onClick={() => {
+                        const dest =
+                          item.path === "/design-lab/packs/manager" && contextId
+                            ? `${item.path}?context_id=${contextId}`
+                            : item.path;
+                        navigate(dest);
+                      }}
                       className={cn(
                         "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors",
                         isActive

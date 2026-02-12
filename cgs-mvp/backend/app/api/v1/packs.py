@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Depends, Body
+from fastapi import APIRouter, Depends, Body, UploadFile, File, HTTPException
 from uuid import UUID
-from typing import Optional, Dict, Any
-from pydantic import BaseModel
+from typing import Optional, Dict, Any, List
+from pydantic import BaseModel, Field, validator
+import json
+import yaml
 
 from app.api.deps import get_current_user
 from app.services.pack_service import PackService
@@ -28,6 +30,14 @@ class CreatePackRequest(BaseModel):
     content_type_id: Optional[str] = None
     sort_order: Optional[int] = 0
 
+    # ← NEW: JSONB fields for workflow configuration
+    agents_config: List[Dict[str, Any]] = []
+    brief_questions: List[Dict[str, Any]] = []
+    tools_config: List[Dict[str, Any]] = []
+    prompt_templates: Dict[str, str] = {}
+    default_llm_provider: str = "openai"
+    default_llm_model: str = "gpt-4o"
+
 
 class UpdatePackRequest(BaseModel):
     name: Optional[str] = None
@@ -36,6 +46,36 @@ class UpdatePackRequest(BaseModel):
     outcome: Optional[str] = None
     status: Optional[str] = None
     is_active: Optional[bool] = None
+
+    # ← NEW: JSONB fields (optional for updates)
+    agents_config: Optional[List[Dict[str, Any]]] = None
+    brief_questions: Optional[List[Dict[str, Any]]] = None
+    tools_config: Optional[List[Dict[str, Any]]] = None
+    prompt_templates: Optional[Dict[str, str]] = None
+    default_llm_provider: Optional[str] = None
+    default_llm_model: Optional[str] = None
+
+
+class PackImport(BaseModel):
+    """Schema for importing pack from JSON/YAML template"""
+    version: str = "1.0"
+    name: str
+    description: str = ""
+    icon: str = "package"
+    agents: List[Dict[str, Any]] = Field(min_length=1, max_length=10)
+    brief_questions: List[Dict[str, Any]] = []
+    tools_config: List[Dict[str, Any]] = []
+    default_llm_provider: str = "openai"
+    default_llm_model: str = "gpt-4o"
+
+    @validator('agents')
+    def validate_agents(cls, v):
+        for agent in v:
+            if 'name' not in agent:
+                raise ValueError("Each agent must have 'name'")
+            if 'prompt' not in agent:
+                raise ValueError("Each agent must have 'prompt'")
+        return v
 
 
 # ==================== ENDPOINTS ====================
@@ -132,3 +172,78 @@ async def delete_pack(
     """
     PackService().delete_pack(pack_id, user_id)
     return {"deleted": True}
+
+
+@router.post("/import")
+async def import_pack(
+    file: UploadFile = File(...),
+    context_id: Optional[str] = None,
+    user_id: UUID = Depends(get_current_user),
+):
+    """
+    Import agent pack from JSON/YAML template.
+
+    - **file**: JSON or YAML file containing pack template
+    - **context_id**: Optional context UUID (omit for global template)
+
+    Returns pack_id, name, and agents_count
+    """
+    # Read file content
+    content = await file.read()
+
+    # Parse based on extension
+    try:
+        if file.filename.endswith(".json"):
+            template_data = json.loads(content)
+        elif file.filename.endswith((".yaml", ".yml")):
+            template_data = yaml.safe_load(content)
+        else:
+            raise HTTPException(400, "File must be .json, .yaml, or .yml")
+    except (json.JSONDecodeError, yaml.YAMLError) as e:
+        raise HTTPException(400, f"Invalid file format: {str(e)}")
+
+    # Validate with Pydantic
+    try:
+        validated = PackImport(**template_data)
+    except Exception as e:
+        raise HTTPException(422, f"Template validation failed: {str(e)}")
+
+    # Import pack
+    try:
+        pack = PackService().import_from_template(
+            user_id, UUID(context_id) if context_id else None, validated.dict()
+        )
+        return {
+            "pack_id": pack["id"],
+            "name": pack["name"],
+            "agents_count": len(pack.get("agents_config", [])),
+        }
+    except Exception as e:
+        raise HTTPException(500, f"Import failed: {str(e)}")
+
+
+@router.get("/{pack_id}/export")
+async def export_pack(pack_id: UUID, user_id: UUID = Depends(get_current_user)):
+    """
+    Export pack as JSON template.
+
+    - **pack_id**: UUID of the pack
+
+    Returns JSON template ready for download
+    """
+    pack = PackService().get_pack(pack_id)
+
+    # Build template
+    template = {
+        "version": "1.0",
+        "name": pack["name"],
+        "description": pack.get("description", ""),
+        "icon": pack.get("icon", "package"),
+        "agents": pack.get("agents_config", []),
+        "brief_questions": pack.get("brief_questions", []),
+        "tools_config": pack.get("tools_config", []),
+        "default_llm_provider": pack.get("default_llm_provider", "openai"),
+        "default_llm_model": pack.get("default_llm_model", "gpt-4o"),
+    }
+
+    return template

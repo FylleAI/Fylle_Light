@@ -55,7 +55,7 @@ class WorkflowService:
             # Execute agents in sequence
             for i, agent in enumerate(agents):
                 agent_name = agent["name"]
-                agent_role = agent["role"]
+                agent_role = agent.get("role", agent_name)
                 agent_tools = agent.get("tools", [])
                 progress = int((i / total_agents) * 90)
 
@@ -69,8 +69,52 @@ class WorkflowService:
                     result = await self._execute_tool(tool_name, run["topic"], exec_context, user_id, run_id)
                     tool_results[tool_name] = result
 
-                # Build prompt
-                system_prompt = pack["prompt_templates"].get(agent_name, f"You are a {agent_role}.")
+                # Build prompt with Jinja2 template rendering
+                # Get agent prompt (embedded in agents_config)
+                agent_prompt_template = agent.get("prompt", "")
+                if not agent_prompt_template:
+                    # Fallback to old prompt_templates
+                    agent_prompt_template = pack["prompt_templates"].get(agent_name, f"You are a {agent_role}.")
+
+                # Build template context
+                template_context = {
+                    # Brief variables (topic, target_word_count, etc.)
+                    **run.get("input_data", {}),
+                    "topic": run["topic"],
+
+                    # Context data
+                    "context": {
+                        "brand_name": context.get("brand_name", ""),
+                        "industry": context.get("industry", ""),
+                        "audience_info": context.get("audience_info", {}),
+                        "voice_info": context.get("voice_info", {}),
+                        "company_info": context.get("company_info", {}),
+                        "goals_info": context.get("goals_info", {}),
+                    },
+
+                    # Agent outputs (for chaining) - both index and name-based access
+                    "agent": {
+                        # Index-based: agent['0'], agent['1'], etc.
+                        **{str(idx): {"output": agent_outputs[agents[idx]["name"]]} for idx in range(i)},
+                        # Name-based: agent.Researcher, agent.Writer, etc.
+                        **{agents[idx]["name"]: {"output": agent_outputs[agents[idx]["name"]]} for idx in range(i)}
+                    }
+                }
+
+                # Render Jinja2 template
+                from jinja2 import Template, TemplateSyntaxError
+                try:
+                    template = Template(agent_prompt_template)
+                    rendered_prompt = template.render(**template_context)
+                except TemplateSyntaxError as e:
+                    logger.error(f"Template syntax error in agent {agent_name}: {e}")
+                    rendered_prompt = agent_prompt_template  # Fallback to raw
+                except Exception as e:
+                    logger.error(f"Template rendering error in agent {agent_name}: {e}")
+                    rendered_prompt = agent_prompt_template  # Fallback to raw
+
+                # Build final system prompt
+                system_prompt = rendered_prompt
                 system_prompt += "\n\nIMPORTANT: All generated content MUST be in English."
                 system_prompt += f"\n\n{exec_context}\n\n{archive_prompt}"
 

@@ -1,6 +1,7 @@
 import { useLocation } from "wouter";
 import { useOutputsSummary } from "@/hooks/useOutputs";
 import { usePacks } from "@/hooks/usePacks";
+import { useAppStore } from "@/lib/store";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,8 +16,9 @@ import type { AgentPack } from "@/types/design-lab";
 
 export default function OutputsHub() {
   const [, navigate] = useLocation();
-  const { data: summary, isLoading } = useOutputsSummary();
-  const { data: packs } = usePacks();
+  const contextId = useAppStore((s) => s.contextId);
+  const { data: summary, isLoading } = useOutputsSummary(contextId ?? undefined);
+  const { data: packs } = usePacks(contextId ?? undefined);
 
   // Build pack lookup for icons
   const packMap: Record<string, AgentPack> = {};

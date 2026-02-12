@@ -28,22 +28,26 @@ export interface ArchiveStats {
 
 /**
  * Fetch all archive items for the current user.
+ * Optionally filtered by context_id.
  */
-export function useArchive() {
+export function useArchive(contextId?: string) {
+  const qs = contextId ? `?context_id=${contextId}` : "";
   return useQuery<ArchiveItem[]>({
-    queryKey: ["archive"],
-    queryFn: () => apiRequest<ArchiveItem[]>("/api/v1/archive"),
+    queryKey: ["archive", { contextId }],
+    queryFn: () => apiRequest<ArchiveItem[]>(`/api/v1/archive${qs}`),
     staleTime: 1000 * 60,
   });
 }
 
 /**
  * Fetch archive statistics (approved, rejected, pending counts).
+ * Optionally filtered by context_id.
  */
-export function useArchiveStats() {
+export function useArchiveStats(contextId?: string) {
+  const qs = contextId ? `?context_id=${contextId}` : "";
   return useQuery<ArchiveStats>({
-    queryKey: ["archive", "stats"],
-    queryFn: () => apiRequest<ArchiveStats>("/api/v1/archive/stats"),
+    queryKey: ["archive", "stats", { contextId }],
+    queryFn: () => apiRequest<ArchiveStats>(`/api/v1/archive/stats${qs}`),
     staleTime: 1000 * 60,
   });
 }

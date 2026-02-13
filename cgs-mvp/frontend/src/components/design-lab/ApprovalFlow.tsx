@@ -39,7 +39,7 @@ export default function ApprovalFlow({
   const [isReference, setIsReference] = useState(false);
 
   // Already reviewed
-  if (currentStatus === "completato") {
+  if (currentStatus === "completed") {
     return (
       <div className="flex items-center gap-2 px-4 py-3 bg-green-500/5 border border-green-500/10 rounded-xl">
         <CheckCircle className="w-5 h-5 text-green-400" />

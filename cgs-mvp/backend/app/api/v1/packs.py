@@ -203,8 +203,11 @@ async def import_pack(
         raise HTTPException(400, f"Invalid file format: {str(e)}")
 
     # Validate with Pydantic
+    from pydantic import ValidationError
     try:
         validated = PackImport(**template_data)
+    except ValidationError as e:
+        raise HTTPException(422, f"Template validation failed: {e.errors()}")
     except Exception as e:
         raise HTTPException(422, f"Template validation failed: {str(e)}")
 

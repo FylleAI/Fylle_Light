@@ -22,7 +22,16 @@ class OutputService:
         if brief_id:
             query = query.eq("brief_id", str(brief_id))
         if context_id:
-            query = query.eq("context_id", str(context_id))
+            # outputs table has no context_id column - filter via briefs
+            briefs = (self.db.table("briefs")
+                      .select("id")
+                      .eq("context_id", str(context_id))
+                      .eq("user_id", str(user_id))
+                      .execute().data)
+            brief_ids = [b["id"] for b in briefs]
+            if not brief_ids:
+                return []
+            query = query.in_("brief_id", brief_ids)
         return query.order("number", desc=True).execute().data
 
     def get_summary(self, user_id: UUID, context_id: Optional[UUID] = None) -> list:
@@ -142,7 +151,7 @@ class OutputService:
         ).eq("user_id", str(user_id)).execute()
 
         if review_data.status.value == "approved":
-            self.db.table("outputs").update({"status": "completato"}).eq("id", str(output_id)).execute()
+            self.db.table("outputs").update({"status": "completed"}).eq("id", str(output_id)).execute()
 
         logger.info("Reviewed output %s | status=%s", output_id, review_data.status.value)
         return {"reviewed": True}

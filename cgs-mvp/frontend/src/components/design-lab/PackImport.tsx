@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Upload, FileJson, FileCode, Check, AlertCircle, X } from "lucide-react";
+import { Upload, FileJson, Check, AlertCircle, X } from "lucide-react";
 import { useImportPack } from "@/hooks/usePacks";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,9 +35,9 @@ export function PackImport({ contextId, onSuccess, onCancel }: PackImportProps) 
 
       if (file.name.endsWith(".json")) {
         data = JSON.parse(text);
-      } else if (file.name.endsWith(".yaml") || file.name.endsWith(".yml")) {
-        // For YAML, show raw text (would need yaml parser for full preview)
-        data = { preview: "YAML file - will be parsed on server" };
+      } else {
+        setPreviewData(null);
+        return;
       }
 
       setPreviewData(data);
@@ -118,7 +118,7 @@ export function PackImport({ contextId, onSuccess, onCancel }: PackImportProps) 
           <input
             ref={fileInputRef}
             type="file"
-            accept=".json,.yaml,.yml"
+            accept=".json"
             onChange={(e) => {
               if (e.target.files?.[0]) {
                 handleFileSelect(e.target.files[0]);
@@ -155,11 +155,7 @@ export function PackImport({ contextId, onSuccess, onCancel }: PackImportProps) 
               <div className="flex gap-2 justify-center text-xs text-gray-400">
                 <span className="flex items-center gap-1">
                   <FileJson className="w-3 h-3" />
-                  .json
-                </span>
-                <span className="flex items-center gap-1">
-                  <FileCode className="w-3 h-3" />
-                  .yaml
+                  .json format
                 </span>
               </div>
             </div>

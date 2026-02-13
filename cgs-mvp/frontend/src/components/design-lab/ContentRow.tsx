@@ -17,17 +17,17 @@ const statusConfig: Record<
   ContentStatus,
   { label: string; bg: string; text: string }
 > = {
-  da_approvare: {
+  pending_review: {
     label: "Pending Review",
     bg: "bg-yellow-500/10",
     text: "text-yellow-400",
   },
-  completato: {
+  completed: {
     label: "Completed",
     bg: "bg-green-500/10",
     text: "text-green-400",
   },
-  adattato: {
+  adapted: {
     label: "Adapted",
     bg: "bg-blue-500/10",
     text: "text-blue-400",
@@ -58,7 +58,7 @@ export default function ContentRow({
   packSlug,
 }: ContentRowProps) {
   const [, navigate] = useLocation();
-  const config = statusConfig[status] || statusConfig.da_approvare;
+  const config = statusConfig[status] || statusConfig.pending_review;
 
   return (
     <button

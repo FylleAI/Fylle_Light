@@ -92,12 +92,14 @@ class WorkflowService:
                         "goals_info": context.get("goals_info", {}),
                     },
 
-                    # Agent outputs (for chaining) - both index and name-based access
+                    # Agent outputs (for chaining) - index, original name, and normalized name
                     "agent": {
                         # Index-based: agent['0'], agent['1'], etc.
                         **{str(idx): {"output": agent_outputs[agents[idx]["name"]]} for idx in range(i)},
-                        # Name-based: agent.Researcher, agent.Writer, etc.
-                        **{agents[idx]["name"]: {"output": agent_outputs[agents[idx]["name"]]} for idx in range(i)}
+                        # Original name: agent["Context Specialist"], etc.
+                        **{agents[idx]["name"]: {"output": agent_outputs[agents[idx]["name"]]} for idx in range(i)},
+                        # Normalized name (spaces→underscores): agent.Context_Specialist, etc.
+                        **{agents[idx]["name"].replace(" ", "_"): {"output": agent_outputs[agents[idx]["name"]]} for idx in range(i)},
                     }
                 }
 
@@ -168,7 +170,7 @@ class WorkflowService:
                 "title": run["topic"],
                 "metadata": {"agent_outputs": {k: v[:500] for k, v in agent_outputs.items()}},
                 "version": 1,
-                "status": "da_approvare",
+                "status": "pending_review",
                 "is_new": True,
                 "number": next_number,
                 "author": last_agent_name,
@@ -219,6 +221,33 @@ class WorkflowService:
             f"Audience: {json.dumps(context.get('audience_info', {}), indent=2)}",
             f"Voice: {json.dumps(context.get('voice_info', {}), indent=2)}",
             f"Goals: {json.dumps(context.get('goals_info', {}), indent=2)}",
+        ]
+
+        # Inject cards data into context
+        if cards:
+            lines.append("")
+            lines.append("## CONTEXT CARDS")
+            card_type_labels = {
+                "product": "Product & Services",
+                "target": "Target Audience",
+                "brand_voice": "Brand Voice",
+                "competitor": "Competitors",
+                "topic": "Content Topics",
+                "campaigns": "Campaigns",
+                "performance": "Performance Data",
+                "feedback": "Feedback & Learnings",
+            }
+            for card in sorted(cards, key=lambda c: c.get("sort_order", 0)):
+                card_type = card.get("card_type", "unknown")
+                label = card_type_labels.get(card_type, card_type.replace("_", " ").title())
+                lines.append(f"### {label}: {card.get('title', '')}")
+                content = card.get("content", {})
+                if isinstance(content, dict):
+                    lines.append(json.dumps(content, indent=2))
+                else:
+                    lines.append(str(content))
+
+        lines.extend([
             "",
             "## BRIEF",
             f"Name: {brief['name']}",
@@ -226,7 +255,7 @@ class WorkflowService:
             f"Compiled: {brief.get('compiled_brief', '')}",
             "",
             f"## TOPIC: {topic}",
-        ]
+        ])
         return "\n".join(lines)
 
     def _build_archive_prompt(self, references, guardrails) -> str:

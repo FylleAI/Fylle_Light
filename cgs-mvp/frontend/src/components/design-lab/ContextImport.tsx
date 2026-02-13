@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Upload, FileText, AlertCircle, CheckCircle2 } from "lucide-react";
@@ -10,6 +11,7 @@ export default function ContextImport() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [, navigate] = useLocation();
 
   const importContext = useImportContext();
   const setContextId = useAppStore((s) => s.setContextId);
@@ -66,6 +68,9 @@ export default function ContextImport() {
       // Reset form
       setFile(null);
       setPreview(null);
+
+      // Redirect to home after import
+      setTimeout(() => navigate("/design-lab"), 1500);
     } catch (err: any) {
       toast({
         title: "Import failed",
@@ -85,7 +90,7 @@ export default function ContextImport() {
               Import Context Template
             </h3>
             <p className="text-xs text-neutral-500">
-              Upload a JSON or YAML template file
+              Upload a JSON template file
             </p>
           </div>
         </div>
@@ -94,7 +99,7 @@ export default function ContextImport() {
         <div className="border-2 border-dashed border-neutral-700 rounded-lg p-6 text-center">
           <input
             type="file"
-            accept=".json,.yaml,.yml"
+            accept=".json"
             onChange={handleFileSelect}
             className="hidden"
             id="template-upload"
@@ -108,7 +113,7 @@ export default function ContextImport() {
               {file ? file.name : "Click to select template file"}
             </p>
             <p className="text-xs text-neutral-600 mt-1">
-              Supports .json, .yaml, .yml
+              Supports .json format
             </p>
           </label>
         </div>

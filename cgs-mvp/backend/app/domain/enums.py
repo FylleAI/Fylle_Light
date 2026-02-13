@@ -40,9 +40,9 @@ class OutputType(str, Enum):
 
 
 class OutputStatus(str, Enum):
-    PENDING_REVIEW = "da_approvare"
-    COMPLETED = "completato"
-    ADAPTED = "adattato"
+    PENDING_REVIEW = "pending_review"
+    COMPLETED = "completed"
+    ADAPTED = "adapted"
 
 
 class ReviewStatus(str, Enum):

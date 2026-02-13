@@ -29,17 +29,17 @@ const statusConfig: Record<
   ContentStatus,
   { label: string; bg: string; text: string }
 > = {
-  da_approvare: {
+  pending_review: {
     label: "To review",
     bg: "bg-yellow-500/10",
     text: "text-yellow-400",
   },
-  completato: {
+  completed: {
     label: "Completed",
     bg: "bg-green-500/10",
     text: "text-green-400",
   },
-  adattato: {
+  adapted: {
     label: "Adapted",
     bg: "bg-blue-500/10",
     text: "text-blue-400",
@@ -140,7 +140,7 @@ export default function ContentView({ packType, contentId }: ContentViewProps) {
   }
 
   const status = (displayOutput?.status || output.status) as ContentStatus;
-  const config = statusConfig[status] || statusConfig.da_approvare;
+  const config = statusConfig[status] || statusConfig.pending_review;
   const currentVersion = displayOutput?.version || output.version;
 
   return (

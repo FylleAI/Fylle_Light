@@ -106,11 +106,11 @@ export default function BriefDetail({ briefSlug }: BriefDetailProps) {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate("/design-lab/context/agent-pack")}
+          onClick={() => navigate("/design-lab")}
           className="text-neutral-400 hover:text-neutral-200 hover:bg-surface-elevated rounded-lg"
         >
           <ArrowLeft className="w-4 h-4 mr-1" />
-          Agent Pack
+          Home
         </Button>
       </div>
 

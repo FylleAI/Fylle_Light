@@ -69,7 +69,7 @@ export interface Brief {
 }
 
 // ── CONTENT ITEM ──
-export type ContentStatus = "da_approvare" | "completato" | "adattato";
+export type ContentStatus = "pending_review" | "completed" | "adapted";
 
 export interface ContentItem {
   id: string;

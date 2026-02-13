@@ -1,4 +1,5 @@
 import logging
+import re
 from uuid import UUID
 import json
 from app.config.supabase import get_supabase_admin
@@ -79,20 +80,8 @@ BRIEF (name: {brief['name']}):
             logger.error("LLM call failed | output=%s error=%s", output_id, str(e))
             raise LLMException("Error generating response")
 
-        # Safe parsing with fallback
-        try:
-            parsed = json.loads(response.content)
-        except json.JSONDecodeError:
-            # Try to extract JSON from text
-            start = response.content.find("{")
-            end = response.content.rfind("}")
-            if start != -1 and end != -1:
-                try:
-                    parsed = json.loads(response.content[start:end + 1])
-                except json.JSONDecodeError:
-                    parsed = {"message": response.content, "action": None}
-            else:
-                parsed = {"message": response.content, "action": None}
+        # Robust JSON parsing with multiple fallback strategies
+        parsed = self._parse_llm_response(response.content)
 
         action_type = parsed.get("action")
         action_data = {}
@@ -114,14 +103,14 @@ BRIEF (name: {brief['name']}):
                 "title": output.get("title"),
                 "version": output["version"] + 1,
                 "parent_output_id": str(output_id),
-                "status": "adattato",
+                "status": "adapted",
                 "is_new": False,
                 "number": output.get("number"),
                 "author": output.get("author"),
             }).execute().data[0]
             # Update the status of the original (root) output
             root_id = output.get("parent_output_id") or str(output_id)
-            self.db.table("outputs").update({"status": "adattato"}).eq("id", root_id).execute()
+            self.db.table("outputs").update({"status": "adapted"}).eq("id", root_id).execute()
             action_data = {"new_output_id": new_output["id"]}
             updated_output = new_output
 
@@ -162,6 +151,57 @@ BRIEF (name: {brief['name']}):
             "context_changes": context_changes,
             "brief_changes": brief_changes,
         }
+
+    def _parse_llm_response(self, content: str) -> dict:
+        """Parse LLM JSON response with multiple fallback strategies."""
+        VALID_ACTIONS = {"edit_output", "update_context", "update_brief", None}
+
+        # Strategy 1: Direct JSON parse
+        try:
+            parsed = json.loads(content)
+            if isinstance(parsed, dict) and "message" in parsed:
+                if parsed.get("action") not in VALID_ACTIONS:
+                    parsed["action"] = None
+                return parsed
+        except json.JSONDecodeError:
+            pass
+
+        # Strategy 2: Extract JSON from markdown code block
+        code_block = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', content, re.DOTALL)
+        if code_block:
+            try:
+                parsed = json.loads(code_block.group(1))
+                if isinstance(parsed, dict) and "message" in parsed:
+                    if parsed.get("action") not in VALID_ACTIONS:
+                        parsed["action"] = None
+                    return parsed
+            except json.JSONDecodeError:
+                pass
+
+        # Strategy 3: Find outermost JSON object with balanced braces
+        depth = 0
+        start_idx = None
+        for i, ch in enumerate(content):
+            if ch == '{':
+                if depth == 0:
+                    start_idx = i
+                depth += 1
+            elif ch == '}':
+                depth -= 1
+                if depth == 0 and start_idx is not None:
+                    try:
+                        parsed = json.loads(content[start_idx:i + 1])
+                        if isinstance(parsed, dict) and "message" in parsed:
+                            if parsed.get("action") not in VALID_ACTIONS:
+                                parsed["action"] = None
+                            return parsed
+                    except json.JSONDecodeError:
+                        start_idx = None
+                        continue
+
+        # Fallback: treat entire response as plain message
+        logger.warning("Could not parse LLM response as JSON, using as plain message")
+        return {"message": content, "action": None}
 
     def get_history(self, output_id: UUID):
         res = (self.db.table("chat_messages")

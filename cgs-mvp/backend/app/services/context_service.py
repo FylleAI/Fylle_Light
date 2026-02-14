@@ -1,8 +1,11 @@
 import logging
+import csv
+import io
 from uuid import UUID
 from typing import Dict, Any
 from app.config.supabase import get_supabase_admin
 from app.db.repositories.context_repo import ContextRepository
+from app.db.repositories.context_item_repo import ContextItemRepository
 from app.exceptions import NotFoundException, ConflictException
 
 logger = logging.getLogger("cgs-mvp.context")
@@ -74,6 +77,10 @@ class ContextService:
                   .eq("context_id", str(context_id))
                   .execute().data)
 
+        # Conta context items (dati gerarchici da CSV)
+        item_repo = ContextItemRepository(self.db)
+        context_items_count = item_repo.count_by_context(context_id)
+
         return {
             "fonti_informative": {
                 "label": "Information Sources",
@@ -100,6 +107,11 @@ class ContextService:
                 "label": "Agent Pack",
                 "briefs": briefs,
                 "count": len(briefs),
+            },
+            "context_items": {
+                "label": "Imported Context Data",
+                "count": context_items_count,
+                "has_data": context_items_count > 0,
             },
         }
 
@@ -165,3 +177,142 @@ class ContextService:
             'cards': cards_created,
             'cards_count': len(cards_created)
         }
+
+    # ─── Context Items (hierarchical data) ───────────────
+
+    def get_context_items(self, context_id: UUID, user_id: UUID) -> list:
+        """Lista piatta di tutti gli items di un contesto."""
+        self.get(context_id, user_id)  # ownership check
+        repo = ContextItemRepository(self.db)
+        return repo.list_by_context(context_id)
+
+    def get_context_items_tree(self, context_id: UUID, user_id: UUID) -> list:
+        """Albero annidato di tutti gli items di un contesto."""
+        self.get(context_id, user_id)  # ownership check
+        repo = ContextItemRepository(self.db)
+        return repo.get_tree(context_id)
+
+    def create_context_item(self, context_id: UUID, user_id: UUID, data: dict) -> dict:
+        """Crea un singolo nodo nell'albero del contesto."""
+        self.get(context_id, user_id)  # ownership check
+        repo = ContextItemRepository(self.db)
+        return repo.create({
+            "context_id": str(context_id),
+            "parent_id": str(data["parent_id"]) if data.get("parent_id") else None,
+            "level": data.get("level", 0),
+            "name": data["name"],
+            "content": data.get("content"),
+            "sort_order": data.get("sort_order", 0),
+        })
+
+    def update_context_item(self, context_id: UUID, item_id: UUID, user_id: UUID, data: dict) -> dict:
+        """Aggiorna un nodo esistente (nome e/o contenuto)."""
+        self.get(context_id, user_id)  # ownership check
+        repo = ContextItemRepository(self.db)
+        # Filtra solo i campi non-None
+        updates = {k: v for k, v in data.items() if v is not None}
+        if not updates:
+            raise ValueError("No fields to update")
+        return repo.update(item_id, updates)
+
+    def delete_context_item(self, context_id: UUID, item_id: UUID, user_id: UUID) -> None:
+        """Cancella un nodo (e i suoi figli grazie al CASCADE)."""
+        self.get(context_id, user_id)  # ownership check
+        repo = ContextItemRepository(self.db)
+        repo.delete(item_id)
+
+    def import_context_items_from_csv(
+        self, context_id: UUID, user_id: UUID, csv_content: str
+    ) -> list:
+        """
+        Importa dati gerarchici da un CSV con colonne:
+        Level 0, Level 1, Level 2, Level 3, Contenuto
+
+        Ogni riga viene parsificata creando nodi nell'albero.
+        I nodi duplicati (stesso nome sotto lo stesso genitore) non vengono ricreati.
+        """
+        self.get(context_id, user_id)  # ownership check
+        repo = ContextItemRepository(self.db)
+
+        # Prova diverse codifiche
+        try:
+            reader = csv.DictReader(io.StringIO(csv_content))
+        except Exception as e:
+            raise ValueError(f"Cannot parse CSV: {e}")
+
+        # Valida colonne
+        fieldnames = reader.fieldnames or []
+        # Supporta sia colonne italiane che inglesi
+        level_columns = []
+        content_column = None
+
+        for col in fieldnames:
+            col_stripped = col.strip()
+            if col_stripped.startswith("Level "):
+                level_columns.append(col)
+            elif col_stripped.lower() in ("contenuto", "content"):
+                content_column = col
+
+        if not level_columns:
+            raise ValueError(
+                f"CSV must have 'Level 0', 'Level 1', etc. columns. Found: {fieldnames}"
+            )
+        if not content_column:
+            raise ValueError(
+                f"CSV must have a 'Contenuto' or 'Content' column. Found: {fieldnames}"
+            )
+
+        # Ordina level columns per numero
+        level_columns.sort(key=lambda c: int(c.strip().replace("Level ", "")))
+        max_levels = len(level_columns)
+
+        # Cancella items precedenti per questo contesto (re-import)
+        repo.delete_by_context(context_id)
+
+        # Traccia nodi esistenti: chiave = (parent_id, name) → item_id
+        existing_nodes: Dict[tuple, str] = {}
+        sort_counter = 0
+
+        rows = list(reader)
+        logger.info(
+            "CSV import | context=%s rows=%d levels=%d",
+            context_id, len(rows), max_levels
+        )
+
+        for row in rows:
+            current_parent_id = None
+
+            for i, col in enumerate(level_columns):
+                value = (row.get(col) or "").strip()
+                if not value:
+                    break  # nessun livello più profondo in questa riga
+
+                level_num = int(col.strip().replace("Level ", ""))
+                node_key = (current_parent_id, value)
+
+                if node_key not in existing_nodes:
+                    # Crea nuovo nodo
+                    item = repo.create({
+                        "context_id": str(context_id),
+                        "parent_id": current_parent_id,
+                        "level": level_num,
+                        "name": value,
+                        "content": None,  # contenuto viene aggiunto dopo
+                        "sort_order": sort_counter,
+                    })
+                    existing_nodes[node_key] = item["id"]
+                    sort_counter += 1
+
+                current_parent_id = existing_nodes[node_key]
+
+            # Dopo aver trovato/creato il nodo più profondo, aggiungi il contenuto
+            content_value = (row.get(content_column) or "").strip()
+            if current_parent_id and content_value:
+                repo.update(UUID(current_parent_id), {"content": content_value})
+
+        items = repo.list_by_context(context_id)
+        logger.info(
+            "CSV import completed | context=%s items_created=%d",
+            context_id, len(items)
+        )
+        return items

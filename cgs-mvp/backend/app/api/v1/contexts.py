@@ -4,9 +4,9 @@ from pydantic import ValidationError
 import json
 import yaml
 from app.api.deps import get_current_user
-from app.domain.models import ContextCreate, ContextUpdate, ContextImport
+from app.domain.models import ContextCreate, ContextUpdate, ContextImport, ContextItemUpdate
 from app.services.context_service import ContextService
-from app.exceptions import ConflictException
+from app.exceptions import ConflictException, NotFoundException
 import logging
 
 router = APIRouter()
@@ -153,3 +153,95 @@ async def export_context(
             for card in cards
         ]
     }
+
+
+# ─── Context Items (hierarchical data) ───────────────
+
+@router.get("/{context_id}/items")
+async def get_context_items(context_id: UUID, user_id: UUID = Depends(get_current_user)):
+    """Get all context items as a flat list."""
+    return ContextService().get_context_items(context_id, user_id)
+
+
+@router.get("/{context_id}/items/tree")
+async def get_context_items_tree(context_id: UUID, user_id: UUID = Depends(get_current_user)):
+    """Get context items as a nested tree structure."""
+    return ContextService().get_context_items_tree(context_id, user_id)
+
+
+@router.post("/{context_id}/items")
+async def create_context_item(context_id: UUID, data: dict, user_id: UUID = Depends(get_current_user)):
+    """Create a single context item node."""
+    try:
+        return ContextService().create_context_item(context_id, user_id, data)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.patch("/{context_id}/items/{item_id}")
+async def update_context_item(
+    context_id: UUID, item_id: UUID, data: dict,
+    user_id: UUID = Depends(get_current_user)
+):
+    """Update a context item (name, content, or sort_order)."""
+    try:
+        return ContextService().update_context_item(context_id, item_id, user_id, data)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.delete("/{context_id}/items/{item_id}")
+async def delete_context_item(
+    context_id: UUID, item_id: UUID,
+    user_id: UUID = Depends(get_current_user)
+):
+    """Delete a context item and all its children (cascade)."""
+    try:
+        ContextService().delete_context_item(context_id, item_id, user_id)
+        return {"deleted": True}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/{context_id}/items/import-csv")
+async def import_context_items_csv(
+    context_id: UUID,
+    file: UploadFile = File(...),
+    user_id: UUID = Depends(get_current_user)
+):
+    """
+    Import hierarchical context data from a CSV file.
+
+    CSV must have columns: Level 0, Level 1, Level 2, Level 3, Contenuto
+    Re-importing replaces all existing items for this context.
+    """
+    if not file.filename or not file.filename.endswith('.csv'):
+        raise HTTPException(status_code=400, detail="File must be a .csv")
+
+    content = await file.read()
+
+    # Prova diverse codifiche
+    csv_text = None
+    for encoding in ['utf-8-sig', 'utf-8', 'latin-1', 'cp1252']:
+        try:
+            csv_text = content.decode(encoding)
+            break
+        except UnicodeDecodeError:
+            continue
+
+    if csv_text is None:
+        raise HTTPException(status_code=400, detail="Cannot decode CSV file. Try saving it as UTF-8.")
+
+    try:
+        items = ContextService().import_context_items_from_csv(context_id, user_id, csv_text)
+        return {
+            "items_count": len(items),
+            "message": f"Successfully imported {len(items)} context items"
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except NotFoundException as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        logger.error("CSV import failed | context=%s error=%s", context_id, str(e))
+        raise HTTPException(status_code=500, detail=f"Import failed: {str(e)}")

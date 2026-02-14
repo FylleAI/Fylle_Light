@@ -21,6 +21,9 @@ export default function ContextHub() {
         case "operativo":
           count = summary.operativo?.cards?.length;
           break;
+        case "context-items":
+          count = summary.context_items?.count;
+          break;
         case "agent-pack":
           count = summary.agent_pack?.count;
           break;
@@ -52,7 +55,7 @@ export default function ContextHub() {
           Operational Context
         </h1>
         <p className="text-neutral-400 text-sm mt-1">
-          The 5 areas that define your brand context
+          The areas that define your brand context
         </p>
       </div>
 

@@ -34,6 +34,9 @@ export default function DesignLabHome() {
         case "operativo":
           count = summary.operativo?.cards?.length;
           break;
+        case "context-items":
+          count = summary.context_items?.count;
+          break;
         case "agent-pack":
           count = summary.agent_pack?.count;
           break;

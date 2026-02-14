@@ -285,6 +285,26 @@ class CardImport(BaseModel):
         return v
 
 
+# ─── Context Items (hierarchical) ──────────────────
+
+class ContextItemCreate(BaseModel):
+    """Crea un singolo nodo nell'albero del contesto."""
+    name: str
+    content: Optional[str] = None
+    parent_id: Optional[UUID] = None
+    level: int = 0
+    sort_order: int = 0
+
+
+class ContextItemUpdate(BaseModel):
+    """Aggiorna un nodo esistente (nome o contenuto)."""
+    name: Optional[str] = None
+    content: Optional[str] = None
+    sort_order: Optional[int] = None
+
+
+# ─── Context Import/Export ───────────────────────────
+
 class ContextImport(BaseModel):
     """Schema for importing a complete context via template"""
     version: str = "1.0"

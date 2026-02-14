@@ -6,6 +6,7 @@ import FontiInformative from "./context-areas/FontiInformative";
 import FontiMercato from "./context-areas/FontiMercato";
 import BrandContext from "./context-areas/BrandContext";
 import ContextOperativo from "./context-areas/ContextOperativo";
+import ContextItemsTree from "./context-areas/ContextItemsTree";
 import AgentPackList from "./context-areas/AgentPackList";
 
 const areaComponents: Record<string, React.ComponentType> = {
@@ -13,6 +14,7 @@ const areaComponents: Record<string, React.ComponentType> = {
   "fonti-mercato": FontiMercato,
   "brand": BrandContext,
   "operativo": ContextOperativo,
+  "context-items": ContextItemsTree,
   "agent-pack": AgentPackList,
 };
 

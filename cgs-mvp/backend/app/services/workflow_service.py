@@ -32,6 +32,7 @@ class WorkflowService:
             context = self.db.table("contexts").select("*").eq("id", brief["context_id"]).single().execute().data
             pack = self.db.table("agent_packs").select("*").eq("id", brief["pack_id"]).single().execute().data
             cards = self.db.table("cards").select("*").eq("context_id", brief["context_id"]).execute().data
+            context_items = self.db.table("context_items").select("*").eq("context_id", brief["context_id"]).order("level").order("sort_order").execute().data
 
             # Load Archive (learning loop)
             archive_repo = ArchiveRepository(self.db)
@@ -43,7 +44,7 @@ class WorkflowService:
             yield {"type": "status", "data": {"status": "running"}}
 
             # Prepare execution context
-            exec_context = self._build_execution_context(context, brief, cards, run["topic"])
+            exec_context = self._build_execution_context(context, brief, cards, run["topic"], context_items)
             archive_prompt = self._build_archive_prompt(references, guardrails)
 
             agents = pack["agents_config"]
@@ -213,7 +214,7 @@ class WorkflowService:
             tracker.update_run(status="failed", error_message=str(e))
             yield {"type": "error", "data": {"error": str(e)}}
 
-    def _build_execution_context(self, context, brief, cards, topic) -> str:
+    def _build_execution_context(self, context, brief, cards, topic, context_items=None) -> str:
         lines = [
             f"## CONTEXT: {context['brand_name']}",
             f"Industry: {context.get('industry', 'N/A')}",
@@ -246,6 +247,34 @@ class WorkflowService:
                     lines.append(json.dumps(content, indent=2))
                 else:
                     lines.append(str(content))
+
+        # Inject hierarchical context items (from CSV import)
+        if context_items:
+            lines.append("")
+            lines.append("## FULL CONTEXT DATA")
+            # Build tree from flat items
+            by_id = {}
+            for item in context_items:
+                by_id[item["id"]] = {**item, "children": []}
+            roots = []
+            for item in context_items:
+                node = by_id[item["id"]]
+                parent_id = item.get("parent_id")
+                if parent_id and parent_id in by_id:
+                    by_id[parent_id]["children"].append(node)
+                else:
+                    roots.append(node)
+
+            def render_tree(nodes, depth=0):
+                for node in nodes:
+                    heading = "#" * min(depth + 3, 6)  # ### → ######
+                    lines.append(f"{heading} {node['name']}")
+                    if node.get("content"):
+                        lines.append(node["content"])
+                        lines.append("")
+                    render_tree(node["children"], depth + 1)
+
+            render_tree(roots)
 
         lines.extend([
             "",

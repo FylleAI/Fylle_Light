@@ -38,6 +38,11 @@ interface ContextSummary {
     briefs: { id: string; name: string; pack_id: string }[];
     count: number;
   };
+  context_items: {
+    label: string;
+    count: number;
+    has_data: boolean;
+  };
 }
 
 export function useContext(contextId?: string) {

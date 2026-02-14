@@ -173,6 +173,20 @@ export interface Document {
   updated_at: string;
 }
 
+// ── CONTEXT ITEM (hierarchical data from CSV) ──
+export interface ContextItem {
+  id: string;
+  context_id: string;
+  parent_id: string | null;
+  level: number;
+  name: string;
+  content: string | null;
+  sort_order: number;
+  children?: ContextItem[];
+  created_at: string;
+  updated_at: string;
+}
+
 // ── CONTEXT AREAS DATA (constant, matches backend summary endpoint) ──
 export const CONTEXT_AREAS: ContextArea[] = [
   {
@@ -210,6 +224,15 @@ export const CONTEXT_AREAS: ContextArea[] = [
     icon: "⚙️",
     iconBg: "bg-amber-500/10",
     iconColor: "text-amber-500",
+  },
+  {
+    id: "context-items",
+    label: "Imported Context Data",
+    description: "Hierarchical data from CSV: all levels of context",
+    href: "/design-lab/context/context-items",
+    icon: "🌳",
+    iconBg: "bg-teal-500/10",
+    iconColor: "text-teal-500",
   },
   {
     id: "agent-pack",

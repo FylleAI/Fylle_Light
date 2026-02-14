@@ -1,6 +1,7 @@
 import { FileCode, BookOpen } from "lucide-react";
 import ContextImport from "@/components/design-lab/ContextImport";
 import ContextExport from "@/components/design-lab/ContextExport";
+import ContextCSVImport from "@/components/design-lab/ContextCSVImport";
 
 export default function ContextImportExport() {
   const handleDownloadExample = () => {
@@ -62,16 +63,29 @@ export default function ContextImportExport() {
         </div>
       </div>
 
-      {/* Main Content - Two Columns */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Import Section */}
-        <div>
-          <ContextImport />
-        </div>
+      {/* CSV Import - Full Width */}
+      <div>
+        <h2 className="text-sm font-medium text-neutral-500 uppercase tracking-wider mb-3">
+          CSV Context Data Import
+        </h2>
+        <ContextCSVImport />
+      </div>
 
-        {/* Export Section */}
-        <div>
-          <ContextExport />
+      {/* JSON Import / Export - Two Columns */}
+      <div>
+        <h2 className="text-sm font-medium text-neutral-500 uppercase tracking-wider mb-3">
+          JSON Context Import / Export
+        </h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Import Section */}
+          <div>
+            <ContextImport />
+          </div>
+
+          {/* Export Section */}
+          <div>
+            <ContextExport />
+          </div>
         </div>
       </div>
 

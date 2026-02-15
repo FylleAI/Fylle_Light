@@ -28,7 +28,7 @@ export function useCreateContext() {
 
   return useMutation({
     mutationFn: (brandName: string) =>
-      apiRequest("/api/v1/contexts", {
+      apiRequest<Context>("/api/v1/contexts", {
         method: "POST",
         body: {
           name: brandName,
@@ -83,10 +83,15 @@ export function useImportContext() {
 /**
  * Hook to export a context as template
  */
+interface ExportData {
+  context: Context;
+  [key: string]: unknown;
+}
+
 export function useExportContext() {
   return useMutation({
     mutationFn: async (contextId: string) => {
-      const data = await apiRequest(`/api/v1/contexts/${contextId}/export`);
+      const data = await apiRequest<ExportData>(`/api/v1/contexts/${contextId}/export`);
 
       // Download as JSON file
       const blob = new Blob([JSON.stringify(data, null, 2)], {

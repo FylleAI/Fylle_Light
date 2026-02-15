@@ -120,7 +120,7 @@ class OutputService:
         raise NotFoundException("No file available for download")
 
     def update(self, output_id: UUID, user_id: UUID, data: dict) -> list:
-        allowed_fields = {"is_new"}
+        allowed_fields = {"is_new", "text_content", "title"}
         update_data = {k: v for k, v in data.items() if k in allowed_fields}
         if not update_data:
             raise ValidationException("No valid fields to update")

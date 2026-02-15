@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { useLocation } from "wouter";
-import { useOutput } from "@/hooks/useOutputs";
+import { useOutput, useDeleteOutput, useUpdateOutput } from "@/hooks/useOutputs";
 import { useArchive } from "@/hooks/useArchive";
 import { useAppStore } from "@/lib/store";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,9 +14,14 @@ import {
   Star,
   Tag,
   MessageSquare,
+  Trash2,
+  Pencil,
+  Save,
+  X,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useToast } from "@/hooks/use-toast";
 
 interface ArchiveDetailProps {
   outputId: string;
@@ -56,6 +62,13 @@ export default function ArchiveDetail({ outputId }: ArchiveDetailProps) {
   const contextId = useAppStore((s) => s.contextId);
   const { data: output, isLoading: outputLoading } = useOutput(outputId);
   const { data: archiveItems, isLoading: archiveLoading } = useArchive(contextId ?? undefined);
+  const deleteOutput = useDeleteOutput();
+  const updateOutput = useUpdateOutput();
+  const { toast } = useToast();
+
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState("");
 
   // Find the archive entry for this output
   const archiveItem = archiveItems?.find((a) => a.output_id === outputId);
@@ -89,10 +102,61 @@ export default function ArchiveDetail({ outputId }: ArchiveDetailProps) {
   const cfg = statusConfig[reviewStatus] || statusConfig.pending;
   const StatusIcon = cfg.icon;
 
+  const handleDelete = () => {
+    if (!confirmDelete) {
+      setConfirmDelete(true);
+      setTimeout(() => setConfirmDelete(false), 4000);
+      return;
+    }
+    deleteOutput.mutate(outputId, {
+      onSuccess: () => {
+        toast({ title: "Output deleted from archive" });
+        navigate("/design-lab/archive");
+      },
+      onError: (error) => {
+        toast({
+          title: "Delete failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      },
+    });
+  };
+
+  const startEditing = () => {
+    setEditContent(output?.text_content || "");
+    setIsEditing(true);
+  };
+
+  const cancelEditing = () => {
+    setIsEditing(false);
+    setEditContent("");
+  };
+
+  const saveEdit = () => {
+    if (!editContent.trim()) return;
+    updateOutput.mutate(
+      { id: outputId, updates: { text_content: editContent } },
+      {
+        onSuccess: () => {
+          setIsEditing(false);
+          toast({ title: "Content updated" });
+        },
+        onError: (error) => {
+          toast({
+            title: "Update failed",
+            description: error.message,
+            variant: "destructive",
+          });
+        },
+      }
+    );
+  };
+
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
-      {/* Back button */}
-      <div className="flex items-center gap-3">
+      {/* Back button + Actions */}
+      <div className="flex items-center justify-between">
         <Button
           variant="ghost"
           size="sm"
@@ -102,6 +166,38 @@ export default function ArchiveDetail({ outputId }: ArchiveDetailProps) {
           <ArrowLeft className="w-4 h-4 mr-1" />
           Archive
         </Button>
+
+        <div className="flex items-center gap-2">
+          {!isEditing && output?.text_content && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={startEditing}
+              className="border-neutral-600 text-neutral-300 hover:bg-neutral-700 rounded-lg"
+            >
+              <Pencil className="w-3.5 h-3.5 mr-1.5" />
+              Edit Content
+            </Button>
+          )}
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleDelete}
+            disabled={deleteOutput.isPending}
+            className={`rounded-lg ${
+              confirmDelete
+                ? "border-red-500 text-red-400 hover:bg-red-500/10"
+                : "border-neutral-600 text-neutral-400 hover:bg-neutral-700"
+            }`}
+          >
+            {deleteOutput.isPending ? (
+              <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+            ) : (
+              <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+            )}
+            {confirmDelete ? "Confirm Delete" : "Delete"}
+          </Button>
+        </div>
       </div>
 
       {/* Header with status */}
@@ -198,18 +294,56 @@ export default function ArchiveDetail({ outputId }: ArchiveDetailProps) {
         </Card>
       )}
 
-      {/* Output content */}
+      {/* Output content — view or edit mode */}
       {output?.text_content && (
         <Card className="bg-surface-elevated border-0 rounded-2xl">
           <CardContent className="p-6 md:p-8">
-            <h3 className="text-xs text-neutral-500 uppercase tracking-wide mb-4">
-              Original Content
-            </h3>
-            <article className="prose prose-invert prose-sm max-w-none prose-headings:text-neutral-100 prose-p:text-neutral-300 prose-li:text-neutral-300 prose-strong:text-neutral-200 prose-a:text-accent prose-blockquote:border-neutral-700 prose-blockquote:text-neutral-400 prose-code:text-accent prose-code:bg-neutral-800 prose-code:px-1 prose-code:rounded prose-pre:bg-neutral-900 prose-hr:border-neutral-700">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {output.text_content}
-              </ReactMarkdown>
-            </article>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xs text-neutral-500 uppercase tracking-wide">
+                {isEditing ? "Edit Content" : "Original Content"}
+              </h3>
+              {isEditing && (
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={cancelEditing}
+                    className="border-neutral-600 text-neutral-400 hover:bg-neutral-700 rounded-lg h-7 px-2 text-xs"
+                  >
+                    <X className="w-3 h-3 mr-1" />
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={saveEdit}
+                    disabled={updateOutput.isPending || !editContent.trim()}
+                    className="bg-accent hover:bg-accent/90 text-black font-medium rounded-lg h-7 px-3 text-xs"
+                  >
+                    {updateOutput.isPending ? (
+                      <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                    ) : (
+                      <Save className="w-3 h-3 mr-1" />
+                    )}
+                    Save
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {isEditing ? (
+              <textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                rows={20}
+                className="w-full bg-surface text-neutral-200 text-sm rounded-xl px-4 py-3 resize-y border border-neutral-700 focus:border-accent/50 focus:outline-none font-mono leading-relaxed"
+              />
+            ) : (
+              <article className="prose prose-invert prose-sm max-w-none prose-headings:text-neutral-100 prose-p:text-neutral-300 prose-li:text-neutral-300 prose-strong:text-neutral-200 prose-a:text-accent prose-blockquote:border-neutral-700 prose-blockquote:text-neutral-400 prose-code:text-accent prose-code:bg-neutral-800 prose-code:px-1 prose-code:rounded prose-pre:bg-neutral-900 prose-hr:border-neutral-700">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {output.text_content}
+                </ReactMarkdown>
+              </article>
+            )}
           </CardContent>
         </Card>
       )}

@@ -74,7 +74,32 @@ export function useMarkAsSeen() {
 }
 
 /**
- * Delete an output.
+ * Update an output's text_content or title.
+ */
+export function useUpdateOutput() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      updates,
+    }: {
+      id: string;
+      updates: { text_content?: string; title?: string };
+    }) =>
+      apiRequest(`/api/v1/outputs/${id}`, {
+        method: "PATCH",
+        body: updates,
+      }),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["output", id] });
+      queryClient.invalidateQueries({ queryKey: ["outputs"] });
+    },
+  });
+}
+
+/**
+ * Delete an output (also removes related archive entry via cascade/trigger).
  */
 export function useDeleteOutput() {
   const queryClient = useQueryClient();
@@ -84,6 +109,8 @@ export function useDeleteOutput() {
       apiRequest(`/api/v1/outputs/${id}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["outputs"] });
+      queryClient.invalidateQueries({ queryKey: ["archive"] });
+      queryClient.invalidateQueries({ queryKey: ["archive-stats"] });
     },
   });
 }

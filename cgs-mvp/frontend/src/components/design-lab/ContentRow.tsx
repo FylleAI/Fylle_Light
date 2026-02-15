@@ -32,6 +32,11 @@ const statusConfig: Record<
     bg: "bg-blue-500/10",
     text: "text-blue-400",
   },
+  rejected: {
+    label: "Rejected",
+    bg: "bg-red-500/10",
+    text: "text-red-400",
+  },
 };
 
 function formatDate(dateStr: string): string {

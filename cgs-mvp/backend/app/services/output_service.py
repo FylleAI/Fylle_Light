@@ -152,6 +152,8 @@ class OutputService:
 
         if review_data.status.value == "approved":
             self.db.table("outputs").update({"status": "completed"}).eq("id", str(output_id)).execute()
+        elif review_data.status.value == "rejected":
+            self.db.table("outputs").update({"status": "rejected"}).eq("id", str(output_id)).execute()
 
         logger.info("Reviewed output %s | status=%s", output_id, review_data.status.value)
-        return {"reviewed": True}
+        return {"reviewed": True, "status": review_data.status.value}

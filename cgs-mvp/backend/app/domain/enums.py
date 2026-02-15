@@ -43,6 +43,7 @@ class OutputStatus(str, Enum):
     PENDING_REVIEW = "pending_review"
     COMPLETED = "completed"
     ADAPTED = "adapted"
+    REJECTED = "rejected"
 
 
 class ReviewStatus(str, Enum):

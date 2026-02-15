@@ -8,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Loader2, CheckCircle } from "lucide-react";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { useAppStore } from "@/lib/store";
+import { apiRequest } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import type { QuestionResponse } from "@/types/onboarding";
 
@@ -686,6 +687,30 @@ export default function Onboarding() {
         {currentStep === "generate" && renderGenerate()}
         {currentStep === "result" && renderResult()}
       </AnimatePresence>
+
+      {/* Quick access for existing users */}
+      {FORM_STEPS.includes(currentStep) && (
+        <div className="mt-6 text-center">
+          <button
+            onClick={async () => {
+              try {
+                const contexts = await apiRequest<{ id: string }[]>("/api/v1/contexts");
+                if (contexts.length > 0) {
+                  setContextId(contexts[0].id);
+                  navigate("/design-lab");
+                } else {
+                  toast({ title: "No context found", description: "Complete onboarding first.", variant: "destructive" });
+                }
+              } catch {
+                toast({ title: "Connection error", description: "Backend may not be running.", variant: "destructive" });
+              }
+            }}
+            className="text-xs text-neutral-400 hover:text-neutral-600 transition-colors underline underline-offset-2"
+          >
+            Already have a context? Go to Design Lab →
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -44,6 +44,11 @@ const statusConfig: Record<
     bg: "bg-blue-500/10",
     text: "text-blue-400",
   },
+  rejected: {
+    label: "Rejected",
+    bg: "bg-red-500/10",
+    text: "text-red-400",
+  },
 };
 
 function formatDate(dateStr: string): string {
@@ -144,9 +149,9 @@ export default function ContentView({ packType, contentId }: ContentViewProps) {
   const currentVersion = displayOutput?.version || output.version;
 
   return (
-    <div className={`flex gap-0 ${chatOpen ? "h-[calc(100vh-8rem)]" : ""}`}>
+    <div className={`flex gap-0 ${chatOpen ? "h-[calc(100vh-8rem)] max-h-[calc(100vh-8rem)] overflow-hidden -mb-12" : ""}`}>
       {/* Main content area */}
-      <div className={`space-y-6 overflow-y-auto ${chatOpen ? "w-3/5 pr-4" : "w-full"}`}>
+      <div className={`space-y-6 overflow-y-auto ${chatOpen ? "w-3/5 pr-4 min-h-0" : "w-full"}`}>
         {/* Breadcrumb */}
         <div className="flex items-center justify-between">
           <Button

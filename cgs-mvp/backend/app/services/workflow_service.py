@@ -39,6 +39,28 @@ class WorkflowService:
             references = archive_repo.get_references(UUID(brief["context_id"]))
             guardrails = archive_repo.get_guardrails(UUID(brief["context_id"]))
 
+            # Log feedback loop data
+            logger.info(
+                "Feedback loop loaded | context_id=%s | references=%d | guardrails=%d",
+                brief["context_id"], len(references), len(guardrails)
+            )
+            if references:
+                for ref in references:
+                    logger.info(
+                        "  Reference: topic=%s | is_reference=%s | notes=%s",
+                        ref.get("topic", "N/A"),
+                        ref.get("is_reference"),
+                        (ref.get("reference_notes") or "none")[:100]
+                    )
+            if guardrails:
+                for g in guardrails:
+                    logger.info(
+                        "  Guardrail: topic=%s | feedback=%s | categories=%s",
+                        g.get("topic", "N/A"),
+                        (g.get("feedback") or "N/A")[:100],
+                        g.get("feedback_categories", [])
+                    )
+
             # Update status
             tracker.update_run(status="running", started_at=datetime.utcnow().isoformat())
             yield {"type": "status", "data": {"status": "running"}}
@@ -46,6 +68,15 @@ class WorkflowService:
             # Prepare execution context
             exec_context = self._build_execution_context(context, brief, cards, run["topic"], context_items)
             archive_prompt = self._build_archive_prompt(references, guardrails)
+
+            # Log archive prompt injection
+            if archive_prompt:
+                logger.info(
+                    "Archive prompt built | length=%d chars | preview: %s",
+                    len(archive_prompt), archive_prompt[:200].replace("\n", " | ")
+                )
+            else:
+                logger.info("Archive prompt is EMPTY — no references or guardrails found for this context")
 
             agents = pack["agents_config"]
             total_agents = len(agents)
@@ -120,6 +151,13 @@ class WorkflowService:
                 system_prompt = rendered_prompt
                 system_prompt += "\n\nIMPORTANT: All generated content MUST be in English."
                 system_prompt += f"\n\n{exec_context}\n\n{archive_prompt}"
+
+                # Log system prompt composition for this agent
+                logger.info(
+                    "Agent %s system prompt | total=%d chars | rendered=%d | exec_context=%d | archive=%d",
+                    agent_name, len(system_prompt), len(rendered_prompt),
+                    len(exec_context), len(archive_prompt)
+                )
 
                 if tool_results:
                     system_prompt += f"\n\nSEARCH RESULTS:\n" + "\n".join(

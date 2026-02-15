@@ -38,7 +38,7 @@ export default function ApprovalFlow({
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [isReference, setIsReference] = useState(false);
 
-  // Already reviewed
+  // Already approved
   if (currentStatus === "completed") {
     return (
       <div className="flex items-center gap-2 px-4 py-3 bg-green-500/5 border border-green-500/10 rounded-xl">
@@ -46,6 +46,23 @@ export default function ApprovalFlow({
         <span className="text-sm text-green-400 font-medium">
           Content approved
         </span>
+      </div>
+    );
+  }
+
+  // Already rejected
+  if (currentStatus === "rejected") {
+    return (
+      <div className="space-y-3 px-4 py-3 bg-red-500/5 border border-red-500/10 rounded-xl">
+        <div className="flex items-center gap-2">
+          <XCircle className="w-5 h-5 text-red-400" />
+          <span className="text-sm text-red-400 font-medium">
+            Content rejected
+          </span>
+        </div>
+        <p className="text-xs text-neutral-400">
+          Your feedback has been saved and will be used as a guardrail for future generations.
+        </p>
       </div>
     );
   }

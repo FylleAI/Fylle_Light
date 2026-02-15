@@ -37,6 +37,7 @@ export default function ApprovalFlow({
   const [feedback, setFeedback] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [isReference, setIsReference] = useState(false);
+  const [referenceNotes, setReferenceNotes] = useState("");
 
   // Already approved
   if (currentStatus === "completed") {
@@ -73,6 +74,9 @@ export default function ApprovalFlow({
     const req: ReviewRequest = {
       status: "approved",
       is_reference: isReference,
+      ...(isReference && referenceNotes.trim() && {
+        reference_notes: referenceNotes.trim(),
+      }),
     };
 
     review.mutate(req, {
@@ -145,6 +149,11 @@ export default function ApprovalFlow({
             ? "Saved as reference for future generations"
             : "Archived as completed"}
         </p>
+        {isReference && referenceNotes.trim() && (
+          <p className="text-xs text-neutral-600 italic">
+            Note: "{referenceNotes.trim().slice(0, 80)}{referenceNotes.trim().length > 80 ? "..." : ""}"
+          </p>
+        )}
       </div>
     );
   }
@@ -227,6 +236,19 @@ export default function ApprovalFlow({
           Save as reference (improves future generations)
         </span>
       </label>
+
+      {/* Reference notes - visible when reference is checked */}
+      {isReference && (
+        <div className="animate-in fade-in slide-in-from-top-1 duration-200">
+          <textarea
+            value={referenceNotes}
+            onChange={(e) => setReferenceNotes(e.target.value)}
+            placeholder="What do you like about this content? (optional — helps agents understand why it's good)"
+            rows={2}
+            className="w-full bg-surface text-neutral-200 text-sm rounded-xl px-4 py-3 resize-none border border-neutral-700 focus:border-accent/50 focus:outline-none placeholder:text-neutral-600"
+          />
+        </div>
+      )}
 
       {/* Buttons */}
       <div className="flex gap-3">

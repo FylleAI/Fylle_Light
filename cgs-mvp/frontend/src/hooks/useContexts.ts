@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
 
@@ -54,6 +54,36 @@ export function useContext(contextId?: string) {
     queryFn: () => apiRequest<Context>(`/api/v1/contexts/${id}`),
     enabled: !!id,
     staleTime: 1000 * 60 * 5,
+  });
+}
+
+/**
+ * Update context metadata (company_info, voice_info, audience_info, goals_info, name).
+ */
+export function useUpdateContext() {
+  const queryClient = useQueryClient();
+  const storeContextId = useAppStore((s) => s.contextId);
+
+  return useMutation({
+    mutationFn: ({
+      contextId,
+      updates,
+    }: {
+      contextId?: string;
+      updates: Partial<Context>;
+    }) => {
+      const id = contextId || storeContextId;
+      if (!id) throw new Error("No context ID");
+      return apiRequest<Context>(`/api/v1/contexts/${id}`, {
+        method: "PATCH",
+        body: updates,
+      });
+    },
+    onSuccess: (_, { contextId }) => {
+      const id = contextId || storeContextId;
+      queryClient.invalidateQueries({ queryKey: ["context", id] });
+      queryClient.invalidateQueries({ queryKey: ["context-summary", id] });
+    },
   });
 }
 

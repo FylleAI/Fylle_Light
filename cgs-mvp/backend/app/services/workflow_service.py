@@ -148,13 +148,16 @@ class WorkflowService:
                     rendered_prompt = agent_prompt_template  # Fallback to raw
 
                 # Build final system prompt
+                # Archive prompt (guardrails/references) goes FIRST for maximum weight
                 system_prompt = rendered_prompt
+                if archive_prompt:
+                    system_prompt += f"\n\n{archive_prompt}"
                 system_prompt += "\n\nIMPORTANT: All generated content MUST be in English."
-                system_prompt += f"\n\n{exec_context}\n\n{archive_prompt}"
+                system_prompt += f"\n\n{exec_context}"
 
                 # Log system prompt composition for this agent
                 logger.info(
-                    "Agent %s system prompt | total=%d chars | rendered=%d | exec_context=%d | archive=%d",
+                    "Agent %s system prompt | total=%d chars | rendered=%d | exec_context=%d | archive=%d | archive_position=AFTER_ROLE_BEFORE_CONTEXT",
                     agent_name, len(system_prompt), len(rendered_prompt),
                     len(exec_context), len(archive_prompt)
                 )
@@ -169,12 +172,23 @@ class WorkflowService:
                         f"- {k}: {v[:2000]}" for k, v in agent_outputs.items()
                     )
 
+                # Build user message with guardrail reminder
+                user_message = f"Topic: {run['topic']}"
+                if guardrails:
+                    guardrail_reminder = "\n\nREMINDER — Before writing, re-read the MANDATORY RULES above. Specifically:\n"
+                    for g in guardrails[:5]:
+                        feedback = g.get('feedback', '')
+                        if feedback:
+                            guardrail_reminder += f"• {feedback}\n"
+                    guardrail_reminder += "Failure to follow these rules will result in content rejection."
+                    user_message += guardrail_reminder
+
                 # Call LLM
                 llm = get_llm_adapter(pack.get("default_llm_provider", "openai"))
                 response = await llm.generate(
                     messages=[
                         {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": f"Topic: {run['topic']}"},
+                        {"role": "user", "content": user_message},
                     ],
                     model=pack.get("default_llm_model"),
                 )
@@ -328,22 +342,42 @@ class WorkflowService:
     def _build_archive_prompt(self, references, guardrails) -> str:
         if not references and not guardrails:
             return ""
-        lines = []
+        lines = [
+            "=" * 60,
+            "⚠️  MANDATORY RULES FROM USER FEEDBACK — YOU MUST FOLLOW THESE",
+            "=" * 60,
+            "",
+            "The following rules come from the user's direct feedback on previous content.",
+            "Violating ANY of these rules will result in content rejection.",
+            "These rules take HIGHEST PRIORITY over all other instructions.",
+            "",
+        ]
         if references:
-            lines.append("## POSITIVE REFERENCES (use as guide)")
+            lines.append("### ✅ POSITIVE REFERENCES (emulate these patterns)")
             for ref in references[:3]:
-                lines.append(f"- Topic: {ref['topic']}")
+                lines.append(f"- Topic: \"{ref['topic']}\"")
                 if ref.get("reference_notes"):
-                    lines.append(f"  Note: {ref['reference_notes']}")
+                    lines.append(f"  → Follow this guidance: {ref['reference_notes']}")
                 if ref.get("outputs") and ref["outputs"].get("text_content"):
-                    lines.append(f"  Example: {ref['outputs']['text_content'][:300]}...")
+                    lines.append(f"  → Example to emulate: {ref['outputs']['text_content'][:300]}...")
+            lines.append("")
         if guardrails:
-            lines.append("\n## GUARDRAILS (avoid these mistakes)")
-            for g in guardrails[:3]:
-                lines.append(f"- Topic: {g['topic']}")
-                lines.append(f"  Feedback: {g.get('feedback', 'N/A')}")
+            lines.append("### 🚫 CRITICAL GUARDRAILS — NEVER DO THESE")
+            lines.append("The user REJECTED content for the following reasons.")
+            lines.append("You MUST avoid repeating these mistakes:")
+            lines.append("")
+            for g in guardrails[:5]:
+                lines.append(f"**REJECTED**: \"{g['topic']}\"")
+                feedback = g.get('feedback', 'N/A')
+                lines.append(f"  → REASON: {feedback}")
                 if g.get("feedback_categories"):
-                    lines.append(f"  Categories: {', '.join(g['feedback_categories'])}")
+                    lines.append(f"  → CATEGORIES: {', '.join(g['feedback_categories'])}")
+                # Parse actionable rules from feedback
+                lines.append(f"  → YOU MUST: Follow the user's feedback above exactly.")
+                lines.append("")
+        lines.append("=" * 60)
+        lines.append("END OF MANDATORY RULES")
+        lines.append("=" * 60)
         return "\n".join(lines)
 
     async def _execute_tool(self, tool_name, topic, exec_context, user_id, run_id):

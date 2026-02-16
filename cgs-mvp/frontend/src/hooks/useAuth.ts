@@ -1,5 +1,6 @@
 import { useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
+import posthog from "posthog-js";
 import { supabase } from "@/lib/supabase";
 import { apiRequest } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
@@ -21,6 +22,12 @@ export function useAuth() {
             id: session.user.id,
             email: session.user.email || "",
             full_name: session.user.user_metadata?.full_name,
+          });
+
+          // Identify returning user in PostHog
+          posthog.identify(session.user.id, {
+            email: session.user.email,
+            name: session.user.user_metadata?.full_name,
           });
 
           // Load profile to get contextId
@@ -93,6 +100,12 @@ export function useAuth() {
         full_name: data.user.user_metadata?.full_name,
       });
 
+      // Identify user in PostHog
+      posthog.identify(data.user.id, {
+        email: data.user.email,
+        name: data.user.user_metadata?.full_name,
+      });
+
       // Check contexts
       try {
         const contexts = await apiRequest<{ id: string }[]>("/api/v1/contexts");
@@ -130,6 +143,7 @@ export function useAuth() {
   );
 
   const logout = useCallback(async () => {
+    posthog.reset();
     await supabase.auth.signOut();
     reset();
     navigate("/login");

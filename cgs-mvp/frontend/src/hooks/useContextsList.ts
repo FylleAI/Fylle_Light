@@ -59,7 +59,8 @@ export function useImportContext() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('/api/v1/contexts/import', {
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
+      const response = await fetch(`${API_BASE}/api/v1/contexts/import`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`

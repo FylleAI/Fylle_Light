@@ -158,8 +158,9 @@ export function useImportPack() {
         throw new Error("Not authenticated");
       }
 
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:8000"}/api/v1/packs/import`,
+        `${API_BASE}/api/v1/packs/import`,
         {
           method: "POST",
           headers: {

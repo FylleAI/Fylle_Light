@@ -7,20 +7,26 @@ COPY package.json package-lock.json* ./
 RUN npm install
 
 COPY . .
+
+ARG VITE_API_BASE_URL=""
+ARG VITE_SUPABASE_URL=""
+ARG VITE_SUPABASE_ANON_KEY=""
+
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
+ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
+
 RUN npm run build
 
-# Stage 2: Serve
-FROM node:20-slim
+# Stage 2: Serve with nginx
+FROM nginx:alpine
 
-RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+# Copy built files
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-WORKDIR /app
+# Copy nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/vite.config.ts ./
+EXPOSE 80
 
-EXPOSE 5173
-
-CMD ["npx", "vite", "preview", "--host", "--port", "5173"]
+CMD ["nginx", "-g", "daemon off;"]

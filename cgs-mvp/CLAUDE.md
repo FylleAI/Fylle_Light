@@ -223,7 +223,47 @@ Mai creare pagine o database fuori dalla struttura sotto indicata.
 
 ---
 
-## 8. CONTESTO PROGETTO
+## 8. SKILL REFERENCE PER MILESTONE
+
+> Riferimento rapido per sapere quali Claude Skills caricare all'inizio di ogni sessione.
+> Le skill NON si caricano automaticamente da questo file — vanno invocate esplicitamente.
+> Usare questo elenco per suggerire all'utente quali skill attivare in base al lavoro previsto.
+
+### Directory skill
+- [MCP Market](https://mcpmarket.com/tools/skills) — 48.000+ skills
+- [FastMCP.me](http://FastMCP.me) — catalogo curato, installazione 1-click
+- [claude-skills-vault](https://github.com/georgekhananaev/claude-skills-vault) — repo GitHub
+
+### Skill per milestone
+
+| Milestone | Skill consigliate | Quando caricarle |
+|-----------|-------------------|------------------|
+| **M0** Infra | `fastapi-templates`, `fastapi`, `github-actions-templates`, `python-backend-development` | Setup Sentry, Alembic, CI/CD, cost tracking |
+| **M0.5** Onboarding | `shadcn-ui`, `react-hook-form-zod`, `prompt-engineering-patterns` | UX onboarding, prompt design, componenti UI |
+| **M1** Diagnostica | `python-testing-patterns`, `fastapi`, `systematic-debugging` | Debug endpoint, test suite, pipeline validation |
+| **M1.5** Stripe | `stripe-integration`, `billing-automation` | Checkout, subscriptions, webhooks, billing UI |
+| **M2** RAG | `rag-implementation`, `chunking-strategy`, `embedding-strategies`, `similarity-search-patterns`, `supabase-postgres-best-practices` | pgvector, embeddings, document processing, caching |
+| **M3** API Platform | `fastapi`, `oauth-integrations`, `api-design-principles`, `auth-implementation-patterns` | API keys, webhooks, rate limiting, multi-tenancy |
+| **M4** HubSpot | `oauth-integrations`, `email-gateway` | OAuth2, HubSpot/Slack/GA4 connectors, publishing |
+| **M5** Feedback | `prompt-engineering-patterns`, `data-storytelling` | Performance analysis, auto-guardrails, dashboard |
+| **M6** Agent | `claude-agent-sdk`, `agent-development`, `sub-agent-patterns`, `ai-sdk-ui` | Tool use, ReAct loop, chat UI, streaming |
+
+### Skill trasversali (utili sempre)
+- `shadcn-ui` — componenti UI (usiamo shadcn/ui + Tailwind ovunque)
+- `tanstack-query` — data fetching React (usato in tutti gli hooks)
+- `supabase-postgres-best-practices` — ottimizzazione query, RLS
+- `error-handling-patterns` — gestione errori consistente
+- `git-advanced-workflows` — quando serve lavorare con branch
+
+### Come suggerire le skill
+All'inizio di una sessione di lavoro, dopo aver capito cosa si farà:
+1. Identificare la milestone coinvolta
+2. Suggerire le 2-3 skill più rilevanti dalla tabella sopra
+3. L'utente decide se caricarle (sono opzionali, non obbligatorie)
+
+---
+
+## 9. CONTESTO PROGETTO
 
 ### Cosa fa Fylle Light
 Piattaforma AI per content generation. L'utente configura un contesto (brand info),

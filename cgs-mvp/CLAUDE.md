@@ -190,7 +190,40 @@ cgs-mvp/
 
 ---
 
-## 7. CONTESTO PROGETTO
+## 7. NOTION — Workspace di progetto
+
+### IMPORTANTE
+Davide ha anche altri progetti su Notion. Operare SOLO sulle pagine di Fylle Light.
+Mai creare pagine o database fuori dalla struttura sotto indicata.
+
+### PAGINA PRINCIPALE
+- **Fylle light** (hub): https://www.notion.so/30716a14afca80d6974edbf8f86e08e8
+  - Contiene: overview progetto, stack, architettura, stato attuale
+  - Qui sotto vanno creati nuovi documenti di progetto
+
+### TASK TRACKER (database)
+- **URL**: https://www.notion.so/ddb81d68f80e4b838974a551b6129457
+- **Data Source ID**: `52d15eba-1cb3-4711-ac25-8a0b1d1ef8a0`
+- **View default**: `4c797b42-8edf-42aa-942b-74191e4d8e09`
+- **Schema**: Task (title), Status, Priority, Area, Category, Milestone, Order, Notes
+- **Milestone**: M0 → M0.5 → M1 → M1.5 → M2 → M3 → M4 → M5 → M6
+
+### PAGINE DOCUMENTAZIONE (sotto Fylle light)
+- 🛠 Operations Guide: https://www.notion.so/30916a14afca816495c6f0d25bf58435
+- 📘 Guida Sistema: https://www.notion.so/30916a14afca8139b0e6feb8812295dc
+- 🗺️ Roadmap: https://www.notion.so/30916a14afca81ad9ddbef8911790cff
+- 🎯 Skill Map: https://www.notion.so/30916a14afca81d3aadef79de1238d37
+
+### REGOLE NOTION
+- Nuove pagine: crearle sempre come figli della pagina "Fylle light"
+- Nuovi task: usare il data source ID `52d15eba-1cb3-4711-ac25-8a0b1d1ef8a0`
+- Prima di creare task: verificare che non esista già un task simile
+- Usare sempre Milestone e Order quando si creano task
+- Titoli pagine: usare emoji + nome descrittivo (es. "📘 Guida Completa del Sistema")
+
+---
+
+## 8. CONTESTO PROGETTO
 
 ### Cosa fa Fylle Light
 Piattaforma AI per content generation. L'utente configura un contesto (brand info),
@@ -210,7 +243,8 @@ Output → Review → Archive (feedback loop: references + guardrails)
 Tabelle chiave: contexts, cards, context_items, briefs, agent_packs,
 workflow_runs, outputs, archive, context_documents, brief_documents
 
-### Roadmap (su Notion)
-9 milestone: M0 (Infra) → M0.5 (Onboarding UX) → M1 (Diagnostica) →
+### Roadmap
+9 milestone su Notion (vedi Sezione 7 per i link):
+M0 (Infra) → M0.5 (Onboarding UX) → M1 (Diagnostica) →
 M1.5 (Stripe) → M2 (RAG) → M3 (API Platform) → M4 (HubSpot) →
 M5 (Feedback Auto) → M6 (Agent Guardiano)

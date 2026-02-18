@@ -194,6 +194,7 @@ export default function AgentPackList() {
             <Button
               size="sm"
               variant="outline"
+              onClick={() => navigate("/design-lab/packs/manager")}
               className="border-neutral-600 text-neutral-300 hover:bg-neutral-700 rounded-lg"
             >
               <Plus className="w-4 h-4 mr-2" />

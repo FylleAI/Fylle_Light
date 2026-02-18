@@ -22,7 +22,12 @@ logging.basicConfig(
 logger = logging.getLogger("cgs-mvp")
 
 # ── App ──
-app = FastAPI(title=settings.app_name, debug=settings.debug)
+app = FastAPI(
+    title=settings.app_name,
+    debug=settings.debug,
+    docs_url="/docs" if settings.debug else None,
+    redoc_url="/redoc" if settings.debug else None,
+)
 
 # ── Rate Limiter ──
 app.state.limiter = limiter

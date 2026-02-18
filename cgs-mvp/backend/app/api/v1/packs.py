@@ -96,7 +96,7 @@ async def list_packs(
 
 
 @router.get("/{pack_id}")
-async def get_pack(pack_id: UUID):
+async def get_pack(pack_id: UUID, user_id: UUID = Depends(get_current_user)):
     """Get a single pack by ID."""
     return PackService().get_pack(pack_id)
 

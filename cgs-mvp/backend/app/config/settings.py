@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     # App
     app_name: str = "cgs-mvp"
     app_env: str = "development"
-    debug: bool = True
+    debug: bool = False
     log_level: str = "INFO"
 
     # API

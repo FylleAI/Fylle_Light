@@ -115,14 +115,14 @@ export default function App() {
           </ProtectedRoute>
         </Route>
         <Route path="/design-lab/context/import">
-          <ProtectedRoute>
+          <ProtectedRoute requireContext>
             <DesignLabLayout>
               <ContextImportExport />
             </DesignLabLayout>
           </ProtectedRoute>
         </Route>
         <Route path="/design-lab/packs/manager">
-          <ProtectedRoute>
+          <ProtectedRoute requireContext>
             <DesignLabLayout>
               <PacksManager />
             </DesignLabLayout>

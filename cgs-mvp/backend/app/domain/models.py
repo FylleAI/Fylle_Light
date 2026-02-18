@@ -127,6 +127,8 @@ class Brief(BaseModel):
 
 class AgentPack(BaseModel):
     id: UUID
+    context_id: Optional[UUID] = None
+    user_id: Optional[UUID] = None
     slug: str
     name: str
     description: Optional[str] = None

@@ -1,4 +1,4 @@
-import logging
+import structlog
 import csv
 import io
 from uuid import UUID
@@ -8,7 +8,7 @@ from app.db.repositories.context_repo import ContextRepository
 from app.db.repositories.context_item_repo import ContextItemRepository
 from app.exceptions import NotFoundException, ConflictException
 
-logger = logging.getLogger("cgs-mvp.context")
+logger = structlog.get_logger("cgs-mvp.context")
 
 
 class ContextService:

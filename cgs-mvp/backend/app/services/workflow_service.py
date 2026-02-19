@@ -1,4 +1,4 @@
-import logging
+import structlog
 from uuid import UUID, uuid4
 from datetime import datetime
 import json
@@ -13,7 +13,7 @@ from app.infrastructure.logging.tracker import RunTracker
 from app.db.repositories.archive_repo import ArchiveRepository
 from app.db.repositories.output_repo import OutputRepository
 
-logger = logging.getLogger("cgs-mvp.workflow")
+logger = structlog.get_logger("cgs-mvp.workflow")
 
 
 class WorkflowService:
@@ -41,24 +41,26 @@ class WorkflowService:
 
             # Log feedback loop data
             logger.info(
-                "Feedback loop loaded | context_id=%s | references=%d | guardrails=%d",
-                brief["context_id"], len(references), len(guardrails)
+                "Feedback loop loaded",
+                context_id=brief["context_id"],
+                references_count=len(references),
+                guardrails_count=len(guardrails),
             )
             if references:
                 for ref in references:
                     logger.info(
-                        "  Reference: topic=%s | is_reference=%s | notes=%s",
-                        ref.get("topic", "N/A"),
-                        ref.get("is_reference"),
-                        (ref.get("reference_notes") or "none")[:100]
+                        "Reference loaded",
+                        topic=ref.get("topic", "N/A"),
+                        is_reference=ref.get("is_reference"),
+                        notes=(ref.get("reference_notes") or "none")[:100],
                     )
             if guardrails:
                 for g in guardrails:
                     logger.info(
-                        "  Guardrail: topic=%s | feedback=%s | categories=%s",
-                        g.get("topic", "N/A"),
-                        (g.get("feedback") or "N/A")[:100],
-                        g.get("feedback_categories", [])
+                        "Guardrail loaded",
+                        topic=g.get("topic", "N/A"),
+                        feedback=(g.get("feedback") or "N/A")[:100],
+                        categories=g.get("feedback_categories", []),
                     )
 
             # Update status
@@ -72,11 +74,12 @@ class WorkflowService:
             # Log archive prompt injection
             if archive_prompt:
                 logger.info(
-                    "Archive prompt built | length=%d chars | preview: %s",
-                    len(archive_prompt), archive_prompt[:200].replace("\n", " | ")
+                    "Archive prompt built",
+                    length_chars=len(archive_prompt),
+                    preview=archive_prompt[:200].replace("\n", " | "),
                 )
             else:
-                logger.info("Archive prompt is EMPTY — no references or guardrails found for this context")
+                logger.info("Archive prompt is empty — no references or guardrails")
 
             agents = pack["agents_config"]
             total_agents = len(agents)
@@ -141,10 +144,10 @@ class WorkflowService:
                     template = Template(agent_prompt_template)
                     rendered_prompt = template.render(**template_context)
                 except TemplateSyntaxError as e:
-                    logger.error(f"Template syntax error in agent {agent_name}: {e}")
+                    logger.error("Template syntax error", agent=agent_name, error=str(e))
                     rendered_prompt = agent_prompt_template  # Fallback to raw
                 except Exception as e:
-                    logger.error(f"Template rendering error in agent {agent_name}: {e}")
+                    logger.error("Template rendering error", agent=agent_name, error=str(e))
                     rendered_prompt = agent_prompt_template  # Fallback to raw
 
                 # Build final system prompt
@@ -157,9 +160,12 @@ class WorkflowService:
 
                 # Log system prompt composition for this agent
                 logger.info(
-                    "Agent %s system prompt | total=%d chars | rendered=%d | exec_context=%d | archive=%d | archive_position=AFTER_ROLE_BEFORE_CONTEXT",
-                    agent_name, len(system_prompt), len(rendered_prompt),
-                    len(exec_context), len(archive_prompt)
+                    "Agent system prompt built",
+                    agent=agent_name,
+                    total_chars=len(system_prompt),
+                    rendered_chars=len(rendered_prompt),
+                    exec_context_chars=len(exec_context),
+                    archive_chars=len(archive_prompt),
                 )
 
                 if tool_results:

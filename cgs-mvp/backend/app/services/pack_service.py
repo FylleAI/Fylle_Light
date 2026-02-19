@@ -3,14 +3,14 @@ Pack service for managing agent packs.
 Handles context-specific packs and template packs.
 """
 
-import logging
+import structlog
 from uuid import UUID, uuid4
 from typing import Optional, List, Dict, Any
 
 from app.config.supabase import get_supabase_admin
 from app.exceptions import NotFoundException, ValidationException
 
-logger = logging.getLogger("cgs-mvp.packs")
+logger = structlog.get_logger("cgs-mvp.packs")
 
 
 class PackService:
@@ -165,7 +165,7 @@ class PackService:
 
         result = self.db.table("agent_packs").insert(new_pack).execute()
 
-        logger.info(f"Cloned pack {pack_id} to context {context_id}: {result.data[0]['id']}")
+        logger.info("Pack cloned", source_pack_id=str(pack_id), context_id=str(context_id), new_pack_id=result.data[0]["id"])
         return result.data[0]
 
     def create_pack(
@@ -214,7 +214,7 @@ class PackService:
 
         result = self.db.table("agent_packs").insert(new_pack).execute()
 
-        logger.info(f"Created pack for context {context_id}: {result.data[0]['id']}")
+        logger.info("Pack created", context_id=str(context_id), pack_id=result.data[0]["id"])
         return result.data[0]
 
     def update_pack(
@@ -254,7 +254,7 @@ class PackService:
             .execute()
         )
 
-        logger.info(f"Updated pack {pack_id}")
+        logger.info("Pack updated", pack_id=str(pack_id))
         return result.data[0]
 
     def delete_pack(self, pack_id: UUID, user_id: UUID):
@@ -297,7 +297,7 @@ class PackService:
 
         # Delete pack
         self.db.table("agent_packs").delete().eq("id", str(pack_id)).execute()
-        logger.info(f"Deleted pack {pack_id}")
+        logger.info("Pack deleted", pack_id=str(pack_id))
 
     def import_from_template(
         self, user_id: UUID, context_id: Optional[UUID], template_data: Dict[str, Any]
@@ -358,8 +358,5 @@ class PackService:
 
         result = self.db.table("agent_packs").insert(pack_data).execute()
 
-        logger.info(
-            f"Imported pack template '{template_data['name']}' for "
-            f"{'context ' + str(context_id) if context_id else 'global templates'}: {result.data[0]['id']}"
-        )
+        logger.info("Pack imported from template", template_name=template_data["name"], context_id=str(context_id) if context_id else "global", pack_id=result.data[0]["id"])
         return result.data[0]

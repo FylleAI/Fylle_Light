@@ -7,10 +7,10 @@ from app.api.deps import get_current_user
 from app.domain.models import ContextCreate, ContextUpdate, ContextImport, ContextItemUpdate
 from app.services.context_service import ContextService
 from app.exceptions import ConflictException, NotFoundException
-import logging
+import structlog
 
 router = APIRouter()
-logger = logging.getLogger("cgs-mvp.contexts")
+logger = structlog.get_logger("cgs-mvp.contexts")
 
 
 @router.get("")

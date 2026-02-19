@@ -1,11 +1,11 @@
 import re
-import logging
+import structlog
 from uuid import UUID
 from typing import Optional
 from app.config.supabase import get_supabase_admin
 from app.exceptions import NotFoundException, ValidationException
 
-logger = logging.getLogger("cgs-mvp.brief")
+logger = structlog.get_logger("cgs-mvp.brief")
 
 
 class BriefService:

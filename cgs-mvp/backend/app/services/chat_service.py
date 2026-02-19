@@ -1,4 +1,4 @@
-import logging
+import structlog
 import re
 from uuid import UUID
 import json
@@ -6,7 +6,7 @@ from app.config.supabase import get_supabase_admin
 from app.infrastructure.llm.factory import get_llm_adapter
 from app.exceptions import NotFoundException, LLMException
 
-logger = logging.getLogger("cgs-mvp.chat")
+logger = structlog.get_logger("cgs-mvp.chat")
 
 CHAT_SYSTEM_PROMPT = """You are an expert AI editor. You can do 3 things:
 

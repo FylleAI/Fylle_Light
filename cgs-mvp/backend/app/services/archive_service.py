@@ -1,4 +1,4 @@
-import logging
+import structlog
 from uuid import UUID
 from typing import Optional
 from app.config.supabase import get_supabase_admin
@@ -6,7 +6,7 @@ from app.config.settings import get_settings
 from app.db.repositories.archive_repo import ArchiveRepository
 from openai import AsyncOpenAI
 
-logger = logging.getLogger("cgs-mvp.archive")
+logger = structlog.get_logger("cgs-mvp.archive")
 
 
 class ArchiveService:

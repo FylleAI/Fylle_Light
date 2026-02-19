@@ -1,4 +1,4 @@
-import logging
+import structlog
 from uuid import UUID
 from typing import Optional
 from datetime import datetime
@@ -7,7 +7,7 @@ from app.db.repositories.output_repo import OutputRepository
 from app.infrastructure.storage.supabase_storage import StorageService
 from app.exceptions import NotFoundException, ValidationException
 
-logger = logging.getLogger("cgs-mvp.output")
+logger = structlog.get_logger("cgs-mvp.output")
 
 
 class OutputService:

@@ -1,8 +1,8 @@
 import httpx
-import logging
+import structlog
 from app.config.settings import get_settings
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger("cgs-mvp.perplexity")
 
 
 class PerplexityTool:
@@ -24,9 +24,9 @@ class PerplexityTool:
             )
             data = response.json()
             if response.status_code != 200:
-                logger.error(f"Perplexity error {response.status_code}: {data}")
+                logger.error("Perplexity API error", status_code=response.status_code, response=data)
                 raise RuntimeError(f"Perplexity API error: {data.get('error', {}).get('message', str(data))}")
             if "choices" not in data:
-                logger.error(f"Perplexity unexpected response: {data}")
+                logger.error("Perplexity unexpected response", keys=list(data.keys()))
                 raise RuntimeError(f"Perplexity unexpected response format: {list(data.keys())}")
             return data["choices"][0]["message"]["content"]

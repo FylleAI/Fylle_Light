@@ -1,4 +1,4 @@
-import logging
+import structlog
 from uuid import UUID, uuid4
 from app.config.supabase import get_supabase_admin
 from app.infrastructure.tools.perplexity import PerplexityTool
@@ -6,7 +6,7 @@ from app.infrastructure.llm.factory import get_llm_adapter
 from app.exceptions import LLMException, ExternalServiceException
 import json
 
-logger = logging.getLogger("cgs-mvp.onboarding")
+logger = structlog.get_logger("cgs-mvp.onboarding")
 
 
 class OnboardingService:

@@ -35,6 +35,11 @@ class Settings(BaseSettings):
     perplexity_api_key: str = ""
     serper_api_key: str = ""
 
+    # Sentry
+    sentry_dsn: str = ""
+    sentry_traces_sample_rate: float = 0.2
+    sentry_profiles_sample_rate: float = 0.1
+
     # Storage
     output_bucket: str = "outputs"
     preview_bucket: str = "previews"

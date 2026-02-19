@@ -3,7 +3,7 @@ Document service for handling file uploads to contexts and briefs.
 Manages validation, storage, and database operations.
 """
 
-import logging
+import structlog
 from uuid import UUID
 from typing import Optional, List, Dict, Any
 from fastapi import UploadFile
@@ -17,7 +17,7 @@ from app.db.repositories.document_repo import (
 from app.infrastructure.storage.supabase_storage import StorageService
 from app.exceptions import NotFoundException, ValidationException
 
-logger = logging.getLogger("cgs-mvp.documents")
+logger = structlog.get_logger("cgs-mvp.documents")
 
 # Allowed MIME types for document uploads
 ALLOWED_MIME_TYPES = {
@@ -138,9 +138,7 @@ class DocumentService:
             }
         )
 
-        logger.info(
-            f"Uploaded context document {doc['id']} for context {context_id}"
-        )
+        logger.info("Context document uploaded", doc_id=doc["id"], context_id=str(context_id))
         return doc
 
     def list_context_documents(
@@ -201,7 +199,7 @@ class DocumentService:
 
         # Delete from database
         ContextDocumentRepository(self.db).delete(doc_id)
-        logger.info(f"Deleted context document {doc_id}")
+        logger.info("Context document deleted", doc_id=str(doc_id))
 
     # ==================== BRIEF DOCUMENTS ====================
 
@@ -268,7 +266,7 @@ class DocumentService:
             }
         )
 
-        logger.info(f"Uploaded brief document {doc['id']} for brief {brief_id}")
+        logger.info("Brief document uploaded", doc_id=doc["id"], brief_id=str(brief_id))
         return doc
 
     def list_brief_documents(
@@ -329,7 +327,7 @@ class DocumentService:
 
         # Delete from database
         BriefDocumentRepository(self.db).delete(doc_id)
-        logger.info(f"Deleted brief document {doc_id}")
+        logger.info("Brief document deleted", doc_id=str(doc_id))
 
     # ==================== DOWNLOAD URLS ====================
 

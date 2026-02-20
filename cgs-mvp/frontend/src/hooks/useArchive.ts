@@ -12,7 +12,7 @@ export interface ArchiveItem {
   content_type: string;
   review_status: "approved" | "rejected" | "pending";
   feedback?: string | null;
-  feedback_categories: string[];
+  feedback_categories: string[] | null;
   is_reference: boolean;
   reference_notes?: string | null;
   created_at: string;

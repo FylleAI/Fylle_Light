@@ -114,11 +114,13 @@ export default function ArchiveDetail({ outputId }: ArchiveDetailProps) {
         navigate("/design-lab/archive");
       },
       onError: (error) => {
+        console.error("[ArchiveDetail] Delete failed:", error);
         toast({
           title: "Delete failed",
-          description: error.message,
+          description: error.message || "Network error — please try again",
           variant: "destructive",
         });
+        setConfirmDelete(false);
       },
     });
   };
@@ -242,7 +244,7 @@ export default function ArchiveDetail({ outputId }: ArchiveDetailProps) {
       </div>
 
       {/* Review details card */}
-      {archiveItem && (archiveItem.feedback || archiveItem.feedback_categories.length > 0 || archiveItem.reference_notes) && (
+      {archiveItem && (archiveItem.feedback || (archiveItem.feedback_categories?.length ?? 0) > 0 || archiveItem.reference_notes) && (
         <Card className={`bg-surface-elevated border ${cfg.border} rounded-2xl`}>
           <CardContent className="p-5 space-y-4">
             <h3 className="text-xs text-neutral-500 uppercase tracking-wide flex items-center gap-2">
@@ -251,11 +253,11 @@ export default function ArchiveDetail({ outputId }: ArchiveDetailProps) {
             </h3>
 
             {/* Feedback categories */}
-            {archiveItem.feedback_categories.length > 0 && (
+            {(archiveItem.feedback_categories?.length ?? 0) > 0 && (
               <div>
                 <p className="text-xs text-neutral-500 mb-2">Categories:</p>
                 <div className="flex flex-wrap gap-2">
-                  {archiveItem.feedback_categories.map((cat) => (
+                  {(archiveItem.feedback_categories ?? []).map((cat) => (
                     <span
                       key={cat}
                       className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-neutral-800 text-neutral-300"

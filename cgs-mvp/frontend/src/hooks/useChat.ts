@@ -32,9 +32,10 @@ export function useSendMessage(outputId?: string) {
       // Refresh chat history
       queryClient.invalidateQueries({ queryKey: ["chat", outputId] });
 
-      // If output was edited, refresh output data
+      // If output was edited, refresh output data (including latest version)
       if (data.updated_output) {
         queryClient.invalidateQueries({ queryKey: ["output", outputId] });
+        queryClient.invalidateQueries({ queryKey: ["output", outputId, "latest"] });
         queryClient.invalidateQueries({ queryKey: ["outputs"] });
       }
 

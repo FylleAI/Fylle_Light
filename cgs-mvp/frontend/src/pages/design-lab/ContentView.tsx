@@ -93,6 +93,8 @@ export default function ContentView({ packType, contentId }: ContentViewProps) {
   };
 
   const handleReviewComplete = () => {
+    // Close chat panel to prevent layout issues with overflow-hidden
+    setChatOpen(false);
     refetchOutput();
   };
 
@@ -149,9 +151,9 @@ export default function ContentView({ packType, contentId }: ContentViewProps) {
   const currentVersion = displayOutput?.version || output.version;
 
   return (
-    <div className={`flex gap-0 ${chatOpen ? "h-[calc(100vh-8rem)] max-h-[calc(100vh-8rem)] overflow-hidden -mb-12" : ""}`}>
+    <div className={`flex gap-0 ${chatOpen ? "h-[calc(100vh-8rem)] max-h-[calc(100vh-8rem)] -mb-12" : ""}`}>
       {/* Main content area */}
-      <div className={`space-y-6 overflow-y-auto ${chatOpen ? "w-3/5 pr-4 min-h-0" : "w-full"}`}>
+      <div className={`space-y-6 ${chatOpen ? "w-3/5 pr-4 min-h-0 overflow-y-auto" : "w-full"}`}>
         {/* Breadcrumb */}
         <div className="flex items-center justify-between">
           <Button

@@ -48,13 +48,16 @@ export function useAuth() {
             // Profile might not exist yet
           }
 
-          // Check if user has a context
+          // Check if user has a context — prefer the one saved in localStorage
+          // (the user may have switched context via ContextSelector)
           try {
             const contexts = await apiRequest<{ id: string }[]>(
               "/api/v1/contexts"
             );
             if (contexts.length > 0) {
-              setContextId(contexts[0].id);
+              const savedId = localStorage.getItem("contextId");
+              const validSaved = savedId && contexts.some((c) => c.id === savedId);
+              setContextId(validSaved ? savedId : contexts[0].id);
             }
           } catch {
             // No contexts yet
@@ -106,11 +109,13 @@ export function useAuth() {
         name: data.user.user_metadata?.full_name,
       });
 
-      // Check contexts
+      // Check contexts — prefer saved context from localStorage
       try {
         const contexts = await apiRequest<{ id: string }[]>("/api/v1/contexts");
         if (contexts.length > 0) {
-          setContextId(contexts[0].id);
+          const savedId = localStorage.getItem("contextId");
+          const validSaved = savedId && contexts.some((c) => c.id === savedId);
+          setContextId(validSaved ? savedId : contexts[0].id);
           navigate("/design-lab");
         } else {
           navigate("/onboarding");

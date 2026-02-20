@@ -182,10 +182,20 @@ class OutputService:
             "output_id", str(output_id)
         ).eq("user_id", str(user_id)).execute()
 
-        if review_data.status.value == "approved":
-            self.db.table("outputs").update({"status": "completed"}).eq("id", str(output_id)).execute()
-        elif review_data.status.value == "rejected":
-            self.db.table("outputs").update({"status": "rejected"}).eq("id", str(output_id)).execute()
+        # Update status on the parent output AND all child versions (edit chain).
+        # Without this, the latest version displayed in the frontend keeps
+        # "pending_review" even after the user approves — causing a white screen.
+        new_status = "completed" if review_data.status.value == "approved" else (
+            "rejected" if review_data.status.value == "rejected" else None
+        )
+        if new_status:
+            self.db.table("outputs").update({"status": new_status}).eq(
+                "id", str(output_id)
+            ).execute()
+            # Also update child versions so latestVersion reflects the review
+            self.db.table("outputs").update({"status": new_status}).eq(
+                "parent_output_id", str(output_id)
+            ).execute()
 
         logger.info("Reviewed output %s | status=%s", output_id, review_data.status.value)
         return {"reviewed": True, "status": review_data.status.value}

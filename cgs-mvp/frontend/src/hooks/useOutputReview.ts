@@ -21,7 +21,11 @@ export function useReviewOutput(outputId?: string) {
     onSuccess: () => {
       // Refresh output data to reflect new status
       queryClient.invalidateQueries({ queryKey: ["output", outputId] });
+      queryClient.invalidateQueries({ queryKey: ["output", outputId, "latest"] });
       queryClient.invalidateQueries({ queryKey: ["outputs"] });
+      // Refresh archive data (review updates archive.review_status)
+      queryClient.invalidateQueries({ queryKey: ["archive"] });
+      queryClient.invalidateQueries({ queryKey: ["archive-stats"] });
     },
   });
 }

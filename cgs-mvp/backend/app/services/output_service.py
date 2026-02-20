@@ -131,8 +131,40 @@ class OutputService:
                 .execute().data)
 
     def delete(self, output_id: UUID, user_id: UUID) -> None:
+        # Verify the output exists and belongs to this user
+        output = (self.db.table("outputs")
+                  .select("id")
+                  .eq("id", str(output_id))
+                  .eq("user_id", str(user_id))
+                  .execute())
+        if not output.data:
+            raise NotFoundException("Output not found")
+
+        # Collect all output IDs to delete: the target + any child versions
+        child_outputs = (self.db.table("outputs")
+                         .select("id")
+                         .eq("parent_output_id", str(output_id))
+                         .execute().data)
+        child_ids = [c["id"] for c in child_outputs]
+        all_ids = child_ids + [str(output_id)]
+
+        # Delete in correct order to respect foreign key constraints:
+        # 1. Chat messages (reference output_id)
+        for oid in all_ids:
+            self.db.table("chat_messages").delete().eq("output_id", oid).execute()
+
+        # 2. Archive entries (reference output_id)
+        for oid in all_ids:
+            self.db.table("archive").delete().eq("output_id", oid).execute()
+
+        # 3. Child outputs first, then parent
+        for oid in child_ids:
+            self.db.table("outputs").delete().eq("id", oid).execute()
+
+        # 4. Finally the target output
         self.db.table("outputs").delete().eq("id", str(output_id)).eq("user_id", str(user_id)).execute()
-        logger.info("Deleted output %s", output_id)
+
+        logger.info("Deleted output %s (+ %d children)", output_id, len(child_ids))
 
     def review(self, output_id: UUID, user_id: UUID, review_data) -> dict:
         """Review output: update archive + outputs status."""

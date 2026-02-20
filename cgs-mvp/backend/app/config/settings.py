@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     perplexity_api_key: str = ""
     serper_api_key: str = ""
 
+    # Database (direct Postgres connection — used by Alembic migrations only)
+    database_url: str = ""
+
     # Sentry
     sentry_dsn: str = ""
     sentry_traces_sample_rate: float = 0.2

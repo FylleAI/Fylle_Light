@@ -20,7 +20,7 @@ export async function apiRequest<T = unknown>(
   } = await supabase.auth.getSession();
 
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
+    ...(options.body ? { "Content-Type": "application/json" } : {}),
     ...options.headers,
   };
 
@@ -30,11 +30,17 @@ export async function apiRequest<T = unknown>(
     console.warn("[apiRequest] No session token available for", path);
   }
 
-  const response = await fetch(`${API_BASE}${path}`, {
-    method: options.method || "GET",
-    headers,
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, {
+      method: options.method || "GET",
+      headers,
+      body: options.body ? JSON.stringify(options.body) : undefined,
+    });
+  } catch (networkError) {
+    console.error("[apiRequest] Network error:", options.method || "GET", path, networkError);
+    throw new Error(`Network error: ${networkError instanceof Error ? networkError.message : "Failed to fetch"}`);
+  }
 
   if (response.status === 401) {
     // Token expired or invalid — redirect to login

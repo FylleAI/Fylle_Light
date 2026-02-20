@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
+
 from app.config.supabase import get_supabase_client
 from app.middleware.rate_limit import limiter
 

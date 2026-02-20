@@ -1,15 +1,16 @@
 from fastapi import APIRouter
-from .auth import router as auth_router
-from .users import router as users_router
-from .onboarding import router as onboarding_router
-from .contexts import router as contexts_router
-from .packs import router as packs_router
-from .briefs import router as briefs_router
-from .execute import router as execute_router
-from .outputs import router as outputs_router
+
 from .archive import router as archive_router
+from .auth import router as auth_router
+from .briefs import router as briefs_router
 from .chat import router as chat_router
+from .contexts import router as contexts_router
 from .documents import router as documents_router
+from .execute import router as execute_router
+from .onboarding import router as onboarding_router
+from .outputs import router as outputs_router
+from .packs import router as packs_router
+from .users import router as users_router
 
 router = APIRouter()
 router.include_router(auth_router, prefix="/auth", tags=["auth"])

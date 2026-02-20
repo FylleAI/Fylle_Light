@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends
 from uuid import UUID
-from typing import Optional
+
+from fastapi import APIRouter, Depends
+
 from app.api.deps import get_current_user
 from app.domain.models import ReviewRequest
 from app.services.output_service import OutputService
@@ -9,13 +10,15 @@ router = APIRouter()
 
 
 @router.get("")
-async def list_outputs(brief_id: Optional[UUID] = None, context_id: Optional[UUID] = None, user_id: UUID = Depends(get_current_user)):
+async def list_outputs(
+    brief_id: UUID | None = None, context_id: UUID | None = None, user_id: UUID = Depends(get_current_user)
+):
     """Lista outputs. ?brief_id=X filtra per brief, ?context_id=X filtra per contesto."""
     return OutputService().list(user_id, brief_id, context_id)
 
 
 @router.get("/summary")
-async def outputs_summary(context_id: Optional[UUID] = None, user_id: UUID = Depends(get_current_user)):
+async def outputs_summary(context_id: UUID | None = None, user_id: UUID = Depends(get_current_user)):
     """Vista aggregata per pack. ?context_id=X filtra per contesto."""
     return OutputService().get_summary(user_id, context_id)
 

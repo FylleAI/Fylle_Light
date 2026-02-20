@@ -1,17 +1,16 @@
 import structlog
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
-from app.config.settings import get_settings
-from app.config.logging import setup_observability
 from app.api.v1 import router as v1_router
+from app.config.logging import setup_observability
+from app.config.settings import get_settings
 from app.exceptions import AppException
+from app.middleware.correlation import CorrelationIdMiddleware
 from app.middleware.error_handler import app_exception_handler, generic_exception_handler
 from app.middleware.rate_limit import limiter
-from app.middleware.correlation import CorrelationIdMiddleware
 
 settings = get_settings()
 

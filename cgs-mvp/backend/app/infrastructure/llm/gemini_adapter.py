@@ -1,6 +1,9 @@
 import asyncio
+
 import google.generativeai as genai
+
 from app.config.settings import get_settings
+
 from .base import LLMAdapter, LLMResponse
 
 PRICING = {

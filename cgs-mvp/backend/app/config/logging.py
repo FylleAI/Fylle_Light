@@ -14,8 +14,9 @@ Why Sentry?
 """
 
 import logging
-import structlog
+
 import sentry_sdk
+import structlog
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.starlette import StarletteIntegration
 
@@ -37,15 +38,12 @@ def setup_sentry() -> None:
         dsn=settings.sentry_dsn,
         environment=settings.app_env,  # "development" | "production"
         release=f"{settings.app_name}@0.1.0",
-
         # Performance monitoring: sample 20% of requests for traces
         traces_sample_rate=settings.sentry_traces_sample_rate,
         # Profile 10% of sampled transactions (CPU profiling)
         profiles_sample_rate=settings.sentry_profiles_sample_rate,
-
         # Privacy: don't send cookies, headers with auth tokens, etc.
         send_default_pii=False,
-
         # FastAPI + Starlette integrations for automatic error capture
         integrations=[
             FastApiIntegration(transaction_style="endpoint"),

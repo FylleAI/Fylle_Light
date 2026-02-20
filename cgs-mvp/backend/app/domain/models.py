@@ -1,39 +1,47 @@
-from pydantic import BaseModel, Field, validator
-from typing import Optional, Any, List, Dict
-from uuid import UUID
 from datetime import datetime
+from typing import Any
+from uuid import UUID
+
+from pydantic import BaseModel, Field, validator
+
 from app.domain.enums import (
-    ContextStatus, CardType, BriefStatus, RunStatus,
-    OutputType, OutputStatus, ReviewStatus, SessionType,
-    SessionState, ChatActionType,
+    BriefStatus,
+    CardType,
+    ChatActionType,
+    ContextStatus,
+    OutputStatus,
+    OutputType,
+    ReviewStatus,
+    RunStatus,
 )
 
-
 # ─── Profile ────────────────────────────────────────
+
 
 class Profile(BaseModel):
     id: UUID
     email: str
-    full_name: Optional[str] = None
-    avatar_url: Optional[str] = None
+    full_name: str | None = None
+    avatar_url: str | None = None
     settings: dict = {}
     created_at: datetime
     updated_at: datetime
 
 
 class ProfileUpdate(BaseModel):
-    full_name: Optional[str] = None
-    avatar_url: Optional[str] = None
-    settings: Optional[dict] = None
+    full_name: str | None = None
+    avatar_url: str | None = None
+    settings: dict | None = None
 
 
 # ─── Context ────────────────────────────────────────
 
+
 class ContextCreate(BaseModel):
     name: str
     brand_name: str
-    website: Optional[str] = None
-    industry: Optional[str] = None
+    website: str | None = None
+    industry: str | None = None
     company_info: dict = {}
     audience_info: dict = {}
     voice_info: dict = {}
@@ -41,12 +49,12 @@ class ContextCreate(BaseModel):
 
 
 class ContextUpdate(BaseModel):
-    name: Optional[str] = None
-    company_info: Optional[dict] = None
-    audience_info: Optional[dict] = None
-    voice_info: Optional[dict] = None
-    goals_info: Optional[dict] = None
-    status: Optional[ContextStatus] = None
+    name: str | None = None
+    company_info: dict | None = None
+    audience_info: dict | None = None
+    voice_info: dict | None = None
+    goals_info: dict | None = None
+    status: ContextStatus | None = None
 
 
 class Context(BaseModel):
@@ -54,8 +62,8 @@ class Context(BaseModel):
     user_id: UUID
     name: str
     brand_name: str
-    website: Optional[str] = None
-    industry: Optional[str] = None
+    website: str | None = None
+    industry: str | None = None
     company_info: dict = {}
     audience_info: dict = {}
     voice_info: dict = {}
@@ -67,10 +75,11 @@ class Context(BaseModel):
 
 # ─── Card ────────────────────────────────────────────
 
+
 class CardUpdate(BaseModel):
-    title: Optional[str] = None
-    content: Optional[dict] = None
-    is_visible: Optional[bool] = None
+    title: str | None = None
+    content: dict | None = None
+    is_visible: bool | None = None
 
 
 class Card(BaseModel):
@@ -78,7 +87,7 @@ class Card(BaseModel):
     context_id: UUID
     card_type: CardType
     title: str
-    subtitle: Optional[str] = None
+    subtitle: str | None = None
     content: dict
     sort_order: int = 0
     is_visible: bool = True
@@ -88,22 +97,23 @@ class Card(BaseModel):
 
 # ─── Brief ───────────────────────────────────────────
 
+
 class BriefCreate(BaseModel):
     context_id: UUID
     pack_id: UUID
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     answers: dict = {}
     # slug viene auto-generato dal name nel service
 
 
 class BriefUpdate(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    answers: Optional[dict] = None
-    compiled_brief: Optional[str] = None
-    settings: Optional[dict] = None
-    status: Optional[BriefStatus] = None
+    name: str | None = None
+    description: str | None = None
+    answers: dict | None = None
+    compiled_brief: str | None = None
+    settings: dict | None = None
+    status: BriefStatus | None = None
 
 
 class Brief(BaseModel):
@@ -112,11 +122,11 @@ class Brief(BaseModel):
     pack_id: UUID
     user_id: UUID
     name: str
-    slug: Optional[str] = None
-    description: Optional[str] = None
+    slug: str | None = None
+    description: str | None = None
     questions: list = []
     answers: dict = {}
-    compiled_brief: Optional[str] = None
+    compiled_brief: str | None = None
     settings: dict = {}
     status: BriefStatus = BriefStatus.ACTIVE
     created_at: datetime
@@ -125,15 +135,16 @@ class Brief(BaseModel):
 
 # ─── AgentPack ───────────────────────────────────────
 
+
 class AgentPack(BaseModel):
     id: UUID
-    context_id: Optional[UUID] = None
-    user_id: Optional[UUID] = None
+    context_id: UUID | None = None
+    user_id: UUID | None = None
     slug: str
     name: str
-    description: Optional[str] = None
-    icon: Optional[str] = None
-    content_type_id: Optional[UUID] = None
+    description: str | None = None
+    icon: str | None = None
+    content_type_id: UUID | None = None
     agents_config: list
     tools_config: list = []
     brief_questions: list
@@ -142,12 +153,13 @@ class AgentPack(BaseModel):
     default_llm_model: str = "gpt-4o"
     # Design Lab fields
     status: str = "available"
-    outcome: Optional[str] = None
-    route: Optional[str] = None
+    outcome: str | None = None
+    route: str | None = None
     is_active: bool = True
 
 
 # ─── Run ─────────────────────────────────────────────
+
 
 class RunCreate(BaseModel):
     brief_id: UUID
@@ -163,51 +175,53 @@ class Run(BaseModel):
     input_data: dict = {}
     status: RunStatus = RunStatus.PENDING
     progress: int = 0
-    current_step: Optional[str] = None
+    current_step: str | None = None
     task_outputs: dict = {}
-    final_output: Optional[str] = None
+    final_output: str | None = None
     total_tokens: int = 0
     total_cost_usd: float = 0
-    duration_seconds: Optional[float] = None
-    error_message: Optional[str] = None
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
+    duration_seconds: float | None = None
+    error_message: str | None = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
     created_at: datetime
 
 
 # ─── Output ──────────────────────────────────────────
 
+
 class Output(BaseModel):
     id: UUID
     run_id: UUID
-    brief_id: Optional[UUID] = None
+    brief_id: UUID | None = None
     user_id: UUID
     output_type: OutputType
     mime_type: str
-    text_content: Optional[str] = None
-    file_path: Optional[str] = None
-    file_size_bytes: Optional[int] = None
-    preview_path: Optional[str] = None
-    title: Optional[str] = None
+    text_content: str | None = None
+    file_path: str | None = None
+    file_size_bytes: int | None = None
+    preview_path: str | None = None
+    title: str | None = None
     metadata: dict = {}
     version: int = 1
-    parent_output_id: Optional[UUID] = None
+    parent_output_id: UUID | None = None
     # Design Lab fields
     status: OutputStatus = OutputStatus.PENDING_REVIEW
     is_new: bool = True
-    number: Optional[int] = None
-    author: Optional[str] = None
+    number: int | None = None
+    author: str | None = None
     created_at: datetime
 
 
 # ─── Archive ─────────────────────────────────────────
 
+
 class ReviewRequest(BaseModel):
     status: ReviewStatus
-    feedback: Optional[str] = None
+    feedback: str | None = None
     feedback_categories: list[str] = []
     is_reference: bool = False
-    reference_notes: Optional[str] = None
+    reference_notes: str | None = None
 
 
 class ArchiveItem(BaseModel):
@@ -220,10 +234,10 @@ class ArchiveItem(BaseModel):
     topic: str
     content_type: str
     review_status: ReviewStatus = ReviewStatus.PENDING
-    feedback: Optional[str] = None
+    feedback: str | None = None
     feedback_categories: list = []
     is_reference: bool = False
-    reference_notes: Optional[str] = None
+    reference_notes: str | None = None
     created_at: datetime
 
 
@@ -233,6 +247,7 @@ class ArchiveSearch(BaseModel):
 
 
 # ─── Chat ────────────────────────────────────────────
+
 
 class ChatRequest(BaseModel):
     message: str
@@ -244,97 +259,103 @@ class ChatMessage(BaseModel):
     user_id: UUID
     role: str
     content: str
-    action_type: Optional[ChatActionType] = None
-    action_data: Optional[dict] = None
+    action_type: ChatActionType | None = None
+    action_data: dict | None = None
     created_at: datetime
 
 
 class ChatResponse(BaseModel):
     message: ChatMessage
-    updated_output: Optional[Output] = None
-    context_changes: Optional[dict] = None
-    brief_changes: Optional[dict] = None
+    updated_output: Output | None = None
+    context_changes: dict | None = None
+    brief_changes: dict | None = None
 
 
 # ─── Onboarding ──────────────────────────────────────
 
+
 class OnboardingStart(BaseModel):
     brand_name: str
-    website: Optional[str] = None
+    website: str | None = None
     email: str
-    additional_context: Optional[str] = None
+    additional_context: str | None = None
 
 
 # ─── Context Import/Export ───────────────────────────
 
+
 class CardImport(BaseModel):
     """Schema for importing a single card"""
+
     card_type: str
     title: str
-    subtitle: Optional[str] = None
-    content: Dict[str, Any]
+    subtitle: str | None = None
+    content: dict[str, Any]
     sort_order: int = 0
     is_visible: bool = True
 
-    @validator('card_type')
+    @validator("card_type")
     def validate_card_type(cls, v):
         valid_types = [
-            'product', 'target', 'brand_voice', 'competitor',
-            'topic', 'campaigns', 'performance', 'feedback'
+            "product",
+            "target",
+            "brand_voice",
+            "competitor",
+            "topic",
+            "campaigns",
+            "performance",
+            "feedback",
         ]
         if v not in valid_types:
-            raise ValueError(f'Invalid card_type: {v}. Must be one of {valid_types}')
+            raise ValueError(f"Invalid card_type: {v}. Must be one of {valid_types}")
         return v
 
 
 # ─── Context Items (hierarchical) ──────────────────
 
+
 class ContextItemCreate(BaseModel):
     """Crea un singolo nodo nell'albero del contesto."""
+
     name: str
-    content: Optional[str] = None
-    parent_id: Optional[UUID] = None
+    content: str | None = None
+    parent_id: UUID | None = None
     level: int = 0
     sort_order: int = 0
 
 
 class ContextItemUpdate(BaseModel):
     """Aggiorna un nodo esistente (nome o contenuto)."""
-    name: Optional[str] = None
-    content: Optional[str] = None
-    sort_order: Optional[int] = None
+
+    name: str | None = None
+    content: str | None = None
+    sort_order: int | None = None
 
 
 # ─── Context Import/Export ───────────────────────────
 
+
 class ContextImport(BaseModel):
     """Schema for importing a complete context via template"""
+
     version: str = "1.0"
     template_type: str = "context"
 
-    context: Dict[str, Any] = Field(
-        ...,
-        description="Context metadata including company_info, audience_info, etc."
-    )
+    context: dict[str, Any] = Field(..., description="Context metadata including company_info, audience_info, etc.")
 
-    cards: List[CardImport] = Field(
-        ...,
-        min_items=1,
-        max_items=8,
-        description="Card data (1-8 cards)"
-    )
+    cards: list[CardImport] = Field(..., min_items=1, max_items=8, description="Card data (1-8 cards)")
 
-    @validator('context')
+    @validator("context")
     def validate_context_structure(cls, v):
-        required_fields = ['brand_name', 'name']
+        required_fields = ["brand_name", "name"]
         for field in required_fields:
             if field not in v:
-                raise ValueError(f'Missing required field in context: {field}')
+                raise ValueError(f"Missing required field in context: {field}")
         return v
 
-    @validator('cards')
+    @validator("cards")
     def validate_unique_card_types(cls, v):
         card_types = [card.card_type for card in v]
         if len(card_types) != len(set(card_types)):
-            raise ValueError('Duplicate card_type found. Each card_type must be unique.')
+            raise ValueError("Duplicate card_type found. Each card_type must be unique.")
         return v

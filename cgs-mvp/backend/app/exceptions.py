@@ -1,7 +1,5 @@
 """Custom exception hierarchy for the CGS MVP backend."""
 
-from typing import Optional
-
 
 class AppException(Exception):
     """Base exception for all application errors."""
@@ -9,7 +7,7 @@ class AppException(Exception):
     status_code: int = 500
     detail: str = "Internal server error"
 
-    def __init__(self, detail: Optional[str] = None, *, context: Optional[dict] = None):
+    def __init__(self, detail: str | None = None, *, context: dict | None = None):
         self.detail = detail or self.__class__.detail
         self.context = context or {}
         super().__init__(self.detail)

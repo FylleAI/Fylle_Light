@@ -1,4 +1,5 @@
 from uuid import UUID
+
 from app.config.supabase import get_supabase_admin
 
 
@@ -8,17 +9,19 @@ class RunTracker:
         self.db = get_supabase_admin()
 
     def log(self, level: str, message: str, **kwargs):
-        self.db.table("run_logs").insert({
-            "run_id": str(self.run_id),
-            "level": level,
-            "message": message,
-            "agent_name": kwargs.get("agent_name"),
-            "step_number": kwargs.get("step_number"),
-            "tokens_used": kwargs.get("tokens_used"),
-            "cost_usd": kwargs.get("cost_usd"),
-            "duration_ms": kwargs.get("duration_ms"),
-            "metadata": kwargs.get("metadata", {}),
-        }).execute()
+        self.db.table("run_logs").insert(
+            {
+                "run_id": str(self.run_id),
+                "level": level,
+                "message": message,
+                "agent_name": kwargs.get("agent_name"),
+                "step_number": kwargs.get("step_number"),
+                "tokens_used": kwargs.get("tokens_used"),
+                "cost_usd": kwargs.get("cost_usd"),
+                "duration_ms": kwargs.get("duration_ms"),
+                "metadata": kwargs.get("metadata", {}),
+            }
+        ).execute()
 
     def info(self, msg, **kw):
         self.log("INFO", msg, **kw)

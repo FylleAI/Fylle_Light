@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, Body, UploadFile, File, HTTPException
-from uuid import UUID
-from typing import Optional, Dict, Any, List
-from pydantic import BaseModel, Field, validator
 import json
+from typing import Any
+from uuid import UUID
+
 import yaml
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from pydantic import BaseModel, Field, validator
 
 from app.api.deps import get_current_user
 from app.services.pack_service import PackService
@@ -16,7 +17,7 @@ router = APIRouter()
 
 class ClonePackRequest(BaseModel):
     context_id: str
-    name: Optional[str] = None
+    name: str | None = None
 
 
 class CreatePackRequest(BaseModel):
@@ -26,54 +27,55 @@ class CreatePackRequest(BaseModel):
     description: str
     icon: str
     outcome: str
-    status: Optional[str] = "available"
-    content_type_id: Optional[str] = None
-    sort_order: Optional[int] = 0
+    status: str | None = "available"
+    content_type_id: str | None = None
+    sort_order: int | None = 0
 
     # ← NEW: JSONB fields for workflow configuration
-    agents_config: List[Dict[str, Any]] = []
-    brief_questions: List[Dict[str, Any]] = []
-    tools_config: List[Dict[str, Any]] = []
-    prompt_templates: Dict[str, str] = {}
+    agents_config: list[dict[str, Any]] = []
+    brief_questions: list[dict[str, Any]] = []
+    tools_config: list[dict[str, Any]] = []
+    prompt_templates: dict[str, str] = {}
     default_llm_provider: str = "openai"
     default_llm_model: str = "gpt-4o"
 
 
 class UpdatePackRequest(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    icon: Optional[str] = None
-    outcome: Optional[str] = None
-    status: Optional[str] = None
-    is_active: Optional[bool] = None
+    name: str | None = None
+    description: str | None = None
+    icon: str | None = None
+    outcome: str | None = None
+    status: str | None = None
+    is_active: bool | None = None
 
     # ← NEW: JSONB fields (optional for updates)
-    agents_config: Optional[List[Dict[str, Any]]] = None
-    brief_questions: Optional[List[Dict[str, Any]]] = None
-    tools_config: Optional[List[Dict[str, Any]]] = None
-    prompt_templates: Optional[Dict[str, str]] = None
-    default_llm_provider: Optional[str] = None
-    default_llm_model: Optional[str] = None
+    agents_config: list[dict[str, Any]] | None = None
+    brief_questions: list[dict[str, Any]] | None = None
+    tools_config: list[dict[str, Any]] | None = None
+    prompt_templates: dict[str, str] | None = None
+    default_llm_provider: str | None = None
+    default_llm_model: str | None = None
 
 
 class PackImport(BaseModel):
     """Schema for importing pack from JSON/YAML template"""
+
     version: str = "1.0"
     name: str
     description: str = ""
     icon: str = "package"
-    agents: List[Dict[str, Any]] = Field(min_length=1, max_length=10)
-    brief_questions: List[Dict[str, Any]] = []
-    tools_config: List[Dict[str, Any]] = []
+    agents: list[dict[str, Any]] = Field(min_length=1, max_length=10)
+    brief_questions: list[dict[str, Any]] = []
+    tools_config: list[dict[str, Any]] = []
     default_llm_provider: str = "openai"
     default_llm_model: str = "gpt-4o"
 
-    @validator('agents')
+    @validator("agents")
     def validate_agents(cls, v):
         for agent in v:
-            if 'name' not in agent:
+            if "name" not in agent:
                 raise ValueError("Each agent must have 'name'")
-            if 'prompt' not in agent:
+            if "prompt" not in agent:
                 raise ValueError("Each agent must have 'prompt'")
         return v
 
@@ -83,7 +85,7 @@ class PackImport(BaseModel):
 
 @router.get("")
 async def list_packs(
-    context_id: Optional[UUID] = None,
+    context_id: UUID | None = None,
     user_id: UUID = Depends(get_current_user),
 ):
     """
@@ -177,7 +179,7 @@ async def delete_pack(
 @router.post("/import")
 async def import_pack(
     file: UploadFile = File(...),
-    context_id: Optional[str] = None,
+    context_id: str | None = None,
     user_id: UUID = Depends(get_current_user),
 ):
     """
@@ -204,6 +206,7 @@ async def import_pack(
 
     # Validate with Pydantic
     from pydantic import ValidationError
+
     try:
         validated = PackImport(**template_data)
     except ValidationError as e:
@@ -213,9 +216,7 @@ async def import_pack(
 
     # Import pack
     try:
-        pack = PackService().import_from_template(
-            user_id, UUID(context_id) if context_id else None, validated.dict()
-        )
+        pack = PackService().import_from_template(user_id, UUID(context_id) if context_id else None, validated.dict())
         return {
             "pack_id": pack["id"],
             "name": pack["name"],

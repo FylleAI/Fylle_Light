@@ -1,5 +1,7 @@
 from openai import AsyncOpenAI
+
 from app.config.settings import get_settings
+
 from .base import LLMAdapter, LLMResponse
 
 PRICING = {

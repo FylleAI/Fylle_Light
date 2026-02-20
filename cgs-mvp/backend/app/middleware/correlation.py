@@ -15,14 +15,13 @@ How it works:
 4. Add it to the response header → frontend can reference it in bug reports
 """
 
-import uuid
 import time
+import uuid
 
 import structlog
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
-
 
 logger = structlog.get_logger("cgs-mvp.http")
 

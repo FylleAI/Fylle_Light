@@ -1,10 +1,12 @@
-import structlog
+import json
 import re
 from uuid import UUID
-import json
+
+import structlog
+
 from app.config.supabase import get_supabase_admin
+from app.exceptions import LLMException, NotFoundException
 from app.infrastructure.llm.factory import get_llm_adapter
-from app.exceptions import NotFoundException, LLMException
 
 logger = structlog.get_logger("cgs-mvp.chat")
 
@@ -41,32 +43,41 @@ class ChatService:
         context = self.db.table("contexts").select("*").eq("id", brief["context_id"]).single().execute().data
 
         # Load history
-        history = (self.db.table("chat_messages")
-                   .select("*")
-                   .eq("output_id", str(output_id))
-                   .order("created_at")
-                   .execute().data)
+        history = (
+            self.db.table("chat_messages")
+            .select("*")
+            .eq("output_id", str(output_id))
+            .order("created_at")
+            .execute()
+            .data
+        )
 
         # Save user message
-        self.db.table("chat_messages").insert({
-            "output_id": str(output_id),
-            "user_id": str(user_id),
-            "role": "user",
-            "content": user_message,
-        }).execute()
+        self.db.table("chat_messages").insert(
+            {
+                "output_id": str(output_id),
+                "user_id": str(user_id),
+                "role": "user",
+                "content": user_message,
+            }
+        ).execute()
 
         # Build messages for LLM
         messages = [
-            {"role": "system", "content": CHAT_SYSTEM_PROMPT + f"""
+            {
+                "role": "system",
+                "content": CHAT_SYSTEM_PROMPT
+                + f"""
 
 CURRENT CONTENT:
-{output.get('text_content', '')}
+{output.get("text_content", "")}
 
-CONTEXT (brand: {context['brand_name']}):
-{json.dumps(context.get('voice_info', {}), indent=2)}
+CONTEXT (brand: {context["brand_name"]}):
+{json.dumps(context.get("voice_info", {}), indent=2)}
 
-BRIEF (name: {brief['name']}):
-{json.dumps(brief.get('answers', {}), indent=2)}"""},
+BRIEF (name: {brief["name"]}):
+{json.dumps(brief.get("answers", {}), indent=2)}""",
+            },
         ]
 
         for msg in history[-10:]:  # Last 10 messages
@@ -93,21 +104,28 @@ BRIEF (name: {brief['name']}):
         if action_type:
             logger.info("Chat action: %s | output=%s", action_type, output_id)
         if action_type == "edit_output" and parsed.get("edited_content"):
-            new_output = self.db.table("outputs").insert({
-                "run_id": output["run_id"],
-                "brief_id": output.get("brief_id"),
-                "user_id": str(user_id),
-                "output_type": output["output_type"],
-                "mime_type": output["mime_type"],
-                "text_content": parsed["edited_content"],
-                "title": output.get("title"),
-                "version": output["version"] + 1,
-                "parent_output_id": str(output_id),
-                "status": "adapted",
-                "is_new": False,
-                "number": output.get("number"),
-                "author": output.get("author"),
-            }).execute().data[0]
+            new_output = (
+                self.db.table("outputs")
+                .insert(
+                    {
+                        "run_id": output["run_id"],
+                        "brief_id": output.get("brief_id"),
+                        "user_id": str(user_id),
+                        "output_type": output["output_type"],
+                        "mime_type": output["mime_type"],
+                        "text_content": parsed["edited_content"],
+                        "title": output.get("title"),
+                        "version": output["version"] + 1,
+                        "parent_output_id": str(output_id),
+                        "status": "adapted",
+                        "is_new": False,
+                        "number": output.get("number"),
+                        "author": output.get("author"),
+                    }
+                )
+                .execute()
+                .data[0]
+            )
             # Update the status of the original (root) output
             root_id = output.get("parent_output_id") or str(output_id)
             self.db.table("outputs").update({"status": "adapted"}).eq("id", root_id).execute()
@@ -134,14 +152,21 @@ BRIEF (name: {brief['name']}):
             action_data = {"brief_id": brief["id"], "changes": updates}
 
         # Save assistant message
-        assistant_msg = self.db.table("chat_messages").insert({
-            "output_id": str(output_id),
-            "user_id": str(user_id),
-            "role": "assistant",
-            "content": parsed.get("message", response.content),
-            "action_type": action_type,
-            "action_data": action_data or None,
-        }).execute().data[0]
+        assistant_msg = (
+            self.db.table("chat_messages")
+            .insert(
+                {
+                    "output_id": str(output_id),
+                    "user_id": str(user_id),
+                    "role": "assistant",
+                    "content": parsed.get("message", response.content),
+                    "action_type": action_type,
+                    "action_data": action_data or None,
+                }
+            )
+            .execute()
+            .data[0]
+        )
 
         logger.info("Chat completed | output=%s action=%s", output_id, action_type or "none")
 
@@ -167,7 +192,7 @@ BRIEF (name: {brief['name']}):
             pass
 
         # Strategy 2: Extract JSON from markdown code block
-        code_block = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', content, re.DOTALL)
+        code_block = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", content, re.DOTALL)
         if code_block:
             try:
                 parsed = json.loads(code_block.group(1))
@@ -182,15 +207,15 @@ BRIEF (name: {brief['name']}):
         depth = 0
         start_idx = None
         for i, ch in enumerate(content):
-            if ch == '{':
+            if ch == "{":
                 if depth == 0:
                     start_idx = i
                 depth += 1
-            elif ch == '}':
+            elif ch == "}":
                 depth -= 1
                 if depth == 0 and start_idx is not None:
                     try:
-                        parsed = json.loads(content[start_idx:i + 1])
+                        parsed = json.loads(content[start_idx : i + 1])
                         if isinstance(parsed, dict) and "message" in parsed:
                             if parsed.get("action") not in VALID_ACTIONS:
                                 parsed["action"] = None
@@ -204,9 +229,5 @@ BRIEF (name: {brief['name']}):
         return {"message": content, "action": None}
 
     def get_history(self, output_id: UUID):
-        res = (self.db.table("chat_messages")
-               .select("*")
-               .eq("output_id", str(output_id))
-               .order("created_at")
-               .execute())
+        res = self.db.table("chat_messages").select("*").eq("output_id", str(output_id)).order("created_at").execute()
         return res.data

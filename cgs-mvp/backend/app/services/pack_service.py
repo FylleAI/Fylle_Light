@@ -3,9 +3,10 @@ Pack service for managing agent packs.
 Handles context-specific packs and template packs.
 """
 
-import structlog
+from typing import Any
 from uuid import UUID, uuid4
-from typing import Optional, List, Dict, Any
+
+import structlog
 
 from app.config.supabase import get_supabase_admin
 from app.exceptions import NotFoundException, ValidationException
@@ -19,9 +20,7 @@ class PackService:
     def __init__(self):
         self.db = get_supabase_admin()
 
-    def list_packs(
-        self, user_id: UUID, context_id: Optional[UUID] = None
-    ) -> List[Dict[str, Any]]:
+    def list_packs(self, user_id: UUID, context_id: UUID | None = None) -> list[dict[str, Any]]:
         """
         List packs for a user.
 
@@ -56,13 +55,7 @@ class PackService:
             )
 
         # Calculate user_status based on user's briefs
-        briefs = (
-            self.db.table("briefs")
-            .select("pack_id")
-            .eq("user_id", str(user_id))
-            .execute()
-            .data
-        )
+        briefs = self.db.table("briefs").select("pack_id").eq("user_id", str(user_id)).execute().data
         user_pack_ids = {b["pack_id"] for b in briefs}
 
         # Enrich packs with computed fields
@@ -75,13 +68,11 @@ class PackService:
 
             # Computed flags
             pack["is_template"] = pack["context_id"] is None
-            pack["is_editable"] = (
-                pack["user_id"] is not None and pack["user_id"] == str(user_id)
-            )
+            pack["is_editable"] = pack["user_id"] is not None and pack["user_id"] == str(user_id)
 
         return packs
 
-    def get_pack(self, pack_id: UUID) -> Dict[str, Any]:
+    def get_pack(self, pack_id: UUID) -> dict[str, Any]:
         """
         Get a single pack by ID.
 
@@ -94,13 +85,7 @@ class PackService:
         Raises:
             NotFoundException: If pack not found
         """
-        result = (
-            self.db.table("agent_packs")
-            .select("*")
-            .eq("id", str(pack_id))
-            .single()
-            .execute()
-        )
+        result = self.db.table("agent_packs").select("*").eq("id", str(pack_id)).single().execute()
 
         if not result.data:
             raise NotFoundException("Pack not found")
@@ -108,8 +93,8 @@ class PackService:
         return result.data
 
     def clone_pack_to_context(
-        self, pack_id: UUID, context_id: UUID, user_id: UUID, name: Optional[str] = None
-    ) -> Dict[str, Any]:
+        self, pack_id: UUID, context_id: UUID, user_id: UUID, name: str | None = None
+    ) -> dict[str, Any]:
         """
         Clone a pack (template or existing) to a specific context.
 
@@ -153,7 +138,6 @@ class PackService:
             "content_type_id": source.get("content_type_id"),
             "sort_order": source.get("sort_order", 0),
             "is_active": True,
-
             # ← COPY JSONB fields from source
             "agents_config": source.get("agents_config", []),
             "brief_questions": source.get("brief_questions", []),
@@ -165,12 +149,12 @@ class PackService:
 
         result = self.db.table("agent_packs").insert(new_pack).execute()
 
-        logger.info("Pack cloned", source_pack_id=str(pack_id), context_id=str(context_id), new_pack_id=result.data[0]["id"])
+        logger.info(
+            "Pack cloned", source_pack_id=str(pack_id), context_id=str(context_id), new_pack_id=result.data[0]["id"]
+        )
         return result.data[0]
 
-    def create_pack(
-        self, context_id: UUID, user_id: UUID, pack_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def create_pack(self, context_id: UUID, user_id: UUID, pack_data: dict[str, Any]) -> dict[str, Any]:
         """
         Create a brand new pack for a context.
 
@@ -217,9 +201,7 @@ class PackService:
         logger.info("Pack created", context_id=str(context_id), pack_id=result.data[0]["id"])
         return result.data[0]
 
-    def update_pack(
-        self, pack_id: UUID, user_id: UUID, updates: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def update_pack(self, pack_id: UUID, user_id: UUID, updates: dict[str, Any]) -> dict[str, Any]:
         """
         Update a pack (only if user owns it).
 
@@ -247,12 +229,7 @@ class PackService:
             raise NotFoundException("Pack not found or access denied")
 
         # Update pack
-        result = (
-            self.db.table("agent_packs")
-            .update(updates)
-            .eq("id", str(pack_id))
-            .execute()
-        )
+        result = self.db.table("agent_packs").update(updates).eq("id", str(pack_id)).execute()
 
         logger.info("Pack updated", pack_id=str(pack_id))
         return result.data[0]
@@ -282,26 +259,17 @@ class PackService:
             raise NotFoundException("Pack not found or access denied")
 
         # Check if pack is in use
-        briefs = (
-            self.db.table("briefs")
-            .select("id")
-            .eq("pack_id", str(pack_id))
-            .limit(1)
-            .execute()
-            .data
-        )
+        briefs = self.db.table("briefs").select("id").eq("pack_id", str(pack_id)).limit(1).execute().data
         if briefs:
-            raise ValidationException(
-                "Cannot delete pack: it is being used by one or more briefs"
-            )
+            raise ValidationException("Cannot delete pack: it is being used by one or more briefs")
 
         # Delete pack
         self.db.table("agent_packs").delete().eq("id", str(pack_id)).execute()
         logger.info("Pack deleted", pack_id=str(pack_id))
 
     def import_from_template(
-        self, user_id: UUID, context_id: Optional[UUID], template_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, user_id: UUID, context_id: UUID | None, template_data: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         Import pack from JSON/YAML template.
 
@@ -346,7 +314,6 @@ class PackService:
             "outcome": template_data.get("outcome", "content"),
             "status": "active",
             "is_active": True,
-
             # JSONB fields from template
             "agents_config": template_data.get("agents", []),
             "brief_questions": template_data.get("brief_questions", []),
@@ -358,5 +325,10 @@ class PackService:
 
         result = self.db.table("agent_packs").insert(pack_data).execute()
 
-        logger.info("Pack imported from template", template_name=template_data["name"], context_id=str(context_id) if context_id else "global", pack_id=result.data[0]["id"])
+        logger.info(
+            "Pack imported from template",
+            template_name=template_data["name"],
+            context_id=str(context_id) if context_id else "global",
+            pack_id=result.data[0]["id"],
+        )
         return result.data[0]

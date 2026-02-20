@@ -1,5 +1,6 @@
 import httpx
 import structlog
+
 from app.config.settings import get_settings
 
 logger = structlog.get_logger("cgs-mvp.perplexity")

@@ -2,11 +2,11 @@
 
 import sentry_sdk
 import structlog
-
 from fastapi import Request
 from fastapi.responses import JSONResponse
-from app.exceptions import AppException
+
 from app.config.settings import get_settings
+from app.exceptions import AppException
 
 logger = structlog.get_logger("cgs-mvp.errors")
 

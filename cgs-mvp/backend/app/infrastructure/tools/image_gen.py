@@ -1,5 +1,7 @@
 import base64
+
 from openai import AsyncOpenAI
+
 from app.config.settings import get_settings
 
 

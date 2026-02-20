@@ -1,7 +1,7 @@
-from .base import LLMAdapter
-from .openai_adapter import OpenAIAdapter
 from .anthropic_adapter import AnthropicAdapter
+from .base import LLMAdapter
 from .gemini_adapter import GeminiAdapter
+from .openai_adapter import OpenAIAdapter
 
 _ADAPTERS = {
     "openai": OpenAIAdapter,

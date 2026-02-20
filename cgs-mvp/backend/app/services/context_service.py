@@ -1,12 +1,14 @@
-import structlog
 import csv
 import io
+from typing import Any
 from uuid import UUID
-from typing import Dict, Any
+
+import structlog
+
 from app.config.supabase import get_supabase_admin
-from app.db.repositories.context_repo import ContextRepository
 from app.db.repositories.context_item_repo import ContextItemRepository
-from app.exceptions import NotFoundException, ConflictException
+from app.db.repositories.context_repo import ContextRepository
+from app.exceptions import ConflictException, NotFoundException
 
 logger = structlog.get_logger("cgs-mvp.context")
 
@@ -44,38 +46,29 @@ class ContextService:
 
     def get_cards(self, context_id: UUID, user_id: UUID) -> list:
         self.get(context_id, user_id)  # ownership check
-        return (self.db.table("cards")
-                .select("*")
-                .eq("context_id", str(context_id))
-                .order("sort_order")
-                .execute().data)
+        return self.db.table("cards").select("*").eq("context_id", str(context_id)).order("sort_order").execute().data
 
     def update_card(self, context_id: UUID, card_type: str, user_id: UUID, data: dict) -> list:
         self.get(context_id, user_id)  # ownership check
-        return (self.db.table("cards")
-                .update(data)
-                .eq("context_id", str(context_id))
-                .eq("card_type", card_type)
-                .execute().data)
+        return (
+            self.db.table("cards")
+            .update(data)
+            .eq("context_id", str(context_id))
+            .eq("card_type", card_type)
+            .execute()
+            .data
+        )
 
     def get_summary(self, context_id: UUID, user_id: UUID) -> dict:
         """Return the 5 context areas for the Design Lab."""
-        context = (self.db.table("contexts")
-                   .select("*")
-                   .eq("id", str(context_id))
-                   .single()
-                   .execute().data)
+        context = self.db.table("contexts").select("*").eq("id", str(context_id)).single().execute().data
         if not context or context["user_id"] != str(user_id):
             raise NotFoundException("Context not found")
 
-        cards = (self.db.table("cards")
-                 .select("card_type, title")
-                 .eq("context_id", str(context_id))
-                 .execute().data)
-        briefs = (self.db.table("briefs")
-                  .select("id, name, pack_id, slug")
-                  .eq("context_id", str(context_id))
-                  .execute().data)
+        cards = self.db.table("cards").select("card_type, title").eq("context_id", str(context_id)).execute().data
+        briefs = (
+            self.db.table("briefs").select("id, name, pack_id, slug").eq("context_id", str(context_id)).execute().data
+        )
 
         # Conta context items (dati gerarchici da CSV)
         item_repo = ContextItemRepository(self.db)
@@ -99,9 +92,11 @@ class ContextService:
             },
             "operativo": {
                 "label": "Operational Context",
-                "cards": [c for c in cards if c["card_type"] in (
-                    "product", "target", "campaigns", "topic", "performance", "feedback"
-                )],
+                "cards": [
+                    c
+                    for c in cards
+                    if c["card_type"] in ("product", "target", "campaigns", "topic", "performance", "feedback")
+                ],
             },
             "agent_pack": {
                 "label": "Agent Pack",
@@ -115,11 +110,7 @@ class ContextService:
             },
         }
 
-    def import_from_template(
-        self,
-        user_id: UUID,
-        template_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def import_from_template(self, user_id: UUID, template_data: dict[str, Any]) -> dict[str, Any]:
         """
         Import a complete context from a JSON/YAML template.
 
@@ -137,46 +128,39 @@ class ContextService:
         repo = ContextRepository(self.db)
 
         # Extract context metadata
-        context_data = template_data['context']
-        context_data['user_id'] = str(user_id)
-        context_data['status'] = 'active'
+        context_data = template_data["context"]
+        context_data["user_id"] = str(user_id)
+        context_data["status"] = "active"
 
         # Check for duplicate brand_name
         existing = repo.list_by_user(user_id)
-        if any(c['brand_name'] == context_data['brand_name'] for c in existing):
-            raise ConflictException(
-                f"Context with brand_name '{context_data['brand_name']}' already exists"
-            )
+        if any(c["brand_name"] == context_data["brand_name"] for c in existing):
+            raise ConflictException(f"Context with brand_name '{context_data['brand_name']}' already exists")
 
         # Create context
         context = repo.create(context_data)
-        context_id = context['id']
+        context_id = context["id"]
 
         # Create cards
         cards_created = []
-        for card_data in template_data['cards']:
+        for card_data in template_data["cards"]:
             card = {
-                'context_id': context_id,
-                'card_type': card_data['card_type'],
-                'title': card_data['title'],
-                'subtitle': card_data.get('subtitle'),
-                'content': card_data['content'],
-                'sort_order': card_data.get('sort_order', 0),
-                'is_visible': card_data.get('is_visible', True)
+                "context_id": context_id,
+                "card_type": card_data["card_type"],
+                "title": card_data["title"],
+                "subtitle": card_data.get("subtitle"),
+                "content": card_data["content"],
+                "sort_order": card_data.get("sort_order", 0),
+                "is_visible": card_data.get("is_visible", True),
             }
-            created_card = self.db.table('cards').insert(card).execute()
+            created_card = self.db.table("cards").insert(card).execute()
             cards_created.append(created_card.data[0])
 
         logger.info(
-            "Context imported from template | user=%s context=%s cards=%d",
-            user_id, context_id, len(cards_created)
+            "Context imported from template | user=%s context=%s cards=%d", user_id, context_id, len(cards_created)
         )
 
-        return {
-            'context': context,
-            'cards': cards_created,
-            'cards_count': len(cards_created)
-        }
+        return {"context": context, "cards": cards_created, "cards_count": len(cards_created)}
 
     # ─── Context Items (hierarchical data) ───────────────
 
@@ -196,14 +180,16 @@ class ContextService:
         """Crea un singolo nodo nell'albero del contesto."""
         self.get(context_id, user_id)  # ownership check
         repo = ContextItemRepository(self.db)
-        return repo.create({
-            "context_id": str(context_id),
-            "parent_id": str(data["parent_id"]) if data.get("parent_id") else None,
-            "level": data.get("level", 0),
-            "name": data["name"],
-            "content": data.get("content"),
-            "sort_order": data.get("sort_order", 0),
-        })
+        return repo.create(
+            {
+                "context_id": str(context_id),
+                "parent_id": str(data["parent_id"]) if data.get("parent_id") else None,
+                "level": data.get("level", 0),
+                "name": data["name"],
+                "content": data.get("content"),
+                "sort_order": data.get("sort_order", 0),
+            }
+        )
 
     def update_context_item(self, context_id: UUID, item_id: UUID, user_id: UUID, data: dict) -> dict:
         """Aggiorna un nodo esistente (nome e/o contenuto)."""
@@ -221,9 +207,7 @@ class ContextService:
         repo = ContextItemRepository(self.db)
         repo.delete(item_id)
 
-    def import_context_items_from_csv(
-        self, context_id: UUID, user_id: UUID, csv_content: str
-    ) -> list:
+    def import_context_items_from_csv(self, context_id: UUID, user_id: UUID, csv_content: str) -> list:
         """
         Importa dati gerarchici da un CSV con colonne:
         Level 0, Level 1, Level 2, Level 3, Contenuto
@@ -254,13 +238,9 @@ class ContextService:
                 content_column = col
 
         if not level_columns:
-            raise ValueError(
-                f"CSV must have 'Level 0', 'Level 1', etc. columns. Found: {fieldnames}"
-            )
+            raise ValueError(f"CSV must have 'Level 0', 'Level 1', etc. columns. Found: {fieldnames}")
         if not content_column:
-            raise ValueError(
-                f"CSV must have a 'Contenuto' or 'Content' column. Found: {fieldnames}"
-            )
+            raise ValueError(f"CSV must have a 'Contenuto' or 'Content' column. Found: {fieldnames}")
 
         # Ordina level columns per numero
         level_columns.sort(key=lambda c: int(c.strip().replace("Level ", "")))
@@ -270,19 +250,16 @@ class ContextService:
         repo.delete_by_context(context_id)
 
         # Traccia nodi esistenti: chiave = (parent_id, name) → item_id
-        existing_nodes: Dict[tuple, str] = {}
+        existing_nodes: dict[tuple, str] = {}
         sort_counter = 0
 
         rows = list(reader)
-        logger.info(
-            "CSV import | context=%s rows=%d levels=%d",
-            context_id, len(rows), max_levels
-        )
+        logger.info("CSV import | context=%s rows=%d levels=%d", context_id, len(rows), max_levels)
 
         for row in rows:
             current_parent_id = None
 
-            for i, col in enumerate(level_columns):
+            for _i, col in enumerate(level_columns):
                 value = (row.get(col) or "").strip()
                 if not value:
                     break  # nessun livello più profondo in questa riga
@@ -292,14 +269,16 @@ class ContextService:
 
                 if node_key not in existing_nodes:
                     # Crea nuovo nodo
-                    item = repo.create({
-                        "context_id": str(context_id),
-                        "parent_id": current_parent_id,
-                        "level": level_num,
-                        "name": value,
-                        "content": None,  # contenuto viene aggiunto dopo
-                        "sort_order": sort_counter,
-                    })
+                    item = repo.create(
+                        {
+                            "context_id": str(context_id),
+                            "parent_id": current_parent_id,
+                            "level": level_num,
+                            "name": value,
+                            "content": None,  # contenuto viene aggiunto dopo
+                            "sort_order": sort_counter,
+                        }
+                    )
                     existing_nodes[node_key] = item["id"]
                     sort_counter += 1
 
@@ -311,8 +290,5 @@ class ContextService:
                 repo.update(UUID(current_parent_id), {"content": content_value})
 
         items = repo.list_by_context(context_id)
-        logger.info(
-            "CSV import completed | context=%s items_created=%d",
-            context_id, len(items)
-        )
+        logger.info("CSV import completed | context=%s items_created=%d", context_id, len(items))
         return items

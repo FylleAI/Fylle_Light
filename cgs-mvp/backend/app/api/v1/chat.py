@@ -1,16 +1,20 @@
-from fastapi import APIRouter, Depends, Request
 from uuid import UUID
+
+from fastapi import APIRouter, Depends, Request
+
 from app.api.deps import get_current_user
 from app.domain.models import ChatRequest
-from app.services.chat_service import ChatService
 from app.middleware.rate_limit import limiter
+from app.services.chat_service import ChatService
 
 router = APIRouter()
 
 
 @router.post("/outputs/{output_id}")
 @limiter.limit("20/minute")
-async def chat_with_output(request: Request, output_id: UUID, req: ChatRequest, user_id: UUID = Depends(get_current_user)):
+async def chat_with_output(
+    request: Request, output_id: UUID, req: ChatRequest, user_id: UUID = Depends(get_current_user)
+):
     service = ChatService()
     result = await service.chat(output_id, user_id, req.message)
     return result

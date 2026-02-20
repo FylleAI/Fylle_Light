@@ -1,5 +1,7 @@
 from anthropic import AsyncAnthropic
+
 from app.config.settings import get_settings
+
 from .base import LLMAdapter, LLMResponse
 
 PRICING = {
@@ -30,8 +32,9 @@ class AnthropicAdapter(LLMAdapter):
             max_tokens=max_tokens,
         )
         prices = PRICING.get(model, {"input": 3.0, "output": 15.0})
-        cost = (response.usage.input_tokens * prices["input"]
-                + response.usage.output_tokens * prices["output"]) / 1_000_000
+        cost = (
+            response.usage.input_tokens * prices["input"] + response.usage.output_tokens * prices["output"]
+        ) / 1_000_000
 
         return LLMResponse(
             content=response.content[0].text,

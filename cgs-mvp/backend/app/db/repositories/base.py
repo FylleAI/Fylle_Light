@@ -1,4 +1,5 @@
 from uuid import UUID
+
 from supabase import Client
 
 
@@ -12,12 +13,14 @@ class BaseRepository:
         return res.data
 
     def list_by_user(self, user_id: UUID, limit: int = 50, offset: int = 0):
-        res = (self.db.table(self.table)
-               .select("*")
-               .eq("user_id", str(user_id))
-               .order("created_at", desc=True)
-               .range(offset, offset + limit - 1)
-               .execute())
+        res = (
+            self.db.table(self.table)
+            .select("*")
+            .eq("user_id", str(user_id))
+            .order("created_at", desc=True)
+            .range(offset, offset + limit - 1)
+            .execute()
+        )
         return res.data
 
     def create(self, data: dict):

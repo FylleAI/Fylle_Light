@@ -3,19 +3,20 @@ Document service for handling file uploads to contexts and briefs.
 Manages validation, storage, and database operations.
 """
 
-import structlog
+from typing import Any
 from uuid import UUID
-from typing import Optional, List, Dict, Any
+
+import structlog
 from fastapi import UploadFile
 
-from app.config.supabase import get_supabase_admin
 from app.config.settings import get_settings
+from app.config.supabase import get_supabase_admin
 from app.db.repositories.document_repo import (
-    ContextDocumentRepository,
     BriefDocumentRepository,
+    ContextDocumentRepository,
 )
-from app.infrastructure.storage.supabase_storage import StorageService
 from app.exceptions import NotFoundException, ValidationException
+from app.infrastructure.storage.supabase_storage import StorageService
 
 logger = structlog.get_logger("cgs-mvp.documents")
 
@@ -55,8 +56,7 @@ class DocumentService:
         # Validate MIME type
         if file.content_type not in ALLOWED_MIME_TYPES:
             raise ValidationException(
-                f"File type '{file.content_type}' not allowed. "
-                f"Supported types: PDF, DOCX, DOC, TXT, PNG, JPEG, WEBP"
+                f"File type '{file.content_type}' not allowed. Supported types: PDF, DOCX, DOC, TXT, PNG, JPEG, WEBP"
             )
 
         # Check file size
@@ -67,8 +67,7 @@ class DocumentService:
         max_size = self.settings.max_upload_size_mb * 1024 * 1024
         if size > max_size:
             raise ValidationException(
-                f"File too large ({size / 1024 / 1024:.1f}MB). "
-                f"Maximum allowed: {self.settings.max_upload_size_mb}MB"
+                f"File too large ({size / 1024 / 1024:.1f}MB). Maximum allowed: {self.settings.max_upload_size_mb}MB"
             )
 
         return size
@@ -80,8 +79,8 @@ class DocumentService:
         context_id: UUID,
         user_id: UUID,
         file: UploadFile,
-        description: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        description: str | None = None,
+    ) -> dict[str, Any]:
         """
         Upload a document to a context.
 
@@ -141,9 +140,7 @@ class DocumentService:
         logger.info("Context document uploaded", doc_id=doc["id"], context_id=str(context_id))
         return doc
 
-    def list_context_documents(
-        self, context_id: UUID, user_id: UUID
-    ) -> List[Dict[str, Any]]:
+    def list_context_documents(self, context_id: UUID, user_id: UUID) -> list[dict[str, Any]]:
         """
         List all documents for a context.
 
@@ -208,8 +205,8 @@ class DocumentService:
         brief_id: UUID,
         user_id: UUID,
         file: UploadFile,
-        description: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        description: str | None = None,
+    ) -> dict[str, Any]:
         """
         Upload a document to a brief.
 
@@ -231,12 +228,7 @@ class DocumentService:
 
         # Verify brief ownership
         brief = (
-            self.db.table("briefs")
-            .select("id")
-            .eq("id", str(brief_id))
-            .eq("user_id", str(user_id))
-            .single()
-            .execute()
+            self.db.table("briefs").select("id").eq("id", str(brief_id)).eq("user_id", str(user_id)).single().execute()
         )
         if not brief.data:
             raise NotFoundException("Brief not found or access denied")
@@ -269,9 +261,7 @@ class DocumentService:
         logger.info("Brief document uploaded", doc_id=doc["id"], brief_id=str(brief_id))
         return doc
 
-    def list_brief_documents(
-        self, brief_id: UUID, user_id: UUID
-    ) -> List[Dict[str, Any]]:
+    def list_brief_documents(self, brief_id: UUID, user_id: UUID) -> list[dict[str, Any]]:
         """
         List all documents for a brief.
 
@@ -287,12 +277,7 @@ class DocumentService:
         """
         # Verify ownership
         brief = (
-            self.db.table("briefs")
-            .select("id")
-            .eq("id", str(brief_id))
-            .eq("user_id", str(user_id))
-            .single()
-            .execute()
+            self.db.table("briefs").select("id").eq("id", str(brief_id)).eq("user_id", str(user_id)).single().execute()
         )
         if not brief.data:
             raise NotFoundException("Brief not found or access denied")
@@ -331,9 +316,7 @@ class DocumentService:
 
     # ==================== DOWNLOAD URLS ====================
 
-    def get_document_download_url(
-        self, doc_id: UUID, user_id: UUID, doc_type: str
-    ) -> Dict[str, str]:
+    def get_document_download_url(self, doc_id: UUID, user_id: UUID, doc_type: str) -> dict[str, str]:
         """
         Get a signed URL for downloading a document.
 

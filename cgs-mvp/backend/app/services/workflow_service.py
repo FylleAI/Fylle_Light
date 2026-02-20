@@ -1,17 +1,19 @@
-import structlog
-from uuid import UUID, uuid4
-from datetime import datetime
 import json
 import time
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
+from datetime import datetime
+from uuid import UUID
+
+import structlog
+
 from app.config.supabase import get_supabase_admin
-from app.infrastructure.llm.factory import get_llm_adapter
-from app.infrastructure.tools.perplexity import PerplexityTool
-from app.infrastructure.tools.image_gen import ImageGenerationTool
-from app.infrastructure.storage.supabase_storage import StorageService
-from app.infrastructure.logging.tracker import RunTracker
 from app.db.repositories.archive_repo import ArchiveRepository
 from app.db.repositories.output_repo import OutputRepository
+from app.infrastructure.llm.factory import get_llm_adapter
+from app.infrastructure.logging.tracker import RunTracker
+from app.infrastructure.storage.supabase_storage import StorageService
+from app.infrastructure.tools.image_gen import ImageGenerationTool
+from app.infrastructure.tools.perplexity import PerplexityTool
 
 logger = structlog.get_logger("cgs-mvp.workflow")
 
@@ -32,7 +34,15 @@ class WorkflowService:
             context = self.db.table("contexts").select("*").eq("id", brief["context_id"]).single().execute().data
             pack = self.db.table("agent_packs").select("*").eq("id", brief["pack_id"]).single().execute().data
             cards = self.db.table("cards").select("*").eq("context_id", brief["context_id"]).execute().data
-            context_items = self.db.table("context_items").select("*").eq("context_id", brief["context_id"]).order("level").order("sort_order").execute().data
+            context_items = (
+                self.db.table("context_items")
+                .select("*")
+                .eq("context_id", brief["context_id"])
+                .order("level")
+                .order("sort_order")
+                .execute()
+                .data
+            )
 
             # Load Archive (learning loop)
             archive_repo = ArchiveRepository(self.db)
@@ -116,7 +126,6 @@ class WorkflowService:
                     # Brief variables (topic, target_word_count, etc.)
                     **run.get("input_data", {}),
                     "topic": run["topic"],
-
                     # Context data
                     "context": {
                         "brand_name": context.get("brand_name", ""),
@@ -126,7 +135,6 @@ class WorkflowService:
                         "company_info": context.get("company_info", {}),
                         "goals_info": context.get("goals_info", {}),
                     },
-
                     # Agent outputs (for chaining) - index, original name, and normalized name
                     "agent": {
                         # Index-based: agent['0'], agent['1'], etc.
@@ -134,12 +142,16 @@ class WorkflowService:
                         # Original name: agent["Context Specialist"], etc.
                         **{agents[idx]["name"]: {"output": agent_outputs[agents[idx]["name"]]} for idx in range(i)},
                         # Normalized name (spaces→underscores): agent.Context_Specialist, etc.
-                        **{agents[idx]["name"].replace(" ", "_"): {"output": agent_outputs[agents[idx]["name"]]} for idx in range(i)},
-                    }
+                        **{
+                            agents[idx]["name"].replace(" ", "_"): {"output": agent_outputs[agents[idx]["name"]]}
+                            for idx in range(i)
+                        },
+                    },
                 }
 
                 # Render Jinja2 template
                 from jinja2 import Template, TemplateSyntaxError
+
                 try:
                     template = Template(agent_prompt_template)
                     rendered_prompt = template.render(**template_context)
@@ -169,21 +181,23 @@ class WorkflowService:
                 )
 
                 if tool_results:
-                    system_prompt += f"\n\nSEARCH RESULTS:\n" + "\n".join(
+                    system_prompt += "\n\nSEARCH RESULTS:\n" + "\n".join(
                         f"- {k}: {v[:2000]}" for k, v in tool_results.items()
                     )
 
                 if agent_outputs:
-                    system_prompt += f"\n\nPREVIOUS AGENT OUTPUTS:\n" + "\n".join(
+                    system_prompt += "\n\nPREVIOUS AGENT OUTPUTS:\n" + "\n".join(
                         f"- {k}: {v[:2000]}" for k, v in agent_outputs.items()
                     )
 
                 # Build user message with guardrail reminder
                 user_message = f"Topic: {run['topic']}"
                 if guardrails:
-                    guardrail_reminder = "\n\nREMINDER — Before writing, re-read the MANDATORY RULES above. Specifically:\n"
+                    guardrail_reminder = (
+                        "\n\nREMINDER — Before writing, re-read the MANDATORY RULES above. Specifically:\n"
+                    )
                     for g in guardrails[:5]:
-                        feedback = g.get('feedback', '')
+                        feedback = g.get("feedback", "")
                         if feedback:
                             guardrail_reminder += f"• {feedback}\n"
                     guardrail_reminder += "Failure to follow these rules will result in content rejection."
@@ -210,7 +224,10 @@ class WorkflowService:
                     cost_usd=float(response.cost_usd),
                 )
 
-                yield {"type": "agent_complete", "data": {"agent": agent_name, "tokens": response.tokens_in + response.tokens_out}}
+                yield {
+                    "type": "agent_complete",
+                    "data": {"agent": agent_name, "tokens": response.tokens_in + response.tokens_out},
+                }
 
             # Calculate next sequential number for this brief
             output_repo = OutputRepository(self.db)
@@ -237,16 +254,18 @@ class WorkflowService:
             output = self.db.table("outputs").insert(output_data).execute().data[0]
 
             # Create archive entry (pending review)
-            self.db.table("archive").insert({
-                "output_id": output["id"],
-                "run_id": str(run_id),
-                "context_id": brief["context_id"],
-                "brief_id": brief["id"],
-                "user_id": str(user_id),
-                "topic": run["topic"],
-                "content_type": pack["slug"],
-                "review_status": "pending",
-            }).execute()
+            self.db.table("archive").insert(
+                {
+                    "output_id": output["id"],
+                    "run_id": str(run_id),
+                    "context_id": brief["context_id"],
+                    "brief_id": brief["id"],
+                    "user_id": str(user_id),
+                    "topic": run["topic"],
+                    "content_type": pack["slug"],
+                    "review_status": "pending",
+                }
+            ).execute()
 
             duration = time.time() - start_time
             tracker.update_run(
@@ -260,12 +279,15 @@ class WorkflowService:
                 completed_at=datetime.utcnow().isoformat(),
             )
 
-            yield {"type": "completed", "data": {
-                "output_id": output["id"],
-                "total_tokens": total_tokens,
-                "total_cost_usd": round(total_cost, 4),
-                "duration_seconds": round(duration, 1),
-            }}
+            yield {
+                "type": "completed",
+                "data": {
+                    "output_id": output["id"],
+                    "total_tokens": total_tokens,
+                    "total_cost_usd": round(total_cost, 4),
+                    "duration_seconds": round(duration, 1),
+                },
+            }
 
         except Exception as e:
             tracker.error(str(e))
@@ -334,15 +356,17 @@ class WorkflowService:
 
             render_tree(roots)
 
-        lines.extend([
-            "",
-            "## BRIEF",
-            f"Name: {brief['name']}",
-            f"Answers: {json.dumps(brief.get('answers', {}), indent=2)}",
-            f"Compiled: {brief.get('compiled_brief', '')}",
-            "",
-            f"## TOPIC: {topic}",
-        ])
+        lines.extend(
+            [
+                "",
+                "## BRIEF",
+                f"Name: {brief['name']}",
+                f"Answers: {json.dumps(brief.get('answers', {}), indent=2)}",
+                f"Compiled: {brief.get('compiled_brief', '')}",
+                "",
+                f"## TOPIC: {topic}",
+            ]
+        )
         return "\n".join(lines)
 
     def _build_archive_prompt(self, references, guardrails) -> str:
@@ -361,7 +385,7 @@ class WorkflowService:
         if references:
             lines.append("### ✅ POSITIVE REFERENCES (emulate these patterns)")
             for ref in references[:3]:
-                lines.append(f"- Topic: \"{ref['topic']}\"")
+                lines.append(f'- Topic: "{ref["topic"]}"')
                 if ref.get("reference_notes"):
                     lines.append(f"  → Follow this guidance: {ref['reference_notes']}")
                 if ref.get("outputs") and ref["outputs"].get("text_content"):
@@ -373,13 +397,13 @@ class WorkflowService:
             lines.append("You MUST avoid repeating these mistakes:")
             lines.append("")
             for g in guardrails[:5]:
-                lines.append(f"**REJECTED**: \"{g['topic']}\"")
-                feedback = g.get('feedback', 'N/A')
+                lines.append(f'**REJECTED**: "{g["topic"]}"')
+                feedback = g.get("feedback", "N/A")
                 lines.append(f"  → REASON: {feedback}")
                 if g.get("feedback_categories"):
                     lines.append(f"  → CATEGORIES: {', '.join(g['feedback_categories'])}")
                 # Parse actionable rules from feedback
-                lines.append(f"  → YOU MUST: Follow the user's feedback above exactly.")
+                lines.append("  → YOU MUST: Follow the user's feedback above exactly.")
                 lines.append("")
         lines.append("=" * 60)
         lines.append("END OF MANDATORY RULES")
@@ -403,14 +427,16 @@ class WorkflowService:
                 content_type="image/png",
             )
             # Create image output
-            self.db.table("outputs").insert({
-                "run_id": str(run_id),
-                "user_id": str(user_id),
-                "output_type": "image",
-                "mime_type": "image/png",
-                "file_path": file_path,
-                "file_size_bytes": len(image_bytes),
-                "title": result["revised_prompt"],
-            }).execute()
+            self.db.table("outputs").insert(
+                {
+                    "run_id": str(run_id),
+                    "user_id": str(user_id),
+                    "output_type": "image",
+                    "mime_type": "image/png",
+                    "file_path": file_path,
+                    "file_size_bytes": len(image_bytes),
+                    "title": result["revised_prompt"],
+                }
+            ).execute()
             return f"[Generated image: {result['revised_prompt']}]"
         return ""

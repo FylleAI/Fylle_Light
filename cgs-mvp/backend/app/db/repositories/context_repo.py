@@ -1,5 +1,6 @@
-from .base import BaseRepository
 from uuid import UUID
+
+from .base import BaseRepository
 
 
 class ContextRepository(BaseRepository):
@@ -10,10 +11,6 @@ class ContextRepository(BaseRepository):
         context = self.get_by_id(id)
         if not context:
             return None
-        cards = (self.db.table("cards")
-                 .select("*")
-                 .eq("context_id", str(id))
-                 .order("sort_order")
-                 .execute())
+        cards = self.db.table("cards").select("*").eq("context_id", str(id)).order("sort_order").execute()
         context["cards"] = cards.data
         return context

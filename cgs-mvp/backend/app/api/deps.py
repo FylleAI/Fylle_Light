@@ -1,10 +1,11 @@
-from fastapi import Depends, HTTPException, Header
-from typing import Optional
-from app.config.supabase import get_supabase_admin, get_supabase_client
 from uuid import UUID
 
+from fastapi import Header, HTTPException
 
-async def get_current_user(authorization: Optional[str] = Header(None)) -> UUID:
+from app.config.supabase import get_supabase_admin
+
+
+async def get_current_user(authorization: str | None = Header(None)) -> UUID:
     """Verify JWT token via Supabase Auth (supports HS256 and ES256)."""
     if not authorization:
         raise HTTPException(401, "Missing authorization header")

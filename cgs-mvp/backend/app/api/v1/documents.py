@@ -2,9 +2,9 @@
 Document API endpoints for uploading, listing, and managing documents.
 """
 
-from fastapi import APIRouter, Depends, UploadFile, File, Form
 from uuid import UUID
-from typing import Optional, List
+
+from fastapi import APIRouter, Depends, File, Form, UploadFile
 
 from app.api.deps import get_current_user
 from app.services.document_service import DocumentService
@@ -19,7 +19,7 @@ router = APIRouter()
 async def upload_context_document(
     context_id: UUID,
     file: UploadFile = File(...),
-    description: Optional[str] = Form(None),
+    description: str | None = Form(None),
     user_id: UUID = Depends(get_current_user),
 ):
     """
@@ -29,9 +29,7 @@ async def upload_context_document(
     - **file**: File to upload (PDF, DOCX, TXT, images)
     - **description**: Optional description
     """
-    return await DocumentService().upload_context_document(
-        context_id, user_id, file, description
-    )
+    return await DocumentService().upload_context_document(context_id, user_id, file, description)
 
 
 @router.get("/contexts/{context_id}")
@@ -81,7 +79,7 @@ async def download_context_document(
 async def upload_brief_document(
     brief_id: UUID,
     file: UploadFile = File(...),
-    description: Optional[str] = Form(None),
+    description: str | None = Form(None),
     user_id: UUID = Depends(get_current_user),
 ):
     """
@@ -91,9 +89,7 @@ async def upload_brief_document(
     - **file**: File to upload (PDF, DOCX, TXT, images)
     - **description**: Optional description
     """
-    return await DocumentService().upload_brief_document(
-        brief_id, user_id, file, description
-    )
+    return await DocumentService().upload_brief_document(brief_id, user_id, file, description)
 
 
 @router.get("/briefs/{brief_id}")

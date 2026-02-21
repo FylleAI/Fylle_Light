@@ -53,6 +53,24 @@ export type BriefStatus = "configurato" | "da_configurare";
 // "da_configurare" ↔ "draft"
 // "configurato"    ↔ "active"
 
+/** How a brief's agent_override modifies the pack's base prompt. */
+export type PromptStrategy = "append" | "replace";
+
+/** Override for a single agent in the pack, defined in the Brief. */
+export interface AgentOverride {
+  prompt_append?: string | null;
+  prompt_replace?: string | null;
+  model?: string | null;
+  provider?: string | null;
+  temperature?: number | null;
+}
+
+/** Structure for the briefs.settings JSONB column. */
+export interface BriefSettings {
+  agent_overrides?: Record<string, AgentOverride>;
+  global_instructions?: string | null;
+}
+
 export interface Brief {
   id: string;
   slug: string;
@@ -64,6 +82,7 @@ export interface Brief {
   answers?: Record<string, unknown>;
   compiled_brief?: string;
   questions?: unknown[];
+  settings?: BriefSettings;
   created_at: string;
   updated_at?: string;
 }

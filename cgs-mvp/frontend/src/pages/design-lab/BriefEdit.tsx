@@ -1,5 +1,7 @@
 import { useState, useMemo } from "react";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/api";
 import { useBriefBySlug, useUpdateBrief } from "@/hooks/useBriefs";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,7 +16,10 @@ import {
   Loader2,
   CheckCircle,
   Save,
+  Settings2,
 } from "lucide-react";
+import type { BriefSettings } from "@/types/design-lab";
+import BriefSettingsPanel from "@/components/design-lab/BriefSettingsPanel";
 
 interface BriefEditProps {
   briefSlug: string;
@@ -35,18 +40,41 @@ const cardVariants = {
   exit: { opacity: 0, y: -20, transition: { duration: 0.2 } },
 };
 
+interface PackDetail {
+  id: string;
+  agents_config?: Array<{
+    name: string;
+    prompt: string;
+    provider?: string;
+    model?: string;
+  }>;
+  default_llm_provider?: string;
+  default_llm_model?: string;
+}
+
 export default function BriefEdit({ briefSlug }: BriefEditProps) {
   const [, navigate] = useLocation();
   const { data: brief, isLoading } = useBriefBySlug(briefSlug);
   const updateBrief = useUpdateBrief();
   const { toast } = useToast();
 
-  const [step, setStep] = useState<"name" | "questions" | "saving" | "done">(
+  // Load pack for agents_config (needed for settings panel)
+  const { data: pack } = useQuery<PackDetail>({
+    queryKey: ["pack", brief?.pack_id],
+    queryFn: () => apiRequest<PackDetail>(`/api/v1/packs/${brief!.pack_id}`),
+    enabled: !!brief?.pack_id,
+  });
+
+  const [step, setStep] = useState<"name" | "questions" | "settings" | "saving" | "done">(
     "name"
   );
   const [briefName, setBriefName] = useState<string | null>(null);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, unknown> | null>(null);
+  const [settings, setSettings] = useState<BriefSettings | null>(null);
+
+  // Initialize settings from loaded brief (only once, lazy)
+  const effectiveSettings: BriefSettings = settings ?? (brief?.settings as BriefSettings | undefined) ?? {};
 
   // Initialize state from loaded brief (only once)
   const effectiveName = briefName ?? brief?.name ?? "";
@@ -98,7 +126,7 @@ export default function BriefEdit({ briefSlug }: BriefEditProps) {
       if (totalQuestions > 0) {
         setStep("questions");
       } else {
-        await handleSubmit();
+        setStep("settings");
       }
       return;
     }
@@ -107,13 +135,20 @@ export default function BriefEdit({ briefSlug }: BriefEditProps) {
       if (questionIndex < totalQuestions - 1) {
         setQuestionIndex((prev) => prev + 1);
       } else {
-        await handleSubmit();
+        setStep("settings");
       }
     }
   };
 
   const handleBack = () => {
-    if (step === "questions" && questionIndex > 0) {
+    if (step === "settings") {
+      if (totalQuestions > 0) {
+        setQuestionIndex(totalQuestions - 1);
+        setStep("questions");
+      } else {
+        setStep("name");
+      }
+    } else if (step === "questions" && questionIndex > 0) {
       setQuestionIndex((prev) => prev - 1);
     } else if (step === "questions") {
       setStep("name");
@@ -127,11 +162,17 @@ export default function BriefEdit({ briefSlug }: BriefEditProps) {
 
     setStep("saving");
     try {
+      // Only include settings if user configured something
+      const hasSettings =
+        effectiveSettings.global_instructions ||
+        (effectiveSettings.agent_overrides && Object.keys(effectiveSettings.agent_overrides).length > 0);
+
       await updateBrief.mutateAsync({
         id: brief.id,
         data: {
           name: effectiveName.trim(),
           answers: effectiveAnswers,
+          ...(hasSettings ? { settings: effectiveSettings } : {}),
         },
       });
       setStep("done");
@@ -143,15 +184,17 @@ export default function BriefEdit({ briefSlug }: BriefEditProps) {
         description: msg,
         variant: "destructive",
       });
-      setStep("questions");
+      setStep("settings");
     }
   };
 
-  // Progress
+  // Progress: name(0%) → questions(10-80%) → settings(90%) → done(100%)
   const progress = useMemo(() => {
     if (step === "name") return 0;
     if (step === "saving" || step === "done") return 100;
-    return Math.round(((questionIndex + 1) / totalQuestions) * 100);
+    if (step === "settings") return 90;
+    if (totalQuestions === 0) return 50;
+    return Math.round(10 + ((questionIndex + 1) / totalQuestions) * 70);
   }, [step, questionIndex, totalQuestions]);
 
   // Loading state
@@ -197,12 +240,14 @@ export default function BriefEdit({ briefSlug }: BriefEditProps) {
       </div>
 
       {/* Progress bar */}
-      {(step === "questions" || step === "name") && (
+      {(step === "questions" || step === "name" || step === "settings") && (
         <div className="mb-8">
           <div className="flex items-center justify-between text-xs text-neutral-500 mb-2">
             <span>
               {step === "name"
                 ? "Brief Name"
+                : step === "settings"
+                ? "Advanced Settings"
                 : `Question ${questionIndex + 1} of ${totalQuestions}`}
             </span>
             <span>{progress}%</span>
@@ -387,17 +432,66 @@ export default function BriefEdit({ briefSlug }: BriefEditProps) {
                       }
                       className="bg-accent hover:bg-accent/90 text-black font-medium rounded-xl h-11 px-6"
                     >
-                      {questionIndex < totalQuestions - 1 ? (
-                        <>
-                          Continue
-                          <ArrowRight className="w-4 h-4 ml-2" />
-                        </>
-                      ) : (
-                        <>
-                          Save Changes
-                          <Save className="w-4 h-4 ml-2" />
-                        </>
-                      )}
+                      Continue
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Step: Settings */}
+        {step === "settings" && (
+          <motion.div key="settings" variants={cardVariants} initial="initial" animate="animate" exit="exit">
+            <Card className="bg-surface-elevated border-0 rounded-3xl shadow-lg">
+              <CardContent className="p-8">
+                <div className="flex items-center gap-2 mb-2">
+                  <Settings2 className="w-5 h-5 text-accent" />
+                  <h2 className="text-xl font-semibold text-neutral-100">
+                    Advanced Settings
+                  </h2>
+                </div>
+                <p className="text-sm text-neutral-400 mb-6">
+                  Customize how agents generate content. Skip if you want to use pack defaults.
+                </p>
+
+                <BriefSettingsPanel
+                  agents={pack?.agents_config || []}
+                  packDefaults={{
+                    provider: pack?.default_llm_provider || "openai",
+                    model: pack?.default_llm_model || "gpt-4o",
+                  }}
+                  settings={effectiveSettings}
+                  onChange={(s) => setSettings(s)}
+                />
+
+                {/* Navigation */}
+                <div className="flex justify-between mt-8">
+                  <Button
+                    variant="ghost"
+                    onClick={handleBack}
+                    className="text-neutral-400 hover:text-neutral-200 rounded-xl"
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-1" />
+                    Back
+                  </Button>
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      onClick={handleSubmit}
+                      className="text-neutral-500 hover:text-neutral-300 rounded-xl text-sm"
+                    >
+                      Skip
+                    </Button>
+                    <Button
+                      onClick={handleSubmit}
+                      className="bg-accent hover:bg-accent/90 text-black font-medium rounded-xl h-11 px-6"
+                    >
+                      Save Changes
+                      <Save className="w-4 h-4 ml-2" />
                     </Button>
                   </div>
                 </div>

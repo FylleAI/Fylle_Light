@@ -17,7 +17,10 @@ import {
   Loader2,
   CheckCircle,
   Sparkles,
+  Settings2,
 } from "lucide-react";
+import type { BriefSettings } from "@/types/design-lab";
+import BriefSettingsPanel from "@/components/design-lab/BriefSettingsPanel";
 
 interface BriefCreateProps {
   packId: string;
@@ -32,7 +35,6 @@ interface BriefQuestion {
   required?: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface PackDetail {
   id: string;
   slug: string;
@@ -40,6 +42,14 @@ interface PackDetail {
   description: string;
   icon: string;
   brief_questions: BriefQuestion[];
+  agents_config?: Array<{
+    name: string;
+    prompt: string;
+    provider?: string;
+    model?: string;
+  }>;
+  default_llm_provider?: string;
+  default_llm_model?: string;
   [key: string]: unknown;
 }
 
@@ -63,12 +73,13 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
 
   const createBrief = useCreateBrief();
 
-  const [step, setStep] = useState<"name" | "questions" | "creating" | "done">(
+  const [step, setStep] = useState<"name" | "questions" | "settings" | "creating" | "done">(
     "name"
   );
   const [briefName, setBriefName] = useState("");
   const [questionIndex, setQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, unknown>>({});
+  const [settings, setSettings] = useState<BriefSettings>({});
   const [createdBrief, setCreatedBrief] = useState<{
     id: string;
     slug: string;
@@ -122,7 +133,7 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
       if (totalQuestions > 0) {
         setStep("questions");
       } else {
-        await handleSubmit();
+        setStep("settings");
       }
       return;
     }
@@ -131,13 +142,20 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
       if (questionIndex < totalQuestions - 1) {
         setQuestionIndex((prev) => prev + 1);
       } else {
-        await handleSubmit();
+        setStep("settings");
       }
     }
   };
 
   const handleBack = () => {
-    if (step === "questions" && questionIndex > 0) {
+    if (step === "settings") {
+      if (totalQuestions > 0) {
+        setQuestionIndex(totalQuestions - 1);
+        setStep("questions");
+      } else {
+        setStep("name");
+      }
+    } else if (step === "questions" && questionIndex > 0) {
       setQuestionIndex((prev) => prev - 1);
     } else if (step === "questions") {
       setStep("name");
@@ -158,11 +176,17 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
 
     setStep("creating");
     try {
+      // Only include settings if user configured something
+      const hasSettings =
+        settings.global_instructions ||
+        (settings.agent_overrides && Object.keys(settings.agent_overrides).length > 0);
+
       const result = await createBrief.mutateAsync({
         context_id: contextId,
         pack_id: packId,
         name: briefName.trim(),
         answers,
+        ...(hasSettings ? { settings } : {}),
       });
       setCreatedBrief(result);
       setStep("done");
@@ -174,15 +198,18 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
         description: msg,
         variant: "destructive",
       });
-      setStep("questions");
+      setStep("settings");
     }
   };
 
-  // Progress
+  // Progress: name(0%) → questions(10-80%) → settings(90%) → done(100%)
   const progress = useMemo(() => {
     if (step === "name") return 0;
     if (step === "creating" || step === "done") return 100;
-    return Math.round(((questionIndex + 1) / totalQuestions) * 100);
+    if (step === "settings") return 90;
+    // questions: spread across 10-80%
+    if (totalQuestions === 0) return 50;
+    return Math.round(10 + ((questionIndex + 1) / totalQuestions) * 70);
   }, [step, questionIndex, totalQuestions]);
 
   // Loading state
@@ -225,12 +252,14 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
       </div>
 
       {/* Progress bar */}
-      {(step === "questions" || step === "name") && (
+      {(step === "questions" || step === "name" || step === "settings") && (
         <div className="mb-8">
           <div className="flex items-center justify-between text-xs text-neutral-500 mb-2">
             <span>
               {step === "name"
                 ? "Brief Name"
+                : step === "settings"
+                ? "Advanced Settings"
                 : `Question ${questionIndex + 1} of ${totalQuestions}`}
             </span>
             <span>{progress}%</span>
@@ -422,17 +451,66 @@ export default function BriefCreate({ packId }: BriefCreateProps) {
                       }
                       className="bg-accent hover:bg-accent/90 text-black font-medium rounded-xl h-11 px-6"
                     >
-                      {questionIndex < totalQuestions - 1 ? (
-                        <>
-                          Continue
-                          <ArrowRight className="w-4 h-4 ml-2" />
-                        </>
-                      ) : (
-                        <>
-                          Create Brief
-                          <Sparkles className="w-4 h-4 ml-2" />
-                        </>
-                      )}
+                      Continue
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Step: Settings */}
+        {step === "settings" && pack && (
+          <motion.div key="settings" variants={cardVariants} initial="initial" animate="animate" exit="exit">
+            <Card className="bg-surface-elevated border-0 rounded-3xl shadow-lg">
+              <CardContent className="p-8">
+                <div className="flex items-center gap-2 mb-2">
+                  <Settings2 className="w-5 h-5 text-accent" />
+                  <h2 className="text-xl font-semibold text-neutral-100">
+                    Advanced Settings
+                  </h2>
+                </div>
+                <p className="text-sm text-neutral-400 mb-6">
+                  Customize how agents generate content. Skip if you want to use pack defaults.
+                </p>
+
+                <BriefSettingsPanel
+                  agents={pack.agents_config || []}
+                  packDefaults={{
+                    provider: pack.default_llm_provider || "openai",
+                    model: pack.default_llm_model || "gpt-4o",
+                  }}
+                  settings={settings}
+                  onChange={setSettings}
+                />
+
+                {/* Navigation */}
+                <div className="flex justify-between mt-8">
+                  <Button
+                    variant="ghost"
+                    onClick={handleBack}
+                    className="text-neutral-400 hover:text-neutral-200 rounded-xl"
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-1" />
+                    Back
+                  </Button>
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      onClick={handleSubmit}
+                      className="text-neutral-500 hover:text-neutral-300 rounded-xl text-sm"
+                    >
+                      Skip
+                    </Button>
+                    <Button
+                      onClick={handleSubmit}
+                      className="bg-accent hover:bg-accent/90 text-black font-medium rounded-xl h-11 px-6"
+                    >
+                      Create Brief
+                      <Sparkles className="w-4 h-4 ml-2" />
                     </Button>
                   </div>
                 </div>

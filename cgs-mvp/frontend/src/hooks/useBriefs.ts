@@ -1,12 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
-import type { Brief } from "@/types/design-lab";
+import type { Brief, BriefSettings } from "@/types/design-lab";
 
 interface CreateBriefInput {
   context_id: string;
   pack_id: string;
   name: string;
   answers: Record<string, unknown>;
+  settings?: BriefSettings;
 }
 
 interface UpdateBriefInput {
@@ -14,7 +15,7 @@ interface UpdateBriefInput {
   description?: string;
   answers?: Record<string, unknown>;
   compiled_brief?: string;
-  settings?: Record<string, unknown>;
+  settings?: BriefSettings;
   status?: string;
 }
 

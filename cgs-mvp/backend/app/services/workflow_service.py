@@ -44,15 +44,18 @@ class WorkflowService:
                 .data
             )
 
-            # Load Archive (learning loop)
+            # Load Archive (learning loop) — brief-first, context fallback
             archive_repo = ArchiveRepository(self.db)
-            references = archive_repo.get_references(UUID(brief["context_id"]))
-            guardrails = archive_repo.get_guardrails(UUID(brief["context_id"]))
+            brief_uuid = UUID(brief["id"])
+            context_uuid = UUID(brief["context_id"])
+            references = archive_repo.get_references(context_uuid, brief_id=brief_uuid)
+            guardrails = archive_repo.get_guardrails(context_uuid, brief_id=brief_uuid)
 
             # Log feedback loop data
             logger.info(
                 "Feedback loop loaded",
                 context_id=brief["context_id"],
+                brief_id=brief["id"],
                 references_count=len(references),
                 guardrails_count=len(guardrails),
             )

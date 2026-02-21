@@ -10,16 +10,24 @@ router = APIRouter()
 
 
 @router.get("")
-async def list_archive(context_id: UUID | None = None, user_id: UUID = Depends(get_current_user)):
-    return ArchiveService().list(user_id, context_id)
+async def list_archive(
+    context_id: UUID | None = None,
+    brief_id: UUID | None = None,
+    user_id: UUID = Depends(get_current_user),
+):
+    return ArchiveService().list(user_id, context_id, brief_id)
 
 
 @router.get("/stats")
-async def archive_stats(context_id: UUID | None = None, user_id: UUID = Depends(get_current_user)):
-    return ArchiveService().get_stats(user_id, context_id)
+async def archive_stats(
+    context_id: UUID | None = None,
+    brief_id: UUID | None = None,
+    user_id: UUID = Depends(get_current_user),
+):
+    return ArchiveService().get_stats(user_id, context_id, brief_id)
 
 
 @router.post("/search")
 async def search_archive(data: ArchiveSearch, user_id: UUID = Depends(get_current_user)):
     """Semantic search nell'archivio usando embeddings."""
-    return await ArchiveService().semantic_search(data.query, data.context_id)
+    return await ArchiveService().semantic_search(data.query, data.context_id, data.brief_id)

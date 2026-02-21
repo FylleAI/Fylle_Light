@@ -274,6 +274,7 @@ class ArchiveItem(BaseModel):
 class ArchiveSearch(BaseModel):
     query: str
     context_id: UUID
+    brief_id: UUID | None = None
 
 
 # ─── Chat ────────────────────────────────────────────

@@ -17,7 +17,7 @@ interface PackCardProps {
 
 export default function PackCard({
   id,
-  slug,
+  slug: _slug,
   name,
   description,
   icon,
@@ -28,8 +28,8 @@ export default function PackCard({
   const [, navigate] = useLocation();
 
   const handleClick = () => {
-    if (status === "active") {
-      navigate(`/design-lab/outputs/${slug}`);
+    if (status === "active" && id) {
+      navigate(`/design-lab/packs/${id}`);
     } else if (status === "available" && id) {
       navigate(`/design-lab/brief/create/${id}`);
     }
@@ -82,7 +82,7 @@ export default function PackCard({
             size="sm"
             className="w-full bg-accent hover:bg-accent/90 text-black font-medium rounded-xl h-9 text-sm"
           >
-            View Content
+            Open Pack
             <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
           </Button>
         )}

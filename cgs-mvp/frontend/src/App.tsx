@@ -32,6 +32,7 @@ import Execute from "@/pages/design-lab/Execute";
 import ArchiveHub from "@/pages/design-lab/ArchiveHub";
 import ArchiveDetail from "@/pages/design-lab/ArchiveDetail";
 import PacksManager from "@/pages/design-lab/PacksManager";
+import PackDetail from "@/pages/design-lab/PackDetail";
 
 function LoadingScreen() {
   return (
@@ -127,6 +128,15 @@ export default function App() {
               <PacksManager />
             </DesignLabLayout>
           </ProtectedRoute>
+        </Route>
+        <Route path="/design-lab/packs/:packId">
+          {(params) => (
+            <ProtectedRoute requireContext>
+              <DesignLabLayout>
+                <PackDetail packId={params.packId} />
+              </DesignLabLayout>
+            </ProtectedRoute>
+          )}
         </Route>
         <Route path="/design-lab/context/:areaId">
           {(params) => (

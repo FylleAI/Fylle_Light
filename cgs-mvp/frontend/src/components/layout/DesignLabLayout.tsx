@@ -20,7 +20,7 @@ interface DesignLabLayoutProps {
 const NAV_ITEMS = [
   { path: "/design-lab", label: "Home", icon: Home },
   { path: "/design-lab/context", label: "Context", icon: Layers },
-  { path: "/design-lab/packs/manager", label: "Packs", icon: Package },
+  { path: "/design-lab/packs/manager", label: "Pack Manager", icon: Package },
   { path: "/design-lab/outputs", label: "Outputs", icon: FileOutput },
   { path: "/design-lab/archive", label: "Archive", icon: Archive },
 ];

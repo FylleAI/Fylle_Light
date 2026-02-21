@@ -71,3 +71,10 @@ class ChatActionType(str, Enum):
     EDIT_OUTPUT = "edit_output"
     UPDATE_CONTEXT = "update_context"
     UPDATE_BRIEF = "update_brief"
+
+
+class PromptStrategy(str, Enum):
+    """How a brief's agent_override modifies the pack's base prompt."""
+
+    APPEND = "append"  # Add text after the pack's base prompt (safe default)
+    REPLACE = "replace"  # Replace the agent's prompt entirely

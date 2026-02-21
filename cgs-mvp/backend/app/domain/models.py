@@ -95,6 +95,35 @@ class Card(BaseModel):
     updated_at: datetime
 
 
+# ─── Brief Settings (Pack-as-Template / Brief-as-Characterizer) ──
+
+
+class AgentOverride(BaseModel):
+    """Override for a single agent in the pack, defined in the Brief.
+
+    Allows the brief to customize an agent's behavior without modifying
+    the pack template. Keys in BriefSettings.agent_overrides must match
+    agent names from pack.agents_config.
+    """
+
+    prompt_append: str | None = None
+    prompt_replace: str | None = None
+    model: str | None = None
+    provider: str | None = None
+    temperature: float | None = None
+
+
+class BriefSettings(BaseModel):
+    """Structure for the briefs.settings JSONB column.
+
+    agent_overrides: per-agent customization (key = agent name from pack)
+    global_instructions: text appended to ALL agents' prompts
+    """
+
+    agent_overrides: dict[str, AgentOverride] = {}
+    global_instructions: str | None = None
+
+
 # ─── Brief ───────────────────────────────────────────
 
 
@@ -104,6 +133,7 @@ class BriefCreate(BaseModel):
     name: str
     description: str | None = None
     answers: dict = {}
+    settings: BriefSettings | None = None
     # slug viene auto-generato dal name nel service
 
 
@@ -112,7 +142,7 @@ class BriefUpdate(BaseModel):
     description: str | None = None
     answers: dict | None = None
     compiled_brief: str | None = None
-    settings: dict | None = None
+    settings: BriefSettings | None = None
     status: BriefStatus | None = None
 
 
@@ -127,7 +157,7 @@ class Brief(BaseModel):
     questions: list = []
     answers: dict = {}
     compiled_brief: str | None = None
-    settings: dict = {}
+    settings: BriefSettings = BriefSettings()
     status: BriefStatus = BriefStatus.ACTIVE
     created_at: datetime
     updated_at: datetime

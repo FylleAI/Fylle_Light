@@ -97,6 +97,16 @@ class WorkflowService:
             total_tokens = 0
             total_cost = 0.0
 
+            # Parse brief settings (agent overrides + global instructions)
+            brief_settings = self._parse_brief_settings(brief)
+            if brief_settings["agent_overrides"] or brief_settings["global_instructions"]:
+                logger.info(
+                    "Brief settings active",
+                    overrides_count=len(brief_settings["agent_overrides"]),
+                    has_global=bool(brief_settings["global_instructions"]),
+                    override_agents=list(brief_settings["agent_overrides"].keys()),
+                )
+
             # Execute agents in sequence
             for i, agent in enumerate(agents):
                 agent_name = agent["name"]
@@ -120,6 +130,15 @@ class WorkflowService:
                 if not agent_prompt_template:
                     # Fallback to old prompt_templates
                     agent_prompt_template = pack["prompt_templates"].get(agent_name, f"You are a {agent_role}.")
+
+                # Apply brief's agent_overrides (prompt_replace or prompt_append)
+                agent_override = brief_settings["agent_overrides"].get(agent_name, {})
+                if agent_override.get("prompt_replace"):
+                    logger.info("Agent prompt REPLACED by brief override", agent=agent_name)
+                    agent_prompt_template = agent_override["prompt_replace"]
+                elif agent_override.get("prompt_append"):
+                    logger.info("Agent prompt APPENDED by brief override", agent=agent_name)
+                    agent_prompt_template += f"\n\n{agent_override['prompt_append']}"
 
                 # Build template context
                 template_context = {
@@ -165,6 +184,11 @@ class WorkflowService:
                 # Build final system prompt
                 # Archive prompt (guardrails/references) goes FIRST for maximum weight
                 system_prompt = rendered_prompt
+
+                # Apply brief's global_instructions (applies to ALL agents)
+                if brief_settings["global_instructions"]:
+                    system_prompt += f"\n\n## BRIEF INSTRUCTIONS\n{brief_settings['global_instructions']}"
+
                 if archive_prompt:
                     system_prompt += f"\n\n{archive_prompt}"
                 system_prompt += "\n\nIMPORTANT: All generated content MUST be in English."
@@ -203,14 +227,19 @@ class WorkflowService:
                     guardrail_reminder += "Failure to follow these rules will result in content rejection."
                     user_message += guardrail_reminder
 
-                # Call LLM
-                llm = get_llm_adapter(pack.get("default_llm_provider", "openai"))
+                # Call LLM (with optional per-agent overrides from brief settings)
+                llm_provider = agent_override.get("provider") or pack.get("default_llm_provider", "openai")
+                llm_model = agent_override.get("model") or pack.get("default_llm_model")
+                llm_temperature = agent_override.get("temperature", 0.7)
+                llm = get_llm_adapter(llm_provider)
+
                 response = await llm.generate(
                     messages=[
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_message},
                     ],
-                    model=pack.get("default_llm_model"),
+                    model=llm_model,
+                    temperature=llm_temperature,
                 )
 
                 agent_outputs[agent_name] = response.content
@@ -293,6 +322,20 @@ class WorkflowService:
             tracker.error(str(e))
             tracker.update_run(status="failed", error_message=str(e))
             yield {"type": "error", "data": {"error": str(e)}}
+
+    def _parse_brief_settings(self, brief: dict) -> dict:
+        """Parse brief.settings JSONB into a structured dict.
+
+        Returns a dict with:
+          - agent_overrides: {agent_name: {prompt_append, prompt_replace, model, provider, temperature}}
+          - global_instructions: str | None
+        Falls back gracefully for old briefs with settings={}.
+        """
+        raw = brief.get("settings") or {}
+        return {
+            "agent_overrides": raw.get("agent_overrides", {}),
+            "global_instructions": raw.get("global_instructions"),
+        }
 
     def _build_execution_context(self, context, brief, cards, topic, context_items=None) -> str:
         lines = [

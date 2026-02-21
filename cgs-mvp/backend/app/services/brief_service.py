@@ -23,6 +23,34 @@ class BriefService:
             slug = f"{slug}-{len(existing) + 1}"
         return slug
 
+    def _validate_agent_overrides(self, settings_data, agents_config: list) -> None:
+        """Validate that agent_overrides keys match actual agent names in the pack.
+
+        Prevents typos like "editore" when the pack has "editor".
+        Called during create() and update() when settings are provided.
+        """
+        if not settings_data:
+            return
+
+        # Handle both BriefSettings object and raw dict from DB
+        if hasattr(settings_data, "agent_overrides"):
+            overrides = settings_data.agent_overrides
+        elif isinstance(settings_data, dict):
+            overrides = settings_data.get("agent_overrides", {})
+        else:
+            return
+
+        if not overrides:
+            return
+
+        valid_names = {agent["name"] for agent in agents_config}
+        invalid = set(overrides.keys()) - valid_names
+        if invalid:
+            raise ValidationException(
+                f"Invalid agent name(s) in agent_overrides: {', '.join(sorted(invalid))}. "
+                f"Valid agents: {', '.join(sorted(valid_names))}"
+            )
+
     def compile_brief(self, questions: list, answers: dict) -> str:
         """Compile answers into markdown for prompt injection."""
         lines = ["# Brief\n"]
@@ -63,10 +91,20 @@ class BriefService:
         return result.data
 
     def create(self, user_id: UUID, data) -> dict:
-        """Create brief: pack lookup + slug gen + compile + insert."""
-        pack = self.db.table("agent_packs").select("brief_questions").eq("id", str(data.pack_id)).single().execute()
+        """Create brief: pack lookup + slug gen + validate overrides + compile + insert."""
+        pack = (
+            self.db.table("agent_packs")
+            .select("brief_questions, agents_config")
+            .eq("id", str(data.pack_id))
+            .single()
+            .execute()
+        )
         if not pack.data:
             raise NotFoundException("Pack not found")
+
+        # Validate agent_overrides against pack's actual agents
+        if hasattr(data, "settings") and data.settings:
+            self._validate_agent_overrides(data.settings, pack.data["agents_config"])
 
         slug = self.generate_slug(data.name)
         questions = pack.data["brief_questions"]
@@ -90,15 +128,36 @@ class BriefService:
         )
 
     def update(self, brief_id: UUID, user_id: UUID, data) -> list:
-        """Update brief, recompile if answers change."""
+        """Update brief, recompile if answers change, validate overrides."""
         update_data = data.model_dump(exclude_none=True)
         if not update_data:
             raise ValidationException("No fields to update")
 
-        if "answers" in update_data:
-            brief = self.db.table("briefs").select("questions").eq("id", str(brief_id)).single().execute().data
+        # Fetch brief (needed for recompile and override validation)
+        if "answers" in update_data or "settings" in update_data:
+            brief = (
+                self.db.table("briefs")
+                .select("questions, pack_id")
+                .eq("id", str(brief_id))
+                .single()
+                .execute()
+                .data
+            )
             if brief:
-                update_data["compiled_brief"] = self.compile_brief(brief["questions"], update_data["answers"])
+                if "answers" in update_data:
+                    update_data["compiled_brief"] = self.compile_brief(brief["questions"], update_data["answers"])
+
+                # Validate agent_overrides against pack's agents
+                if "settings" in update_data:
+                    pack = (
+                        self.db.table("agent_packs")
+                        .select("agents_config")
+                        .eq("id", brief["pack_id"])
+                        .single()
+                        .execute()
+                    )
+                    if pack.data:
+                        self._validate_agent_overrides(update_data["settings"], pack.data["agents_config"])
 
         return (
             self.db.table("briefs")
